@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Le Barathon Caennais — Carnet de route du Corsaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1f140e;
+      --ink-soft: #523f2f;
+      --paper: #ebd9b5;
+      --paper-card: #f8efe0;
+      --paper-dark: #dfcb9f;
+      --wine: #781d2a;
+      --wine-light: #9e2a3c;
+      --gold: #c29532;
+      --brass: #9e7520;
+      --moss: #2f5a38;
+      --slate: #6e675b;
+      --cream: #fffdf7;
+      --shadow: rgba(31, 20, 14, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: 'Special Elite', 'Courier New', monospace;
+      background-color: #120b07;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(120, 29, 42, 0.25), transparent 70%),
+        radial-gradient(circle at 50% 100%, rgba(194, 149, 50, 0.15), transparent 70%),
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 2px);
+      padding: 12px 8px 30px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Conteneur principal façon livre relié en cuir */
+    .journal-wrapper {
+      width: 100%;
+      max-width: 480px;
+      background: var(--paper-card);
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6), inset 0 0 80px rgba(82, 63, 47, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Effet coin corné / reliure */
+    .journal-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--wine), var(--gold), var(--wine));
+      z-index: 10;
+    }
+
+    /* En-tête */
+    header {
+      padding: 20px 16px 14px;
+      text-align: center;
+      border-bottom: 2px dashed rgba(82, 63, 47, 0.3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .brand-title svg {
+      color: var(--wine);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: var(--wine);
+      text-transform: uppercase;
+      text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+    }
+
+    .tagline {
+      font-style: italic;
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    /* Barre de profil / utilisateur */
+    .profile-bar {
+      background: var(--paper-dark);
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(82, 63, 47, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .profile-bar label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--ink-soft);
+      font-weight: bold;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      font-family: 'Special Elite', monospace;
+      font-size: 14px;
+      background: var(--cream);
+      color: var(--ink);
+      border: 1px solid var(--ink-soft);
+      border-radius: 6px;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      appearance: none;
+    }
+
+    .select-wrapper::after {
+      content: "▼";
+      font-size: 10px;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--ink-soft);
+    }
+
+    /* Barre d'avancement globale */
+    .progress-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--paper);
+      font-size: 11px;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .progress-badge {
+      background: var(--wine);
+      color: var(--cream);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #27ae60;
+      margin-right: 4px;
+      box-shadow: 0 0 6px #27ae60;
+    }
+
+    /* Navigation par Onglets */
+    .tabs {
+      display: flex;
+      background: var(--paper-dark);
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 6px;
+      background: transparent;
+      border: none;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      color: var(--wine);
+      background: var(--paper-card);
+      box-shadow: inset 0 3px 0 var(--wine);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Contenu des onglets */
+    .tab-content {
+      display: none;
+      padding: 14px 12px 18px;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Liste des étapes (Parcours) */
+    .trail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .waypoint-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--cream);
+      border: 1px solid rgba(82, 63, 47, 0.35);
+      border-left: 6px solid var(--slate);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 3px 8px var(--shadow);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+
+    .waypoint-card.open {
+      border-left-color: var(--moss);
+      cursor: pointer;
+    }
+
+    .waypoint-card.open:active {
+      transform: scale(0.98);
+    }
+
+    .waypoint-card.locked {
+      opacity: 0.6;
+      background: #e6dac1;
+      filter: grayscale(0.4);
+    }
+
+    .seal-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IM Fell English SC', serif;
+      font-size: 18px;
+      font-weight: bold;
+      background: radial-gradient(circle at 35% 30%, #f0d287, var(--gold));
+      border: 2px solid var(--ink);
+      color: var(--ink);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .seal-locked {
+      background: var(--slate);
+      color: #fff;
+      border-color: #4a443a;
+    }
+
+    .waypoint-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .waypoint-title {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .waypoint-sub {
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .status-tag {
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .status-tag.open { background: #d4edda; color: #155724; }
+    .status-tag.locked { background: #e2e3e5; color: #383d41; }
+
+    /* Appel au déblocage avec sceau mystique */
+    .unlock-banner {
+      background: linear-gradient(135deg, #fbf4e6, #f3e5c8);
+      border: 2px dashed var(--wine);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(120, 29, 42, 0.15);
+      animation: pulse-border 2s infinite;
+      margin: 4px 0;
+    }
+
+    .unlock-banner h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      color: var(--wine);
+      margin-bottom: 4px;
+    }
+
+    .unlock-banner p {
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(120, 29, 42, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(120, 29, 42, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(120, 29, 42, 0); }
+    }
+
+    /* Modales */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 11, 7, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: modalFade 0.2s ease-out;
+    }
+
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-card {
+      background: var(--paper-card);
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      color: var(--wine);
+      text-align: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(82, 63, 47, 0.2);
+    }
+
+    /* Boutons */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--ink);
+      font-family: 'Special Elite', monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--wine);
+      color: var(--cream);
+      border-color: #4f111a;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .btn-secondary {
+      background: var(--paper-dark);
+      color: var(--ink);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--ink-soft);
+    }
+
+    /* Feedback & Toasts */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 90%;
+      max-width: 380px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      border-left: 4px solid var(--gold);
+      animation: slideUp 0.3s ease;
+      pointer-events: auto;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Éléments de mini-jeux */
+    .clue-box {
+      background: #f2e6c8;
+      border: 1px dashed var(--ink-soft);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      font-size: 12.5px;
+    }
+
+    .clue-box .label {
+      font-weight: bold;
+      color: var(--wine);
+      display: block;
+      margin-bottom: 2px;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    /* Boussole UI */
+    .compass-container {
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .compass-dial {
+      width: 120px;
+      height: 120px;
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+      margin: 10px auto;
+      position: relative;
+      background: radial-gradient(circle, #fbf4e6 0%, #e6dac1 100%);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .compass-needle {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px; height: 50px;
+      background: var(--wine);
+      transform-origin: bottom center;
+      margin-left: -2px; margin-top: -50px;
+      border-radius: 2px;
+      transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .compass-needle::after {
+      content: "";
+      position: absolute;
+      top: -8px; left: -4px;
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid var(--wine);
+    }
+
+    .compass-cardinal {
+      position: absolute;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--ink-soft);
+    }
+
+    .cardinal-n { top: 4px; left: 50%; transform: translateX(-50%); color: var(--wine); }
+    .cardinal-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
+    .cardinal-e { right: 6px; top: 50%; transform: translateY(-50%); }
+    .cardinal-w { left: 6px; top: 50%; transform: translateY(-50%); }
+
+    /* Motus Grid UI */
+    .motus-grid {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin: 8px 0;
+    }
+
+    .motus-tile {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--ink);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      text-transform: uppercase;
+      background: var(--cream);
+    }
+
+    .m-correct { background: var(--moss); color: #fff; border-color: #1b3822; }
+    .m-present { background: var(--gold); color: var(--ink); border-color: #8c6a1e; }
+    .m-absent { background: var(--slate); color: #fff; border-color: #4a443a; }
+
+    /* Tableau du classement */
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .leaderboard-table th, .leaderboard-table td {
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid rgba(82, 63, 47, 0.2);
+    }
+
+    .leaderboard-table th {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      color: var(--wine);
+      background: rgba(120, 29, 42, 0.08);
+      border-bottom: 2px solid var(--wine);
+    }
+
+    .medal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-family: 'Cinzel', serif;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .medal-1 { background: var(--gold); color: var(--ink); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .medal-2 { background: #c0c0c0; color: #222; }
+    .medal-3 { background: #cd7f32; color: #fff; }
+
+    /* Photo Preview */
+    .photo-preview {
+      width: 100%;
+      max-height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--ink);
+      margin: 8px 0;
+      display: none;
+    }
+
+    /* Carte SVG Conteneur */
+    .map-container {
+      width: 100%;
+      background: #ebd9b5;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.15);
+    }
+
+    /* Controls pour Labyrinthe */
+    .d-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 40px);
+      grid-template-rows: repeat(3, 40px);
+      gap: 6px;
+      justify-content: center;
+      margin: 10px auto;
+    }
+
+    .d-btn {
+      background: var(--paper-dark);
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .d-btn:active { background: var(--wine); color: #fff; }
+
+    /* Canvas confettis */
+    #canvas-confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3000;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas-confetti"></canvas>
+
+<div class="journal-wrapper">
+  <header>
+    <div class="brand-title">
+      <svg viewBox="0 0 40 40" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="20" cy="20" r="17"></circle>
+        <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
+        <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.4"></path>
+      </svg>
+      <h1>Le Barathon Caennais</h1>
+    </div>
+    <p class="tagline">Huit tavernes. Une seule règle : personne n'avance seul.</p>
+  </header>
+
+  <div class="profile-bar">
+    <label for="global-participant">📜 Corsaire au gouvernail :</label>
+    <div class="select-wrapper">
+      <select id="global-participant" onchange="sauvegarderParticipant()">
+        <option value="">-- Choisis ton nom --</option>
+        <option value="Majid">Majid</option>
+        <option value="Alexandre">Alexandre</option>
+        <option value="Jeremy S">Jeremy S</option>
+        <option value="Romain R">Romain R</option>
+        <option value="Théo M">Théo M</option>
+        <option value="Pepette">Pepette</option>
+        <option value="Jules D">Jules D</option>
+        <option value="Daubeuf">Daubeuf</option>
+        <option value="Zaza">Zaza</option>
+        <option value="Emy">Emy</option>
+        <option value="Mama">Mama</option>
+        <option value="David M">David M</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="progress-strip">
+    <span><span class="status-indicator" id="sync-status"></span> <span id="sync-text">Synchronisé</span></span>
+    <span class="progress-badge" id="step-badge">Étape 1 / 8</span>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('accueil')">📍 Parcours</button>
+    <button class="tab-btn" onclick="switchTab('scores')">🏆 Classement</button>
+    <button class="tab-btn" onclick="switchTab('carte')">🗺️ Carte</button>
+  </nav>
+
+  <!-- Onglet 1: Parcours -->
+  <main id="tab-accueil" class="tab-content active">
+    <div id="bars-list" class="trail-list">
+      <!-- Rempli dynamiquement en JS -->
+    </div>
+  </main>
+
+  <!-- Onglet 2: Classement -->
+  <main id="tab-scores" class="tab-content">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rang</th>
+          <th>Corsaire</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-body">
+        <tr><td colspan="3">Chargement du livre des comptes…</td></tr>
+      </tbody>
+    </table>
+    <button class="btn btn-secondary" onclick="chargerClassement()">🔄 Actualiser les rangs</button>
+  </main>
+
+  <!-- Onglet 3: Carte -->
+  <main id="tab-carte" class="tab-content">
+    <div class="map-container">
+      <svg viewBox="0 0 400 500" width="100%" style="display:block;">
+        <defs>
+          <radialGradient id="sealGrad" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f0d287"></stop>
+            <stop offset="100%" stop-color="#c29532"></stop>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="400" height="500" fill="#f2e6c8"></rect>
+        <rect x="6" y="6" width="388" height="488" fill="none" stroke="#523f2f" stroke-width="2"></rect>
+        
+        <!-- Rivière l'Orne -->
+        <path d="M0,470 C60,440 90,480 150,450 C210,420 240,460 300,430 C340,410 370,430 400,415" fill="none" stroke="#527d8d" stroke-width="8" opacity="0.65"></path>
+        <text x="55" y="465" font-size="10" font-style="italic" fill="#2a4550" font-family="'Cinzel', serif">l'Orne</text>
+        
+        <!-- Rose des vents -->
+        <g transform="translate(355,42)" stroke="#781d2a" fill="#781d2a">
+          <circle cx="0" cy="0" r="18" fill="none" stroke-width="1.5"></circle>
+          <path d="M0,-14 L3,0 L0,14 L-3,0 Z"></path>
+          <path d="M-14,0 L0,-3 L14,0 L0,3 Z" opacity="0.4"></path>
+        </g>
+        
+        <!-- Château de Caen -->
+        <g transform="translate(185,85)">
+          <rect x="10" y="0" width="10" height="22" fill="#523f2f"></rect>
+          <rect x="-4" y="10" width="10" height="14" fill="#523f2f"></rect>
+          <rect x="24" y="10" width="10" height="14" fill="#523f2f"></rect>
+          <rect x="-2" y="20" width="34" height="8" fill="#523f2f"></rect>
+          <text x="15" y="42" font-size="9" text-anchor="middle" font-family="'Cinzel', serif" font-weight="bold" fill="#1f140e">Château de Caen</text>
+        </g>
+
+        <!-- Dynamic trail & markers layer -->
+        <g id="carte-markers"></g>
+      </svg>
+    </div>
+    <p class="tagline" style="margin-top:10px; text-align:center;">La carte se dévoile au fil de votre progression…</p>
+  </main>
+</div>
+
+<!-- MODALE ÉNIGME / ÉPREUVE -->
+<div id="modal-riddle" class="modal-overlay">
+  <div class="modal-card">
+    <h3 id="riddle-title">Épreuve du Corsaire</h3>
+    <div id="riddle-content"></div>
+    <div id="riddle-msg" style="margin-top:10px; font-size:13px; text-align:center; min-height:18px;"></div>
+    <button class="btn btn-ghost" onclick="fermerModales()">Fermer</button>
+  </div>
+</div>
+
+<!-- MODALE BOISSON / PHOTO -->
+<div id="modal-drink" class="modal-overlay">
+  <div class="modal-card">
+    <h3 id="drink-bar-title">Valider ma consommation</h3>
+    
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">Qu'as-tu bu à cette halte ?</label>
+      <div class="select-wrapper">
+        <select id="drink-select">
+          <option value="Ricard / Pastis">Ricard / Pastis</option>
+          <option value="Pinte de bière blonde">Pinte de bière blonde</option>
+          <option value="Pinte de bière IPA / Spéciale">Pinte de bière IPA / Spéciale</option>
+          <option value="Bière d'abbaye / Trappiste">Bière d'abbaye / Trappiste</option>
+          <option value="Shot / Shooter">Shot / Shooter</option>
+          <option value="Cocktail maison">Cocktail maison</option>
+          <option value="Embuscade / Cocktail">Embuscade / Cocktail</option>
+          <option value="Rhum arrangé">Rhum arrangé</option>
+          <option value="Soft / Sans alcool">Soft / Sans alcool</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">Preuve visuelle (Photo) :</label>
+      <input type="file" id="drink-photo" accept="image/*" capture="environment" style="padding:6px;">
+      <img id="photo-preview-img" class="photo-preview" alt="Aperçu preuve">
+    </div>
+
+    <button class="btn btn-primary" id="btn-submit-drink" onclick="envoyerBoisson()">📸 Envoyer la preuve (+10 pts)</button>
+    <button class="btn btn-ghost" onclick="fermerModales()">Annuler</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+  // Configuration API & Données
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw93vfV2-3SW1bYJHEP_3NpXX8_O1MUJYF_YHzBnsj82FBmjJghvenZjUll1dQDgfLjIw/exec";
+
+  const INDICES_PERSO = {
+    "Majid": "Cherche sous la 2ème pierre du banc en face du bar.",
+    "Alexandre": "Regarde derrière le poteau métallique du vieux panneau.",
+    "Jeremy S": "Inspecte le muret en pierre à hauteur de genou.",
+    "Romain R": "La fiole est au pied du grand arbre du square.",
+    "Théo M": "Cherche sous la grille au niveau des pavés.",
+    "Pepette": "Derrière le bac à fleurs près de la terrasse.",
+    "Jules D": "Regarde sous la gouttière au coin de la rue.",
+    "Daubeuf": "Fouille dans le creux du mur en briques.",
+    "Zaza": "Inspecte le dessous du rebord de fenêtre.",
+    "Emy": "Cherche derrière le panneau à droite.",
+    "Mama": "Regarde au pied de la statue sur le renfoncement.",
+    "David M": "Sous le banc en bois en sortant du Spark."
+  };
+
+  const BARS_DATA = [
+    { id: 1, name: "Spark Bar", spec: "Ricard / Pastis", address: "51 r. St-Michel" },
+    { id: 2, name: "Le Bon Prétexte", spec: "Pinte de bière blonde", address: "33 r. du Havre" },
+    { id: 3, name: "Café du Théâtre", spec: "Cocktail maison", address: "Pl. du Théâtre" },
+    { id: 4, name: "Le Sémaphore", spec: "Shot / Shooter", address: "44 r. de Bras" },
+    { id: 5, name: "La Tour Solidor", spec: "Bière d'abbaye / Trappiste", address: "24 r. Écuyère" },
+    { id: 6, name: "Kokomo", spec: "Pinte de bière IPA / Spéciale", address: "47 r. de Geôle" },
+    { id: 7, name: "Papa Jerry", spec: "Rhum arrangé", address: "6 r. de Bernières" },
+    { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail", address: "18 r. Écuyère" }
+  ];
+
+  const TARGET_COORDS = { lat: 49.1829, lng: -0.3707 };
+
+  const BAR_MAP_POINTS = {
+    1: { x: 220, y: 430 }, 2: { x: 300, y: 340 }, 3: { x: 250, y: 260 }, 4: { x: 165, y: 230 },
+    5: { x: 172, y: 193 }, 6: { x: 200, y: 165 }, 7: { x: 285, y: 150 }, 8: { x: 198, y: 215 }
+  };
+
+  // État de l'application
+  let currentGlobalStep = 1;
+  let activeBarIdForRiddle = null;
+  let selectedBarForDrink = null;
+  let base64Photo = null, mimeType = null, fileName = null;
+  let mockMode = false;
+
+  // Labyrinthe state
+  const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
+  let mazePos = { r: 0, c: 0 }, mazeTimer = null, mazeGamma = 0, mazeBeta = 0;
+  let MAZE_GRID = generateMaze(MAZE_COLS, MAZE_ROWS, MAZE_SEED);
+
+  // Boussole state
+  let geoWatchId = null, lastLat = null, lastLng = null, lastHeading = null, compassActive = false;
+
+  // Audio Context pour effets sonores Web Audio
+  let audioCtx = null;
+
+  function playSound(type) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'unlock') {
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      } else if (type === 'click') {
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+      } else if (type === 'bird') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
+        osc.frequency.linearRampToValueAtTime(700, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      }
+    } catch(e) {}
+  }
+
+  function showToast(msg, isSuccess = true) {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.style.borderLeftColor = isSuccess ? "var(--moss)" : "var(--wine)";
+    toast.innerHTML = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  // Restauration du joueur au chargement
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedName = localStorage.getItem('barathon_participant');
+    if (savedName) {
+      document.getElementById('global-participant').value = savedName;
+    }
+    const savedStep = localStorage.getItem('barathon_step');
+    if (savedStep) {
+      currentGlobalStep = parseInt(savedStep, 10);
+    }
+    renderBars();
+    renderCarte();
+    fetchGameState();
+    setInterval(fetchGameState, 5000);
+  });
+
+  function sauvegarderParticipant() {
+    const val = document.getElementById('global-participant').value;
+    if (val) localStorage.setItem('barathon_participant', val);
+    playSound('click');
+  }
+
+  async function fetchGameState() {
+    const syncStatus = document.getElementById("sync-status");
+    const syncText = document.getElementById("sync-text");
+    try {
+      const res = await fetch(WEB_APP_URL + "?action=get_state");
+      const data = await res.json();
+      mockMode = false;
+      syncStatus.style.background = "#27ae60";
+      syncText.textContent = "En ligne";
+
+      if (data.currentStep && data.currentStep > currentGlobalStep) {
+        currentGlobalStep = data.currentStep;
+        localStorage.setItem('barathon_step', currentGlobalStep);
+        renderBars();
+        renderCarte();
+        playSound('unlock');
+        showToast(`🎉 L'étape ${currentGlobalStep} a été débloquée !`);
+      }
+    } catch (e) {
+      mockMode = true;
+      syncStatus.style.background = "#f39c12";
+      syncText.textContent = "Mode Local";
+    }
+  }
+
+  function renderBars() {
+    const container = document.getElementById("bars-list");
+    document.getElementById("step-badge").textContent = `Étape ${currentGlobalStep} / 8`;
+    container.innerHTML = "";
+
+    BARS_DATA.forEach(bar => {
+      if (bar.id <= currentGlobalStep) {
+        container.innerHTML += `
+          <div class="waypoint-card open" onclick="ouvrirValidationBoisson(${bar.id})">
+            <div class="seal-icon">${bar.id}</div>
+            <div class="waypoint-details">
+              <div class="waypoint-title">
+                ${bar.name}
+                <span class="status-tag open">Ouvert</span>
+              </div>
+              <div class="waypoint-sub">📍 ${bar.address} • Spécialité : <b>${bar.spec}</b></div>
+            </div>
+          </div>`;
+
+        if (bar.id === currentGlobalStep && currentGlobalStep < BARS_DATA.length) {
+          let nextId = currentGlobalStep + 1;
+          container.innerHTML += `
+            <div class="unlock-banner" onclick="ouvrirEnigme(${nextId})">
+              <h3>🗝️ Débloquer l'Étape ${nextId} : ${BARS_DATA[nextId - 1].name}</h3>
+              <p>Une épreuve attend la guilde. Résous-la pour faire progresser tout le groupe !</p>
+            </div>`;
+        }
+      } else {
+        container.innerHTML += `
+          <div class="waypoint-card locked">
+            <div class="seal-icon seal-locked">🔒</div>
+            <div class="waypoint-details">
+              <div class="waypoint-title">
+                Étape ${bar.id} : Scellée
+                <span class="status-tag locked">Verrouillé</span>
+              </div>
+              <div class="waypoint-sub">Résolvez l'énigme de l'étape précédente pour dévoiler cette taverne.</div>
+            </div>
+          </div>`;
+      }
+    });
+  }
+
+  function renderCarte() {
+    const wrap = document.getElementById("carte-markers");
+    if (!wrap) return;
+    let markers = "", trail = "", prevPt = null;
+
+    BARS_DATA.forEach(bar => {
+      if (bar.id > currentGlobalStep) return;
+      const pt = BAR_MAP_POINTS[bar.id];
+      if (!pt) return;
+      if (prevPt) {
+        trail += `<line x1="${prevPt.x}" y1="${prevPt.y}" x2="${pt.x}" y2="${pt.y}" stroke="#781d2a" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round" opacity="0.8"></line>`;
+      }
+      markers += `
+        <g style="cursor:pointer;" onclick="ouvrirValidationBoisson(${bar.id})">
+          <circle cx="${pt.x}" cy="${pt.y}" r="12" fill="url(#sealGrad)" stroke="#1f140e" stroke-width="1.5"></circle>
+          <text x="${pt.x}" y="${pt.y + 4}" font-size="10" text-anchor="middle" font-family="'Cinzel', serif" font-weight="bold" fill="#1f140e">${bar.id}</text>
+          <text x="${pt.x}" y="${pt.y + 22}" font-size="9" text-anchor="middle" font-weight="bold" fill="#1f140e">${bar.name}</text>
+        </g>`;
+      prevPt = pt;
+    });
+    wrap.innerHTML = `<g>${trail}</g><g>${markers}</g>`;
+  }
+
+  function switchTab(tab) {
+    playSound('click');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    const idx = tab === 'accueil' ? 0 : tab === 'scores' ? 1 : 2;
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+
+    if (tab === 'scores') chargerClassement();
+    if (tab === 'carte') renderCarte();
+  }
+
+  // ---------- GESTION DES ÉPRREUVES / MODALES ----------
+
+  function ouvrirEnigme(barId) {
+    const joueur = document.getElementById("global-participant").value;
+    if (!joueur) {
+      showToast("⚠️ Choisis d'abord ton nom de corsaire !", false);
+      return;
+    }
+
+    playSound('click');
+    activeBarIdForRiddle = barId;
+    const c = document.getElementById("riddle-content");
+    document.getElementById("riddle-title").textContent = `Épreuve pour le Bar ${barId} : ${BARS_DATA[barId - 1].name}`;
+    document.getElementById("riddle-msg").textContent = "";
+
+    if (barId === 2) {
+      let indice = INDICES_PERSO[joueur] || "Inspecte les environs de la zone de départ !";
+      c.innerHTML = `
+        <p style="font-size:13px; margin-bottom:8px;"><b>🧭 Géocaching du Corsaire</b><br>Retrouve la fiole cachée sur le parcours grâce à ton indice secret.</p>
+        <div class="clue-box"><span class="label">Ton Indice Secret</span>${indice}</div>
+        <div class="compass-container">
+          <button id="btn-compass" class="btn btn-secondary" onclick="demarrerBoussole()">📍 Activer le GPS / Boussole</button>
+          <div id="compass-dial-wrap" style="display:none;">
+            <div class="compass-dial">
+              <span class="compass-cardinal cardinal-n">N</span>
+              <span class="compass-cardinal cardinal-e">E</span>
+              <span class="compass-cardinal cardinal-s">S</span>
+              <span class="compass-cardinal cardinal-w">O</span>
+              <div id="compass-needle" class="compass-needle"></div>
+            </div>
+            <div id="compass-info" style="font-size:12px; color:var(--wine); font-weight:bold;">Analyse de la position…</div>
+          </div>
+        </div>
+        <input type="text" id="ans" placeholder="Entre le code à 4 chiffres (Ex: 1715)" maxlength="4" style="text-align:center; letter-spacing:4px; font-size:16px;">
+        <button class="btn btn-primary" onclick="verifierReponse()">🔓 Valider le code secret</button>`;
+    }
+    else if (barId === 3) {
+      c.innerHTML = `
+        <p style="font-size:13px; margin-bottom:8px;">Écoute le cri du volatile des mers. Quel oiseau légendaire impose un cul-sec à l'assemblée ?</p>
+        <div style="background:#f2e6c8; padding:10px; border-radius:6px; margin:10px 0; text-align:center;">
+          <audio controls style="width:100%; margin-bottom:6px;"><source src="pelican.mp3" type="audio/mpeg"></audio>
+          <button class="btn btn-secondary" onclick="playSound('bird')" style="font-size:12px; padding:6px;">🔊 Écouter le signal audio alternatif</button>
+        </div>
+        <input type="text" id="ans" placeholder="Nom de l'oiseau…" style="text-align:center;">
+        <button class="btn btn-primary" onclick="verifierReponse()">Valider la réponse</button>`;
+    }
+    else if (barId === 4) {
+      c.innerHTML = `
+        <p style="font-size:13px; margin-bottom:8px;"><em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. » (9 lettres)</em></p>
+        <input type="text" id="ans" maxlength="9" placeholder="Mot de 9 lettres…" style="text-transform:uppercase; text-align:center; font-size:16px; letter-spacing:2px;">
+        <button class="btn btn-primary" onclick="verifierReponse()">Proposer le mot</button>
+        <div id="motus-histo" style="margin-top:10px;"></div>`;
+    }
+    else if (barId === 5) {
+      c.innerHTML = `
+        <p style="font-size:13px; margin-bottom:8px;"><b>🏴‍☠️ Le Labyrinthe du Port</b><br>Guide la frégate jusqu'au coffre aux trésors 💰 sans toucher les récifs !</p>
+        <div style="text-align:center;">${buildMazeSVG()}</div>
+        <div id="maze-hint" style="font-size:12px; text-align:center; margin:6px 0; color:var(--wine); font-weight:bold;">Utilise les boutons ou le gyroscope.</div>
+        <div class="d-pad">
+          <div></div><button class="d-btn" onclick="tryMoveMaze('U')">▲</button><div></div>
+          <button class="d-btn" onclick="tryMoveMaze('L')">◀</button><div></div><button class="d-btn" onclick="tryMoveMaze('R')">▶</button>
+          <div></div><button class="d-btn" onclick="tryMoveMaze('D')">▼</button><div></div>
+        </div>
+        <button class="btn btn-secondary" onclick="demarrerGyroscope()">📱 Activer le Gyroscope</button>`;
+      window.addEventListener('keydown', handleMazeKeydown);
+    }
+    else if (barId === 6 || barId === 7) {
+      c.innerHTML = `
+        <p style="font-size:14px; text-align:center; margin-bottom:12px;">🍻 <b>Étape de Transition et Convivialité</b><br>Toutes les troupes sont arrivées à bon port. Rassemblez les chopes et trinquez !</p>
+        <button class="btn btn-primary" onclick="unlockGlobalStep()">🍻 Trinquer et débloquer la suite</button>`;
+    }
+    else if (barId === 8) {
+      c.innerHTML = `
+        <p style="font-size:13px; margin-bottom:8px;">Devine le nom du breuvage emblématique de la cité caennaise grâce aux symboles :</p>
+        <div class="clue-box" style="font-size:24px; text-align:center; letter-spacing:8px;">🍂 + 🚌 + 🪟 + 🎲</div>
+        <input type="text" id="ans" placeholder="Nom du cocktail…" style="text-align:center;">
+        <button class="btn btn-primary" onclick="verifierReponse()">🏆 Terminer le Barathon !</button>`;
+    }
+
+    document.getElementById("modal-riddle").classList.add("active");
+  }
+
+  function verifierReponse() {
+    let ans = document.getElementById("ans") ? document.getElementById("ans").value.toLowerCase().trim() : "";
+    let msg = document.getElementById("riddle-msg");
+    let ok = false;
+
+    if (activeBarIdForRiddle === 2 && ans === "1715") ok = true;
+    if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
+
+    if (activeBarIdForRiddle === 4) {
+      if (ans.length !== 9) {
+        msg.textContent = "⚠️ Il faut exactement 9 lettres.";
+        msg.style.color = "var(--wine)";
+        return;
+      }
+      if (ans.toUpperCase() === "PIRATERIE") ok = true;
+      else {
+        let row = `<div class="motus-grid">`;
+        let target = "PIRATERIE".split("");
+        ans.toUpperCase().split("").forEach((l, i) => {
+          let stat = "m-absent";
+          if (l === target[i]) stat = "m-correct";
+          else if (target.includes(l)) stat = "m-present";
+          row += `<div class="motus-tile ${stat}">${l}</div>`;
+        });
+        row += `</div>`;
+        document.getElementById("motus-histo").innerHTML = row;
+        msg.textContent = "Mot incorrect. Observe la couleur des lettres !";
+        msg.style.color = "var(--wine)";
+        return;
+      }
+    }
+
+    if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
+
+    if (ok) {
+      msg.textContent = "✨ Bonne réponse ! Validation en cours…";
+      msg.style.color = "var(--moss)";
+      unlockGlobalStep();
+    } else {
+      msg.textContent = "❌ Ce n'est pas la bonne réponse, réessaie !";
+      msg.style.color = "var(--wine)";
+    }
+  }
+
+  async function unlockGlobalStep() {
+    const p = document.getElementById("global-participant").value;
+    playSound('unlock');
+
+    currentGlobalStep = Math.max(currentGlobalStep, activeBarIdForRiddle);
+    localStorage.setItem('barathon_step', currentGlobalStep);
+
+    if (currentGlobalStep === 8) {
+      lancerConfettis();
+    }
+
+    if (!mockMode) {
+      try {
+        await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "resolve_riddle", step: activeBarIdForRiddle, participant: p })
+        });
+      } catch (e) {}
+    }
+
+    showToast(`🎉 Étape ${activeBarIdForRiddle} débloquée avec succès par ${p} ! (+20 pts)`);
+    fermerModales();
+    renderBars();
+    renderCarte();
+  }
+
+  // ---------- LABYRINTHE LOGIC ----------
+  function generateMaze(cols, rows, seed) {
+    let s = seed % 2147483647;
+    function rng() { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }
+    
+    const grid = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) row.push({ N: true, S: true, E: true, W: true, v: false });
+      grid.push(row);
+    }
+    const opp = { N: 'S', S: 'N', E: 'W', W: 'E' };
+
+    (function carve(r, c) {
+      grid[r][c].v = true;
+      const dirs = ['N', 'S', 'E', 'W'].sort(() => rng() - 0.5);
+      for (const d of dirs) {
+        let nr = r, nc = c;
+        if (d === 'N') nr--; else if (d === 'S') nr++; else if (d === 'E') nc++; else nc--;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || grid[nr][nc].v) continue;
+        grid[r][c][d] = false; grid[nr][nc][opp[d]] = false;
+        carve(nr, nc);
+      }
+    })(0, 0);
+    return grid;
+  }
+
+  function buildMazeSVG() {
+    const cs = 32;
+    let svg = `<svg viewBox="0 0 ${MAZE_COLS * cs} ${MAZE_ROWS * cs}" width="100%" style="max-width:240px; background:#f2e6c8; border:2px solid var(--ink); border-radius:6px;">`;
+    for (let r = 0; r < MAZE_ROWS; r++) {
+      for (let c = 0; c < MAZE_COLS; c++) {
+        const cell = MAZE_GRID[r][c], x = c * cs, y = r * cs;
+        if (cell.N) svg += `<line x1="${x}" y1="${y}" x2="${x + cs}" y2="${y}" stroke="#523f2f" stroke-width="2"></line>`;
+        if (cell.W) svg += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + cs}" stroke="#523f2f" stroke-width="2"></line>`;
+      }
+    }
+    for (let c = 0; c < MAZE_COLS; c++) { if (MAZE_GRID[MAZE_ROWS - 1][c].S) svg += `<line x1="${c * cs}" y1="${MAZE_ROWS * cs}" x2="${(c + 1) * cs}" y2="${MAZE_ROWS * cs}" stroke="#523f2f" stroke-width="2"></line>`; }
+    for (let r = 0; r < MAZE_ROWS; r++) { if (MAZE_GRID[r][MAZE_COLS - 1].E) svg += `<line x1="${MAZE_COLS * cs}" y1="${r * cs}" x2="${MAZE_COLS * cs}" y2="${(r + 1) * cs}" stroke="#523f2f" stroke-width="2"></line>`; }
+    
+    svg += `<text x="${cs / 2}" y="${cs / 2 + 5}" font-size="14" text-anchor="middle">⛵</text>`;
+    svg += `<text x="${(MAZE_COLS - 0.5) * cs}" y="${(MAZE_ROWS - 0.5) * cs + 6}" font-size="16" text-anchor="middle">💰</text>`;
+    svg += `<g id="pirate-token" transform="translate(${cs / 2},${cs / 2})"><text font-size="16" text-anchor="middle" dy="5">🏴‍☠️</text></g>`;
+    svg += `</svg>`;
+    return svg;
+  }
+
+  function tryMoveMaze(dir) {
+    if (activeBarIdForRiddle !== 5) return;
+    const cell = MAZE_GRID[mazePos.r][mazePos.c];
+    let moved = false;
+
+    if (dir === 'U' && !cell.N && mazePos.r > 0) { mazePos.r--; moved = true; }
+    if (dir === 'D' && !cell.S && mazePos.r < MAZE_ROWS - 1) { mazePos.r++; moved = true; }
+    if (dir === 'L' && !cell.W && mazePos.c > 0) { mazePos.c--; moved = true; }
+    if (dir === 'R' && !cell.E && mazePos.c < MAZE_COLS - 1) { mazePos.c++; moved = true; }
+
+    if (moved) {
+      playSound('click');
+      const token = document.getElementById("pirate-token");
+      if (token) token.setAttribute("transform", `translate(${mazePos.c * 32 + 16},${mazePos.r * 32 + 16})`);
+
+      if (mazePos.r === MAZE_ROWS - 1 && mazePos.c === MAZE_COLS - 1) {
+        window.removeEventListener('keydown', handleMazeKeydown);
+        unlockGlobalStep();
+      }
+    }
+  }
+
+  function handleMazeKeydown(e) {
+    if (activeBarIdForRiddle !== 5) return;
+    const dirs = { ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'L', ArrowRight: 'R' };
+    if (dirs[e.key]) { e.preventDefault(); tryMoveMaze(dirs[e.key]); }
+  }
+
+  function demarrerGyroscope() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(res => {
+        if (res === 'granted') window.addEventListener('deviceorientation', handleGyro);
+      });
+    } else {
+      window.addEventListener('deviceorientation', handleGyro);
+    }
+    showToast("📱 Gyroscope activé ! Incline ton téléphone.");
+  }
+
+  function handleGyro(e) {
+    if (activeBarIdForRiddle !== 5) return;
+    if (Math.abs(e.gamma) > 20) tryMoveMaze(e.gamma > 0 ? 'R' : 'L');
+    else if (Math.abs(e.beta) > 20) tryMoveMaze(e.beta > 0 ? 'D' : 'U');
+  }
+
+  // ---------- BOUSSOLE & GEOLOCALISATION ----------
+  function demarrerBoussole() {
+    document.getElementById("btn-compass").style.display = "none";
+    document.getElementById("compass-dial-wrap").style.display = "block";
+
+    if (navigator.geolocation) {
+      geoWatchId = navigator.geolocation.watchPosition(pos => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        const dist = Math.round(haversine(lat, lng, TARGET_COORDS.lat, TARGET_COORDS.lng));
+        const needle = document.getElementById("compass-needle");
+        const info = document.getElementById("compass-info");
+
+        if (needle) needle.style.transform = `rotate(${(dist * 12) % 360}deg)`;
+        if (info) info.textContent = dist < 30 ? `🔥 Ça brûle ! Distance : ${dist}m` : `🧭 Signal GPS capté. Distance : ${dist}m`;
+      }, err => {
+        document.getElementById("compass-info").textContent = "GPS indisponible — utilise l'indice secret !";
+      });
+    }
+  }
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371000, toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // ---------- ENVOI CONSUMMATION & PHOTO ----------
+  function ouvrirValidationBoisson(barId) {
+    const p = document.getElementById("global-participant").value;
+    if (!p) {
+      showToast("⚠️ Choisis ton nom en haut de la page d'abord !", false);
+      return;
+    }
+
+    selectedBarForDrink = BARS_DATA.find(b => b.id === barId);
+    document.getElementById("drink-bar-title").textContent = `Consommation : ${selectedBarForDrink.name}`;
+    document.getElementById("photo-preview-img").style.display = "none";
+    document.getElementById("drink-photo").value = "";
+    base64Photo = null;
+    document.getElementById("modal-drink").classList.add("active");
+  }
+
+  document.getElementById('drink-photo').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      mimeType = file.type;
+      fileName = file.name || "preuve.jpg";
+      
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          // Compression Canvas Client
+          const canvas = document.createElement('canvas');
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+            else { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          
+          const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+          base64Photo = compressedUrl.split(',')[1];
+          mimeType = 'image/jpeg';
+
+          const preview = document.getElementById("photo-preview-img");
+          preview.src = compressedUrl;
+          preview.style.display = "block";
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  async function envoyerBoisson() {
+    if (!base64Photo) {
+      showToast("⚠️ N'oublie pas la photo de ton verre en preuve !", false);
+      return;
+    }
+
+    const p = document.getElementById("global-participant").value;
+    const verre = document.getElementById("drink-select").value;
+    const btn = document.getElementById("btn-submit-drink");
+
+    let points = 10;
+    if (verre === selectedBarForDrink.spec) points += 5;
+
+    btn.disabled = true;
+    btn.textContent = "⏳ Envoi en cours…";
+
+    if (!mockMode) {
+      try {
+        await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "validate_drink", participant: p, bar: selectedBarForDrink.name,
+            verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName
+          })
+        });
+      } catch(e) {}
+    }
+
+    // Sauvegarde des points en local
+    let userScores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
+    userScores[p] = (userScores[p] || 0) + points;
+    localStorage.setItem('barathon_scores', JSON.stringify(userScores));
+
+    showToast(`🍺 Consommation enregistrée pour ${p} ! (+${points} pts)`);
+    btn.disabled = false;
+    btn.textContent = "📸 Envoyer la preuve (+10 pts)";
+    fermerModales();
+    switchTab('scores');
+  }
+
+  function chargerClassement() {
+    const tbody = document.getElementById('ranking-body');
+    tbody.innerHTML = `<tr><td colspan="3">Chargement du registre…</td></tr>`;
+
+    if (mockMode) {
+      let scores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
+      let sorted = Object.entries(scores).map(([p, pts]) => ({ participant: p, points: pts })).sort((a,b) => b.points - a.points);
+      
+      if (sorted.length === 0) {
+        sorted = [
+          { participant: "Majid", points: 45 },
+          { participant: "Alexandre", points: 35 },
+          { participant: "Pepette", points: 25 },
+          { participant: "Jules D", points: 10 }
+        ];
+      }
+      renderRankingTable(sorted);
+      return;
+    }
+
+    fetch(WEB_APP_URL + "?action=classement")
+      .then(r => r.json())
+      .then(data => renderRankingTable(data))
+      .catch(() => {
+        let scores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
+        let sorted = Object.entries(scores).map(([p, pts]) => ({ participant: p, points: pts })).sort((a,b) => b.points - a.points);
+        renderRankingTable(sorted);
+      });
+  }
+
+  function renderRankingTable(data) {
+    const tbody = document.getElementById('ranking-body');
+    tbody.innerHTML = "";
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3">Aucune tournée enregistrée pour l'instant.</td></tr>`;
+      return;
+    }
+    data.forEach((row, i) => {
+      let medal = i === 0 ? '<span class="medal medal-1">I</span>' :
+                  i === 1 ? '<span class="medal medal-2">II</span>' :
+                  i === 2 ? '<span class="medal medal-3">III</span>' : `#${i + 1}`;
+      tbody.innerHTML += `
+        <tr>
+          <td>${medal}</td>
+          <td><b>${row.participant}</b></td>
+          <td><b>${row.points}</b> pts</td>
+        </tr>`;
+    });
+  }
+
+  function fermerModales() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    window.removeEventListener('keydown', handleMazeKeydown);
+    window.removeEventListener('deviceorientation', handleGyro);
+    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+  }
+
+  // ---------- ANIMATION CONFETTIS DE VICTOIRE ----------
+  function lancerConfettis() {
+    const canvas = document.getElementById('canvas-confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const colors = ['#c29532', '#781d2a', '#2f5a38', '#ebd9b5', '#ffffff'];
+
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        tilt: Math.random() * 10 - 10,
+        tiltAngle: 0,
+        tiltAngleIncremental: Math.random() * 0.07 + 0.05
+      });
+    }
+
+    let animationFrame;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.tiltAngle += p.tiltAngleIncremental;
+        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+        p.tilt = Math.sin(p.tiltAngle) * 15;
+
+        ctx.beginPath();
+        ctx.lineWidth = p.r;
+        ctx.strokeStyle = p.color;
+        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+        ctx.stroke();
+
+        if (p.y > canvas.height) {
+          particles[i] = { ...p, y: -20, x: Math.random() * canvas.width };
+        }
+      });
+      animationFrame = requestAnimationFrame(draw);
+    }
+    draw();
+    setTimeout(() => { cancelAnimationFrame(animationFrame); ctx.clearRect(0,0,canvas.width,canvas.height); }, 6000);
+  }
+</script>
+</body>
+</html>
