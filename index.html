@@ -917,10 +917,6 @@
     if (savedName) {
       document.getElementById('global-participant').value = savedName;
     }
-    const savedStep = localStorage.getItem('barathon_step');
-    if (savedStep) {
-      currentGlobalStep = parseInt(savedStep, 10);
-    }
     renderBars();
     renderCarte();
     fetchGameState();
@@ -943,18 +939,30 @@
       syncStatus.style.background = "#27ae60";
       syncText.textContent = "En ligne";
 
-      if (data.currentStep && data.currentStep > currentGlobalStep) {
-        currentGlobalStep = data.currentStep;
-        localStorage.setItem('barathon_step', currentGlobalStep);
-        renderBars();
-        renderCarte();
-        playSound('unlock');
-        showToast(`🎉 L'étape ${currentGlobalStep} a été débloquée !`);
+      if (data.currentStep != null) {
+        const newStep = parseInt(data.currentStep, 10) || 1;
+        if (newStep !== currentGlobalStep) {
+          const wasStep = currentGlobalStep;
+          currentGlobalStep = newStep;
+          localStorage.setItem('barathon_step', currentGlobalStep);
+          renderBars();
+          renderCarte();
+          if (currentGlobalStep > wasStep) {
+            playSound('unlock');
+            showToast(`🎉 L'étape ${currentGlobalStep} a été débloquée !`);
+          }
+        }
       }
     } catch (e) {
       mockMode = true;
       syncStatus.style.background = "#f39c12";
       syncText.textContent = "Mode Local";
+      const savedStep = localStorage.getItem('barathon_step');
+      if (savedStep) {
+        currentGlobalStep = parseInt(savedStep, 10);
+        renderBars();
+        renderCarte();
+      }
     }
   }
 
@@ -1091,6 +1099,7 @@
         <div id="motus-histo" style="margin-top:10px;"></div>`;
     }
     else if (barId === 5) {
+      mazePos = { r: 0, c: 0 };
       c.innerHTML = `
         <p style="font-size:13px; margin-bottom:8px;"><b>🏴‍☠️ Le Labyrinthe du Port</b><br>Guide la frégate jusqu'au coffre aux trésors 💰 sans toucher les récifs !</p>
         <div style="text-align:center;">${buildMazeSVG()}</div>
@@ -1275,10 +1284,15 @@
     showToast("📱 Gyroscope activé ! Incline ton téléphone.");
   }
 
+  let mazeLastMoveTime = 0;
   function handleGyro(e) {
     if (activeBarIdForRiddle !== 5) return;
-    if (Math.abs(e.gamma) > 20) tryMoveMaze(e.gamma > 0 ? 'R' : 'L');
-    else if (Math.abs(e.beta) > 20) tryMoveMaze(e.beta > 0 ? 'D' : 'U');
+    const now = Date.now();
+    if (now - mazeLastMoveTime < 300) return;
+    let moved = false;
+    if (Math.abs(e.gamma) > 20) { tryMoveMaze(e.gamma > 0 ? 'R' : 'L'); moved = true; }
+    else if (Math.abs(e.beta) > 20) { tryMoveMaze(e.beta > 0 ? 'D' : 'U'); moved = true; }
+    if (moved) mazeLastMoveTime = now;
   }
 
   // ---------- BOUSSOLE & GEOLOCALISATION ----------
@@ -1290,11 +1304,12 @@
       geoWatchId = navigator.geolocation.watchPosition(pos => {
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
         const dist = Math.round(haversine(lat, lng, TARGET_COORDS.lat, TARGET_COORDS.lng));
+        const brg = Math.round(bearingTo(lat, lng, TARGET_COORDS.lat, TARGET_COORDS.lng));
         const needle = document.getElementById("compass-needle");
         const info = document.getElementById("compass-info");
 
-        if (needle) needle.style.transform = `rotate(${(dist * 12) % 360}deg)`;
-        if (info) info.textContent = dist < 30 ? `🔥 Ça brûle ! Distance : ${dist}m` : `🧭 Signal GPS capté. Distance : ${dist}m`;
+        if (needle) needle.style.transform = `rotate(${brg}deg)`;
+        if (info) info.textContent = dist < 30 ? `🔥 Ça brûle ! Distance : ${dist}m` : `🧭 Cap : ${brg}° • Distance : ${dist}m`;
       }, err => {
         document.getElementById("compass-info").textContent = "GPS indisponible — utilise l'indice secret !";
       });
@@ -1306,6 +1321,13 @@
     const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function bearingTo(lat1, lon1, lat2, lon2) {
+    const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
+    const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
   }
 
   // ---------- ENVOI CONSUMMATION & PHOTO ----------
