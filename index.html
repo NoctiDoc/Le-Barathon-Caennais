@@ -637,8 +637,8 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    // COORDONNÉES DE TEST (position à remplacer par celle de la vraie cache avant la soirée)
-    const TARGET_COORDS = { lat: 49.1555690, lng: -0.4743279 };
+    // Nouvelle localisation cible mise à jour
+    const TARGET_COORDS = { lat: 49.155970, lng: -0.475070 };
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
     function seededRandom(seed) {
@@ -669,8 +669,6 @@
     }
     const MAZE_GRID = generateMaze(MAZE_COLS, MAZE_ROWS, MAZE_SEED);
 
-    // Emplacements sur la carte stylisée (positions relatives approximatives, pas des GPS exacts).
-    // lx/ly/a = position et ancrage de l'étiquette du sceau.
     const BAR_MAP_POINTS = {
         1: { x: 150, y: 318, lx: 134, ly: 321, a: 'end' },
         2: { x: 138, y: 216, lx: 122, ly: 219, a: 'end' },
@@ -693,9 +691,15 @@
     let px = 15, py = 15;
     const mazeKeys = {};
 
-    let geoWatchId = null, lastLat = null, lastLng = null, lastHeading = null, compassActive = false, needleRotation = 0, roseRotation = 0, lastVibe = 0, gpsFallbackTimer = null;
-    let kfVar = -1, kfT = 0, heatState = 0, headingAccuracy = null, calibCheckT = 0;
-    let compassRaf = null, compassLastT = 0, dispRose = null, dispNeedle = null, dispDist = null, targetDist = null, bearingTarget = null, lastAccuracy = null;
+    // Variables Boussole & GPS optimisées
+    let geoWatchId = null, lastLat = null, lastLng = null, compassActive = false, lastVibe = 0, gpsFallbackTimer = null;
+    let animFrameId = null;
+    let targetNeedleRot = 0, currentNeedleRot = 0;
+    let targetRoseRot = 0, currentRoseRot = 0;
+    let rawHeading = null, smoothedHeading = null, rawBearing = 0;
+    let gpsHistory = [];
+    const GPS_HISTORY_SIZE = 4;
+
     let adminClicks = 0, adminTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -994,7 +998,7 @@
         document.getElementById("riddle-msg").className = "feedback";
 
         if (barId === 2) {
-            resetCompassState();
+            lastLat = null; lastLng = null; rawHeading = null; smoothedHeading = null; compassActive = false; currentNeedleRot = 0; currentRoseRot = 0;
             c.innerHTML = `<div class="riddle-parchment">
                              <strong>Le Radar du Corsaire</strong><br>
                              Suis l'aiguille jusqu'à la cache. Plus tu t'approches, plus l'instrument s'enflamme.
@@ -1010,7 +1014,6 @@
                            <div class="heat-meter" id="heat-meter">${buildHeatSegments()}</div>
                            <div class="heat-scale"><span>Froid</span><span>Brûlant</span></div>
                            <div id="compass-msg" class="feedback feedback-info">Active le radar pour lancer la recherche.</div>
-                           <div id="compass-calib"></div>
                            <button id="btn-compass" class="btn btn-primary" onclick="demarrerBoussole()">Activer le radar</button>
                            <div id="gps-fallback-container"></div>
                            <input type="text" id="ans" placeholder="Code relevé sur la cache" style="text-transform:uppercase; margin-top:14px;">
@@ -1038,7 +1041,7 @@
         else if (barId === 5) {
             px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
             c.innerHTML = `<div class="riddle-parchment" style="margin-bottom:6px;">
-                             🗺️️ <strong>Le Vrai Labyrinthe</strong><br>
+                             🗺 <strong>Le Vrai Labyrinthe</strong><br>
                              Incline ton mobile pour guider ton pirate à travers les coursives vers le magot.
                            </div>
                            <div class="maze-svg-wrap">${buildMazeSVG()}</div>
@@ -1233,6 +1236,12 @@
         return (toDeg(Math.atan2(y, x)) + 360) % 360;
     }
 
+    function smoothAngle(prev, next, alpha) {
+        if (prev == null) return next;
+        const diff = ((next - prev + 540) % 360) - 180;
+        return (prev + alpha * diff + 360) % 360;
+    }
+
     function buildCompassSVG() {
         const cx = 130, cy = 130, F = "'IM Fell English SC', Georgia, serif";
         const pt = (r, deg) => { const a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
@@ -1276,6 +1285,11 @@
               <text x="193" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">E</text>
               <text x="130" y="198" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">S</text>
               <text x="67" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">O</text>
+            </g>
+            <g id="compass-sweep"><path d="M130 130 L130 30 A100 100 0 0 1 200 58.6 Z" fill="url(#cSweepG)"></path></g>
+            <ellipse cx="94" cy="76" rx="64" ry="30" transform="rotate(-34 94 76)" fill="url(#cGlass)"></ellipse>
+          </g>
+          <circle cx="130" cy="130" r="103" fill="none" stroke="#2a1d0e" stroke-opacity=".28" stroke-width="3.5"></circle>
           <g id="compass-needle"><g class="needle-wobble">
             <path d="M133 34 L144 134 L133 128 L122 134 Z" fill="#000" opacity=".18"></path>
             <path d="M130 30 L140 130 L130 123 L120 130 Z" fill="url(#cNeedle)" stroke="#2e0c14" stroke-width="1.1" stroke-linejoin="round"></path>
@@ -1284,11 +1298,6 @@
             <circle cx="130" cy="34" r="7" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.2"></circle>
             <path d="M126.4 30.4 L133.6 37.6 M133.6 30.4 L126.4 37.6" stroke="#7a2333" stroke-width="1.9" stroke-linecap="round"></path>
           </g></g>
-            </g>
-            <g id="compass-sweep"><path d="M130 130 L130 30 A100 100 0 0 1 200 58.6 Z" fill="url(#cSweepG)"></path></g>
-            <ellipse cx="94" cy="76" rx="64" ry="30" transform="rotate(-34 94 76)" fill="url(#cGlass)"></ellipse>
-          </g>
-          <circle cx="130" cy="130" r="103" fill="none" stroke="#2a1d0e" stroke-opacity=".28" stroke-width="3.5"></circle>
           <circle cx="130" cy="130" r="12.5" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.3"></circle>
           <circle cx="130" cy="130" r="6" fill="url(#cJewel)" stroke="#2e0c14" stroke-width=".8"></circle>
           <circle cx="128" cy="128" r="1.6" fill="#fff" opacity=".7"></circle>
@@ -1305,24 +1314,21 @@
         if (m) { m.textContent = text; m.className = "feedback feedback-" + kind; }
     }
 
-    function resetCompassState() {
-        if (compassRaf) { cancelAnimationFrame(compassRaf); compassRaf = null; }
-        compassActive = false; lastLat = null; lastLng = null; lastHeading = null; lastAccuracy = null;
-        needleRotation = 0; roseRotation = 0; dispRose = null; dispNeedle = null; dispDist = null; targetDist = null; bearingTarget = null;
-        kfVar = -1; kfT = 0; heatState = 0; headingAccuracy = null; calibCheckT = 0;
-    }
-
     function demarrerBoussole() {
         if (!navigator.geolocation) { setCompassStatus("Géolocalisation indisponible sur cet appareil.", "warn"); return; }
-        const attach = () => {
-            window.addEventListener('deviceorientation', handleCompassOrientation, true);
-            if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleCompassOrientation, true);
-        };
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission().then(res => { if (res === 'granted') attach(); }).catch(() => {});
-        } else { attach(); }
+            DeviceOrientationEvent.requestPermission().then(res => {
+                if (res === 'granted') window.addEventListener('deviceorientation', handleCompassOrientation, { passive: true });
+            }).catch(() => {});
+        } else { window.addEventListener('deviceorientation', handleCompassOrientation, { passive: true }); }
 
-        geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+        // Options GPS strictes pour forcer la précision maximale
+        geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { 
+            enableHighAccuracy: true, 
+            maximumAge: 0, 
+            timeout: 10000 
+        });
+        
         compassActive = true;
         const inst = document.getElementById("compass-instrument"), btn = document.getElementById("btn-compass");
         if (inst) { inst.classList.remove("standby"); inst.classList.add("active"); }
@@ -1331,37 +1337,46 @@
         if (lab) lab.textContent = "Recherche du signal";
         setCompassStatus("Acquisition du signal GPS…", "info");
 
-        compassLastT = performance.now();
-        if (compassRaf) cancelAnimationFrame(compassRaf);
-        compassRaf = requestAnimationFrame(compassFrame);
+        startCompassRenderLoop();
 
         gpsFallbackTimer = setTimeout(() => {
             if (lastLat == null) {
                 const fc = document.getElementById("gps-fallback-container");
-                if (fc) fc.innerHTML = `<p class="gps-tip">Signal lent ? Place-toi à découvert, loin des hauts murs, et patiente quelques secondes.</p>`;
+                if (fc) fc.innerHTML = `<p class="gps-tip">Signal GPS faible ? Pense à faire un mouvement en '8' avec ton téléphone pour recalibrer le magnétomètre.</p>`;
             }
         }, 8000);
     }
 
-    // Filtre de Kalman 1D sur la position : chaque fix pèse selon sa précision annoncée,
-    // les sauts de quelques mètres du GPS sont lissés sans retard sensible à la marche.
-    function kalmanUpdate(lat, lng, acc, t) {
-        const a = Math.max(acc || 15, 3);
-        if (kfVar < 0) { lastLat = lat; lastLng = lng; kfVar = a * a; kfT = t; return; }
-        const dt = Math.max(0, (t - kfT) / 1000); kfT = t;
-        kfVar += dt * 4 * 4;                       // vitesse max supposée : 4 m/s
-        const K = kfVar / (kfVar + a * a);
-        lastLat += K * (lat - lastLat); lastLng += K * (lng - lastLng);
-        kfVar = (1 - K) * kfVar;
-    }
-
     function updateCompassPosition(pos) {
-        kalmanUpdate(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.timestamp || Date.now());
-        lastAccuracy = pos.coords.accuracy;
+        let currentAccuracy = pos.coords.accuracy;
+
+        // Filtre de précision stricte pour écarter les sauts GPS majeurs
+        if (currentAccuracy > 6) {
+            setCompassStatus(`Signal GPS trop imprécis (${Math.round(currentAccuracy)}m). Bouge un peu...`, "warn");
+            return; 
+        }
+
+        let currentLat = pos.coords.latitude; 
+        let currentLng = pos.coords.longitude;
+
+        // Moyenne glissante (lissage de position)
+        gpsHistory.push({ lat: currentLat, lng: currentLng });
+        if (gpsHistory.length > GPS_HISTORY_SIZE) {
+            gpsHistory.shift();
+        }
+
+        lastLat = gpsHistory.reduce((sum, p) => sum + p.lat, 0) / gpsHistory.length;
+        lastLng = gpsHistory.reduce((sum, p) => sum + p.lng, 0) / gpsHistory.length;
+
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
         const fc = document.getElementById("gps-fallback-container");
         if (fc) fc.innerHTML = "";
-        refreshCompassUI();
+        const lab = document.getElementById("ro-label");
+        if (lab) lab.textContent = "Distance de la cache";
+
+        rawBearing = bearingTo(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
+        updateTargets();
+        updateDistanceAndUI();
     }
 
     function geoErr(err) {
@@ -1369,113 +1384,62 @@
         else setCompassStatus("Signal GPS faible — place-toi à découvert.", "warn");
     }
 
-    function smoothAngle(prev, next, alpha) {
-        if (prev == null) return next;
-        const diff = ((next - prev + 540) % 360) - 180;
-        return (prev + alpha * diff + 360) % 360;
-    }
-
-    // Cap compensé de l'inclinaison (alpha/beta/gamma) : à plat on suit le haut du téléphone,
-    // en position debout on suit son dos (là où pointe la caméra), avec fondu entre les deux.
-    function headingFromEuler(alpha, beta, gamma) {
-        const r = Math.PI / 180, a = alpha * r, b = (beta || 0) * r, g = (gamma || 0) * r;
-        const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
-        const yE = -sA * cB, yN = cA * cB;                                   // haut du téléphone
-        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG); // dos du téléphone
-        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));  // 1 = à plat, 0 = debout (selon le tangage)
-        const ly = Math.hypot(yE, yN), lz = Math.hypot(zE, zN);
-        let e = 0, n = 0;
-        if (ly > 1e-3) { e += w * yE / ly; n += w * yN / ly; }
-        if (lz > 1e-3) { e += (1 - w) * zE / lz; n += (1 - w) * zN / lz; }
-        if (Math.abs(e) + Math.abs(n) < 1e-3) return (360 - alpha) % 360;
-        return (Math.atan2(e, n) / r + 360) % 360;
-    }
-
-    // Les capteurs ne font que mémoriser le cap : l'affichage est calculé à chaque image (voir compassFrame).
     function handleCompassOrientation(event) {
-        let heading = null;
-        if (typeof event.webkitCompassHeading === 'number' && event.webkitCompassHeading >= 0) {
-            heading = event.webkitCompassHeading;
-            if (typeof event.webkitCompassAccuracy === 'number') headingAccuracy = event.webkitCompassAccuracy;
-        } else if (event.alpha != null) {
-            const absSupported = 'ondeviceorientationabsolute' in window;
-            if (event.type === 'deviceorientationabsolute' || event.absolute === true || !absSupported) heading = headingFromEuler(event.alpha, event.beta, event.gamma);
+        let heading = (typeof event.webkitCompassHeading === 'number') ? event.webkitCompassHeading : (event.alpha != null ? (360 - event.alpha) : null);
+        if (heading != null) {
+            smoothedHeading = smoothAngle(smoothedHeading, heading, 0.2); 
+            updateTargets();
         }
-        if (heading == null) return;
-        if (lastHeading == null) { lastHeading = heading; return; }
-        // lissage adaptatif : petit écart = fort lissage (anti-tremblement), grand écart = suivi immédiat
-        const d = Math.abs(((heading - lastHeading + 540) % 360) - 180);
-        lastHeading = smoothAngle(lastHeading, heading, Math.min(0.85, 0.14 + d / 30));
     }
 
-    function compassFrame(now) {
-        if (!compassActive || activeBarIdForRiddle !== 2) { compassRaf = null; return; }
-        const dt = Math.min(0.06, Math.max(0.001, (now - compassLastT) / 1000));
-        compassLastT = now;
-        const ease = speed => 1 - Math.exp(-dt * speed);
-        const turn = (cur, tgt, speed) => {
-            if (cur == null) return tgt;
-            const d = ((tgt - cur + 540) % 360) - 180;
-            const boost = Math.abs(d) > 35 ? 1.8 : 1;
-            let step = d * Math.min(1, ease(speed * boost));
-            const cap = 900 * dt;                                  // vitesse max 900°/s : même un grand virage reste fluide
-            step = Math.max(-cap, Math.min(cap, step));
-            return (cur + step + 360) % 360;
-        };
-        const rose = document.getElementById("compass-rose"), needle = document.getElementById("compass-needle");
-        if (lastHeading != null) dispRose = turn(dispRose, (360 - lastHeading) % 360, 14);
-        // près de la cache la direction GPS est instable : l'aiguille se calme au lieu de s'affoler
-        const near = targetDist != null && targetDist < Math.max(4, (lastAccuracy || 0) * 0.6);
-        if (bearingTarget != null) dispNeedle = turn(dispNeedle, bearingTarget, near ? 2.5 : 9);
-        if (rose && dispRose != null) rose.style.transform = `rotate(${dispRose.toFixed(2)}deg)`;
-        if (needle && dispNeedle != null) needle.style.transform = `rotate(${dispNeedle.toFixed(2)}deg)`;
-
-        if (targetDist != null) {
-            dispDist = dispDist == null ? targetDist : dispDist + (targetDist - dispDist) * ease(5);
-            const val = document.getElementById("ro-digits"), unit = document.getElementById("ro-unit");
-            const km = dispDist >= 1000;
-            const txt = km ? (dispDist / 1000).toFixed(1) : String(Math.round(dispDist));
-            if (val && val.textContent !== txt) val.textContent = txt;
-            if (unit) { const u = km ? "km" : "m"; if (unit.textContent !== u) unit.textContent = u; }
+    function updateTargets() {
+        const activeHeading = smoothedHeading !== null ? smoothedHeading : rawHeading;
+        if (activeHeading != null) {
+            targetRoseRot = (360 - activeHeading) % 360;
+            targetNeedleRot = (rawBearing - activeHeading + 360) % 360;
+        } else {
+            targetNeedleRot = rawBearing;
         }
-
-        if (now - calibCheckT > 1000) {
-            calibCheckT = now;
-            const cal = document.getElementById("compass-calib");
-            if (cal) {
-                const poor = headingAccuracy != null && (headingAccuracy < 0 || headingAccuracy > 25);
-                const html = poor ? `<p class="gps-tip">Boussole imprécise : dessine un grand 8 avec ton téléphone pour la calibrer.</p>` : "";
-                if (cal.innerHTML !== html) cal.innerHTML = html;
-            }
-        }
-        compassRaf = requestAnimationFrame(compassFrame);
     }
 
-    // Paliers de chaleur avec hystérésis : plus de clignotement quand on reste à la frontière d'un palier.
-    function nextHeat(dist) {
-        const up = [30, 15, 5], down = [34, 18, 7];
-        let h = heatState;
-        while (h < 3 && dist <= up[h]) h++;
-        while (h > 0 && dist > down[h - 1]) h--;
-        return h;
+    // Boucle d'animation fluide à 60 FPS (LERP smoothing)
+    function startCompassRenderLoop() {
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        
+        function render() {
+            if (!compassActive || activeBarIdForRiddle !== 2) return;
+
+            const lerpFactor = 0.15;
+            
+            let diffNeedle = ((targetNeedleRot - currentNeedleRot + 540) % 360) - 180;
+            currentNeedleRot += diffNeedle * lerpFactor;
+
+            let diffRose = ((targetRoseRot - currentRoseRot + 540) % 360) - 180;
+            currentRoseRot += diffRose * lerpFactor;
+
+            const needle = document.getElementById("compass-needle");
+            const rose = document.getElementById("compass-rose");
+
+            if (needle) needle.style.transform = `rotate(${currentNeedleRot}deg)`;
+            if (rose) rose.style.transform = `rotate(${currentRoseRot}deg)`;
+
+            animFrameId = requestAnimationFrame(render);
+        }
+        animFrameId = requestAnimationFrame(render);
     }
 
-    function refreshCompassUI() {
-        if (activeBarIdForRiddle !== 2 || !compassActive) return;
+    function updateDistanceAndUI() {
+        if (lastLat == null) return;
+        const dist = haversineDistance(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
         const inst = document.getElementById("compass-instrument");
         if (!inst) return;
-        if (lastLat == null) { setCompassStatus("Acquisition du signal GPS…", "info"); return; }
 
-        const dist = haversineDistance(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
-        targetDist = dist;
-        bearingTarget = bearingTo(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
-
-        heatState = nextHeat(dist);
-        const heat = heatState;
+        const heat = dist <= 5 ? 3 : dist <= 15 ? 2 : dist <= 30 ? 1 : 0;
         inst.dataset.heat = String(heat);
 
-        const lab = document.getElementById("ro-label");
-        if (lab) lab.textContent = "Distance de la cache" + (lastAccuracy != null ? ` (±${Math.round(lastAccuracy)} m)` : "");
+        const val = document.getElementById("ro-digits"), unit = document.getElementById("ro-unit");
+        if (val) val.textContent = dist >= 1000 ? (dist / 1000).toFixed(1) : String(Math.round(dist));
+        if (unit) unit.textContent = dist >= 1000 ? "km" : "m";
 
         const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
         document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
@@ -1514,7 +1478,6 @@
         showModal("modal-drink");
     }
 
-    // Compression d'image automatique via Canvas
     document.getElementById('drink-photo').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1618,10 +1581,10 @@
         px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
 
         if (geoWatchId != null) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
+        if (animFrameId != null) { cancelAnimationFrame(animFrameId); animFrameId = null; }
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
-        window.removeEventListener('deviceorientation', handleCompassOrientation, true);
-        window.removeEventListener('deviceorientationabsolute', handleCompassOrientation, true);
-        resetCompassState();
+        window.removeEventListener('deviceorientation', handleCompassOrientation);
+        compassActive = false; lastLat = null; lastLng = null; rawHeading = null; smoothedHeading = null; currentNeedleRot = 0; currentRoseRot = 0;
     }
 
     function switchTab(tab) {
