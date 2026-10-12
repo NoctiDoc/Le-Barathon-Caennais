@@ -187,8 +187,6 @@
   @keyframes glow-pulse { 0%, 100% { transform: scale(1); opacity: .55; } 50% { transform: scale(1.035); opacity: 1; } }
   @keyframes radar-ping { 0% { transform: scale(1); opacity: .85; border-color: rgba(178,56,80,.8); } 100% { transform: scale(1.32); opacity: 0; border-color: rgba(178,56,80,0); } }
   #compass-rose, #compass-needle, #compass-sweep, .needle-wobble { transform-box: view-box; transform-origin: 130px 130px; }
-  #compass-rose { transition: transform .35s ease-out; }
-  #compass-needle { transition: transform .4s cubic-bezier(.3,1.4,.5,1); }
   #compass-sweep { animation: radar-sweep 5s linear infinite; opacity: .55; }
   .compass-instrument.standby #compass-sweep { opacity: 0; animation-play-state: paused; }
   .compass-instrument.standby .needle-wobble { animation: needle-idle 3.4s ease-in-out infinite; }
@@ -639,7 +637,8 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    const TARGET_COORDS = { lat: 49.156876, lng: -0.474702 };
+    // COORDONNÉES DE TEST (position à remplacer par celle de la vraie cache avant la soirée)
+    const TARGET_COORDS = { lat: 49.156022, lng: -0.475112 };
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
     function seededRandom(seed) {
@@ -695,6 +694,8 @@
     const mazeKeys = {};
 
     let geoWatchId = null, lastLat = null, lastLng = null, lastHeading = null, compassActive = false, needleRotation = 0, roseRotation = 0, lastVibe = 0, gpsFallbackTimer = null;
+    let kfVar = -1, kfT = 0, heatState = 0, headingAccuracy = null, calibCheckT = 0;
+    let compassRaf = null, compassLastT = 0, dispRose = null, dispNeedle = null, dispDist = null, targetDist = null, bearingTarget = null, lastAccuracy = null;
     let adminClicks = 0, adminTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -993,7 +994,7 @@
         document.getElementById("riddle-msg").className = "feedback";
 
         if (barId === 2) {
-            lastLat = null; lastLng = null; lastHeading = null; compassActive = false; needleRotation = 0; roseRotation = 0;
+            resetCompassState();
             c.innerHTML = `<div class="riddle-parchment">
                              <strong>Le Radar du Corsaire</strong><br>
                              Suis l'aiguille jusqu'à la cache. Plus tu t'approches, plus l'instrument s'enflamme.
@@ -1009,6 +1010,7 @@
                            <div class="heat-meter" id="heat-meter">${buildHeatSegments()}</div>
                            <div class="heat-scale"><span>Froid</span><span>Brûlant</span></div>
                            <div id="compass-msg" class="feedback feedback-info">Active le radar pour lancer la recherche.</div>
+                           <div id="compass-calib"></div>
                            <button id="btn-compass" class="btn btn-primary" onclick="demarrerBoussole()">Activer le radar</button>
                            <div id="gps-fallback-container"></div>
                            <input type="text" id="ans" placeholder="Code relevé sur la cache" style="text-transform:uppercase; margin-top:14px;">
@@ -1274,11 +1276,6 @@
               <text x="193" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">E</text>
               <text x="130" y="198" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">S</text>
               <text x="67" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">O</text>
-            </g>
-            <g id="compass-sweep"><path d="M130 130 L130 30 A100 100 0 0 1 200 58.6 Z" fill="url(#cSweepG)"></path></g>
-            <ellipse cx="94" cy="76" rx="64" ry="30" transform="rotate(-34 94 76)" fill="url(#cGlass)"></ellipse>
-          </g>
-          <circle cx="130" cy="130" r="103" fill="none" stroke="#2a1d0e" stroke-opacity=".28" stroke-width="3.5"></circle>
           <g id="compass-needle"><g class="needle-wobble">
             <path d="M133 34 L144 134 L133 128 L122 134 Z" fill="#000" opacity=".18"></path>
             <path d="M130 30 L140 130 L130 123 L120 130 Z" fill="url(#cNeedle)" stroke="#2e0c14" stroke-width="1.1" stroke-linejoin="round"></path>
@@ -1287,6 +1284,11 @@
             <circle cx="130" cy="34" r="7" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.2"></circle>
             <path d="M126.4 30.4 L133.6 37.6 M133.6 30.4 L126.4 37.6" stroke="#7a2333" stroke-width="1.9" stroke-linecap="round"></path>
           </g></g>
+            </g>
+            <g id="compass-sweep"><path d="M130 130 L130 30 A100 100 0 0 1 200 58.6 Z" fill="url(#cSweepG)"></path></g>
+            <ellipse cx="94" cy="76" rx="64" ry="30" transform="rotate(-34 94 76)" fill="url(#cGlass)"></ellipse>
+          </g>
+          <circle cx="130" cy="130" r="103" fill="none" stroke="#2a1d0e" stroke-opacity=".28" stroke-width="3.5"></circle>
           <circle cx="130" cy="130" r="12.5" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.3"></circle>
           <circle cx="130" cy="130" r="6" fill="url(#cJewel)" stroke="#2e0c14" stroke-width=".8"></circle>
           <circle cx="128" cy="128" r="1.6" fill="#fff" opacity=".7"></circle>
@@ -1303,15 +1305,24 @@
         if (m) { m.textContent = text; m.className = "feedback feedback-" + kind; }
     }
 
+    function resetCompassState() {
+        if (compassRaf) { cancelAnimationFrame(compassRaf); compassRaf = null; }
+        compassActive = false; lastLat = null; lastLng = null; lastHeading = null; lastAccuracy = null;
+        needleRotation = 0; roseRotation = 0; dispRose = null; dispNeedle = null; dispDist = null; targetDist = null; bearingTarget = null;
+        kfVar = -1; kfT = 0; heatState = 0; headingAccuracy = null; calibCheckT = 0;
+    }
+
     function demarrerBoussole() {
         if (!navigator.geolocation) { setCompassStatus("Géolocalisation indisponible sur cet appareil.", "warn"); return; }
+        const attach = () => {
+            window.addEventListener('deviceorientation', handleCompassOrientation, true);
+            if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleCompassOrientation, true);
+        };
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission().then(res => {
-                if (res === 'granted') window.addEventListener('deviceorientation', handleCompassOrientation);
-            }).catch(() => {});
-        } else { window.addEventListener('deviceorientation', handleCompassOrientation); }
+            DeviceOrientationEvent.requestPermission().then(res => { if (res === 'granted') attach(); }).catch(() => {});
+        } else { attach(); }
 
-        geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
+        geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
         compassActive = true;
         const inst = document.getElementById("compass-instrument"), btn = document.getElementById("btn-compass");
         if (inst) { inst.classList.remove("standby"); inst.classList.add("active"); }
@@ -1319,6 +1330,10 @@
         const lab = document.getElementById("ro-label");
         if (lab) lab.textContent = "Recherche du signal";
         setCompassStatus("Acquisition du signal GPS…", "info");
+
+        compassLastT = performance.now();
+        if (compassRaf) cancelAnimationFrame(compassRaf);
+        compassRaf = requestAnimationFrame(compassFrame);
 
         gpsFallbackTimer = setTimeout(() => {
             if (lastLat == null) {
@@ -1328,13 +1343,24 @@
         }, 8000);
     }
 
+    // Filtre de Kalman 1D sur la position : chaque fix pèse selon sa précision annoncée,
+    // les sauts de quelques mètres du GPS sont lissés sans retard sensible à la marche.
+    function kalmanUpdate(lat, lng, acc, t) {
+        const a = Math.max(acc || 15, 3);
+        if (kfVar < 0) { lastLat = lat; lastLng = lng; kfVar = a * a; kfT = t; return; }
+        const dt = Math.max(0, (t - kfT) / 1000); kfT = t;
+        kfVar += dt * 4 * 4;                       // vitesse max supposée : 4 m/s
+        const K = kfVar / (kfVar + a * a);
+        lastLat += K * (lat - lastLat); lastLng += K * (lng - lastLng);
+        kfVar = (1 - K) * kfVar;
+    }
+
     function updateCompassPosition(pos) {
-        lastLat = pos.coords.latitude; lastLng = pos.coords.longitude;
+        kalmanUpdate(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.timestamp || Date.now());
+        lastAccuracy = pos.coords.accuracy;
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
         const fc = document.getElementById("gps-fallback-container");
         if (fc) fc.innerHTML = "";
-        const lab = document.getElementById("ro-label");
-        if (lab) lab.textContent = "Distance de la cache";
         refreshCompassUI();
     }
 
@@ -1349,47 +1375,107 @@
         return (prev + alpha * diff + 360) % 360;
     }
 
-    function setNeedleRotation(targetDeg) {
-        const needle = document.getElementById("compass-needle");
-        if (!needle) return;
-        const current = ((needleRotation % 360) + 360) % 360;
-        const delta = ((targetDeg - current + 540) % 360) - 180;
-        needleRotation += delta;
-        needle.style.transform = `rotate(${needleRotation}deg)`;
+    // Cap compensé de l'inclinaison (alpha/beta/gamma) : à plat on suit le haut du téléphone,
+    // en position debout on suit son dos (là où pointe la caméra), avec fondu entre les deux.
+    function headingFromEuler(alpha, beta, gamma) {
+        const r = Math.PI / 180, a = alpha * r, b = (beta || 0) * r, g = (gamma || 0) * r;
+        const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
+        const yE = -sA * cB, yN = cA * cB;                                   // haut du téléphone
+        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG); // dos du téléphone
+        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));  // 1 = à plat, 0 = debout (selon le tangage)
+        const ly = Math.hypot(yE, yN), lz = Math.hypot(zE, zN);
+        let e = 0, n = 0;
+        if (ly > 1e-3) { e += w * yE / ly; n += w * yN / ly; }
+        if (lz > 1e-3) { e += (1 - w) * zE / lz; n += (1 - w) * zN / lz; }
+        if (Math.abs(e) + Math.abs(n) < 1e-3) return (360 - alpha) % 360;
+        return (Math.atan2(e, n) / r + 360) % 360;
     }
 
-    function setRoseRotation(targetDeg) {
-        const rose = document.getElementById("compass-rose");
-        if (!rose) return;
-        const current = ((roseRotation % 360) + 360) % 360;
-        const delta = ((targetDeg - current + 540) % 360) - 180;
-        roseRotation += delta;
-        rose.style.transform = `rotate(${roseRotation}deg)`;
-    }
-
+    // Les capteurs ne font que mémoriser le cap : l'affichage est calculé à chaque image (voir compassFrame).
     function handleCompassOrientation(event) {
-        const heading = (typeof event.webkitCompassHeading === 'number') ? event.webkitCompassHeading : (event.alpha != null ? (360 - event.alpha) : null);
-        if (heading != null) lastHeading = smoothAngle(lastHeading, heading, 0.3);
-        refreshCompassUI();
+        let heading = null;
+        if (typeof event.webkitCompassHeading === 'number' && event.webkitCompassHeading >= 0) {
+            heading = event.webkitCompassHeading;
+            if (typeof event.webkitCompassAccuracy === 'number') headingAccuracy = event.webkitCompassAccuracy;
+        } else if (event.alpha != null) {
+            const absSupported = 'ondeviceorientationabsolute' in window;
+            if (event.type === 'deviceorientationabsolute' || event.absolute === true || !absSupported) heading = headingFromEuler(event.alpha, event.beta, event.gamma);
+        }
+        if (heading == null) return;
+        if (lastHeading == null) { lastHeading = heading; return; }
+        // lissage adaptatif : petit écart = fort lissage (anti-tremblement), grand écart = suivi immédiat
+        const d = Math.abs(((heading - lastHeading + 540) % 360) - 180);
+        lastHeading = smoothAngle(lastHeading, heading, Math.min(0.85, 0.14 + d / 30));
+    }
+
+    function compassFrame(now) {
+        if (!compassActive || activeBarIdForRiddle !== 2) { compassRaf = null; return; }
+        const dt = Math.min(0.06, Math.max(0.001, (now - compassLastT) / 1000));
+        compassLastT = now;
+        const ease = speed => 1 - Math.exp(-dt * speed);
+        const turn = (cur, tgt, speed) => {
+            if (cur == null) return tgt;
+            const d = ((tgt - cur + 540) % 360) - 180;
+            const boost = Math.abs(d) > 35 ? 1.8 : 1;
+            let step = d * Math.min(1, ease(speed * boost));
+            const cap = 900 * dt;                                  // vitesse max 900°/s : même un grand virage reste fluide
+            step = Math.max(-cap, Math.min(cap, step));
+            return (cur + step + 360) % 360;
+        };
+        const rose = document.getElementById("compass-rose"), needle = document.getElementById("compass-needle");
+        if (lastHeading != null) dispRose = turn(dispRose, (360 - lastHeading) % 360, 14);
+        // près de la cache la direction GPS est instable : l'aiguille se calme au lieu de s'affoler
+        const near = targetDist != null && targetDist < Math.max(4, (lastAccuracy || 0) * 0.6);
+        if (bearingTarget != null) dispNeedle = turn(dispNeedle, bearingTarget, near ? 2.5 : 9);
+        if (rose && dispRose != null) rose.style.transform = `rotate(${dispRose.toFixed(2)}deg)`;
+        if (needle && dispNeedle != null) needle.style.transform = `rotate(${dispNeedle.toFixed(2)}deg)`;
+
+        if (targetDist != null) {
+            dispDist = dispDist == null ? targetDist : dispDist + (targetDist - dispDist) * ease(5);
+            const val = document.getElementById("ro-digits"), unit = document.getElementById("ro-unit");
+            const km = dispDist >= 1000;
+            const txt = km ? (dispDist / 1000).toFixed(1) : String(Math.round(dispDist));
+            if (val && val.textContent !== txt) val.textContent = txt;
+            if (unit) { const u = km ? "km" : "m"; if (unit.textContent !== u) unit.textContent = u; }
+        }
+
+        if (now - calibCheckT > 1000) {
+            calibCheckT = now;
+            const cal = document.getElementById("compass-calib");
+            if (cal) {
+                const poor = headingAccuracy != null && (headingAccuracy < 0 || headingAccuracy > 25);
+                const html = poor ? `<p class="gps-tip">Boussole imprécise : dessine un grand 8 avec ton téléphone pour la calibrer.</p>` : "";
+                if (cal.innerHTML !== html) cal.innerHTML = html;
+            }
+        }
+        compassRaf = requestAnimationFrame(compassFrame);
+    }
+
+    // Paliers de chaleur avec hystérésis : plus de clignotement quand on reste à la frontière d'un palier.
+    function nextHeat(dist) {
+        const up = [30, 15, 5], down = [34, 18, 7];
+        let h = heatState;
+        while (h < 3 && dist <= up[h]) h++;
+        while (h > 0 && dist > down[h - 1]) h--;
+        return h;
     }
 
     function refreshCompassUI() {
         if (activeBarIdForRiddle !== 2 || !compassActive) return;
         const inst = document.getElementById("compass-instrument");
         if (!inst) return;
-        if (lastHeading != null) setRoseRotation((360 - lastHeading) % 360);
         if (lastLat == null) { setCompassStatus("Acquisition du signal GPS…", "info"); return; }
 
         const dist = haversineDistance(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
-        const brg = bearingTo(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
-        setNeedleRotation(lastHeading != null ? (brg - lastHeading + 360) % 360 : brg);
+        targetDist = dist;
+        bearingTarget = bearingTo(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
 
-        const heat = dist <= 5 ? 3 : dist <= 15 ? 2 : dist <= 30 ? 1 : 0;
+        heatState = nextHeat(dist);
+        const heat = heatState;
         inst.dataset.heat = String(heat);
 
-        const val = document.getElementById("ro-digits"), unit = document.getElementById("ro-unit");
-        if (val) val.textContent = dist >= 1000 ? (dist / 1000).toFixed(1) : String(Math.round(dist));
-        if (unit) unit.textContent = dist >= 1000 ? "km" : "m";
+        const lab = document.getElementById("ro-label");
+        if (lab) lab.textContent = "Distance de la cache" + (lastAccuracy != null ? ` (±${Math.round(lastAccuracy)} m)` : "");
 
         const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
         document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
@@ -1533,8 +1619,9 @@
 
         if (geoWatchId != null) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
-        window.removeEventListener('deviceorientation', handleCompassOrientation);
-        compassActive = false; lastLat = null; lastLng = null; lastHeading = null; needleRotation = 0; roseRotation = 0;
+        window.removeEventListener('deviceorientation', handleCompassOrientation, true);
+        window.removeEventListener('deviceorientationabsolute', handleCompassOrientation, true);
+        resetCompassState();
     }
 
     function switchTab(tab) {
