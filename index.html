@@ -1,1531 +1,1567 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Le Barathon Caennais — Carnet de route du Corsaire</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --ink: #1f140e;
-      --ink-soft: #523f2f;
-      --paper: #ebd9b5;
-      --paper-card: #f8efe0;
-      --paper-dark: #dfcb9f;
-      --wine: #781d2a;
-      --wine-light: #9e2a3c;
-      --gold: #c29532;
-      --brass: #9e7520;
-      --moss: #2f5a38;
-      --slate: #6e675b;
-      --cream: #fffdf7;
-      --shadow: rgba(31, 20, 14, 0.25);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      min-height: 100vh;
-      color: var(--ink);
-      font-family: 'Special Elite', 'Courier New', monospace;
-      background-color: #120b07;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(120, 29, 42, 0.25), transparent 70%),
-        radial-gradient(circle at 50% 100%, rgba(194, 149, 50, 0.15), transparent 70%),
-        repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 2px);
-      padding: 12px 8px 30px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    /* Conteneur principal façon livre relié en cuir */
-    .journal-wrapper {
-      width: 100%;
-      max-width: 480px;
-      background: var(--paper-card);
-      border: 3px solid var(--ink);
-      border-radius: 12px;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.6), inset 0 0 80px rgba(82, 63, 47, 0.15);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Effet coin corné / reliure */
-    .journal-wrapper::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 8px;
-      background: linear-gradient(90deg, var(--wine), var(--gold), var(--wine));
-      z-index: 10;
-    }
-
-    /* En-tête */
-    header {
-      padding: 20px 16px 14px;
-      text-align: center;
-      border-bottom: 2px dashed rgba(82, 63, 47, 0.3);
-      background: linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
-    }
-
-    .brand-title {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 4px;
-    }
-
-    .brand-title svg {
-      color: var(--wine);
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-      flex-shrink: 0;
-    }
-
-    h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      color: var(--wine);
-      text-transform: uppercase;
-      text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
-    }
-
-    .tagline {
-      font-style: italic;
-      font-size: 12px;
-      color: var(--ink-soft);
-      margin-top: 2px;
-    }
-
-    /* Barre de profil / utilisateur */
-    .profile-bar {
-      background: var(--paper-dark);
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(82, 63, 47, 0.25);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .profile-bar label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--ink-soft);
-      font-weight: bold;
-    }
-
-    .select-wrapper {
-      position: relative;
-    }
-
-    select, input[type="text"] {
-      width: 100%;
-      padding: 9px 12px;
-      font-family: 'Special Elite', monospace;
-      font-size: 14px;
-      background: var(--cream);
-      color: var(--ink);
-      border: 1px solid var(--ink-soft);
-      border-radius: 6px;
-      outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-      appearance: none;
-    }
-
-    .select-wrapper::after {
-      content: "▼";
-      font-size: 10px;
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--ink-soft);
-    }
-
-    /* Barre d'avancement globale */
-    .progress-strip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 14px;
-      background: var(--paper);
-      font-size: 11px;
-      border-bottom: 2px solid var(--ink);
-    }
-
-    .progress-badge {
-      background: var(--wine);
-      color: var(--cream);
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .status-indicator {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #27ae60;
-      margin-right: 4px;
-      box-shadow: 0 0 6px #27ae60;
-    }
-
-    /* Navigation par Onglets */
-    .tabs {
-      display: flex;
-      background: var(--paper-dark);
-      border-bottom: 2px solid var(--ink);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 12px 6px;
-      background: transparent;
-      border: none;
-      font-family: 'Cinzel', serif;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ink-soft);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      text-align: center;
-    }
-
-    .tab-btn.active {
-      color: var(--wine);
-      background: var(--paper-card);
-      box-shadow: inset 0 3px 0 var(--wine);
-    }
-
-    .tab-btn:hover:not(.active) {
-      background: rgba(255,255,255,0.3);
-    }
-
-    /* Contenu des onglets */
-    .tab-content {
-      display: none;
-      padding: 14px 12px 18px;
-    }
-
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.25s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Liste des étapes (Parcours) */
-    .trail-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .waypoint-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--cream);
-      border: 1px solid rgba(82, 63, 47, 0.35);
-      border-left: 6px solid var(--slate);
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 3px 8px var(--shadow);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      position: relative;
-    }
-
-    .waypoint-card.open {
-      border-left-color: var(--moss);
-      cursor: pointer;
-    }
-
-    .waypoint-card.open:active {
-      transform: scale(0.98);
-    }
-
-    .waypoint-card.locked {
-      opacity: 0.6;
-      background: #e6dac1;
-      filter: grayscale(0.4);
-    }
-
-    .seal-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'IM Fell English SC', serif;
-      font-size: 18px;
-      font-weight: bold;
-      background: radial-gradient(circle at 35% 30%, #f0d287, var(--gold));
-      border: 2px solid var(--ink);
-      color: var(--ink);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .seal-locked {
-      background: var(--slate);
-      color: #fff;
-      border-color: #4a443a;
-    }
-
-    .waypoint-details {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .waypoint-title {
-      font-family: 'Cinzel', serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .waypoint-sub {
-      font-size: 11px;
-      color: var(--ink-soft);
-      margin-top: 2px;
-    }
-
-    .status-tag {
-      font-size: 10px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-    }
-
-    .status-tag.open { background: #d4edda; color: #155724; }
-    .status-tag.locked { background: #e2e3e5; color: #383d41; }
-
-    /* Appel au déblocage avec sceau mystique */
-    .unlock-banner {
-      background: linear-gradient(135deg, #fbf4e6, #f3e5c8);
-      border: 2px dashed var(--wine);
-      border-radius: 8px;
-      padding: 14px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(120, 29, 42, 0.15);
-      animation: pulse-border 2s infinite;
-      margin: 4px 0;
-    }
-
-    .unlock-banner h3 {
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      color: var(--wine);
-      margin-bottom: 4px;
-    }
-
-    .unlock-banner p {
-      font-size: 12px;
-      color: var(--ink-soft);
-    }
-
-    @keyframes pulse-border {
-      0% { box-shadow: 0 0 0 0 rgba(120, 29, 42, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(120, 29, 42, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(120, 29, 42, 0); }
-    }
-
-    /* Modales */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(18, 11, 7, 0.85);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 14px;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-      animation: modalFade 0.2s ease-out;
-    }
-
-    @keyframes modalFade {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .modal-card {
-      background: var(--paper-card);
-      border: 2px solid var(--ink);
-      border-radius: 10px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      padding: 20px;
-      width: 100%;
-      max-width: 420px;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .modal-card h3 {
-      font-family: 'Cinzel', serif;
-      font-size: 18px;
-      color: var(--wine);
-      text-align: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(82, 63, 47, 0.2);
-    }
-
-    /* Boutons */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid var(--ink);
-      font-family: 'Special Elite', monospace;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: var(--wine);
-      color: var(--cream);
-      border-color: #4f111a;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    }
-
-    .btn-primary:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-
-    .btn-secondary {
-      background: var(--paper-dark);
-      color: var(--ink);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: transparent;
-      color: var(--ink-soft);
-    }
-
-    /* Feedback & Toasts */
-    .toast-container {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 90%;
-      max-width: 380px;
-      pointer-events: none;
-    }
-
-    .toast {
-      background: var(--ink);
-      color: var(--cream);
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-      border-left: 4px solid var(--gold);
-      animation: slideUp 0.3s ease;
-      pointer-events: auto;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Éléments de mini-jeux */
-    .clue-box {
-      background: #f2e6c8;
-      border: 1px dashed var(--ink-soft);
-      border-radius: 6px;
-      padding: 10px 12px;
-      margin: 10px 0;
-      font-size: 12.5px;
-    }
-
-    .clue-box .label {
-      font-weight: bold;
-      color: var(--wine);
-      display: block;
-      margin-bottom: 2px;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    /* Boussole UI */
-    .compass-container {
-      text-align: center;
-      margin: 12px 0;
-    }
-
-    .compass-dial {
-      width: 120px;
-      height: 120px;
-      border: 3px solid var(--ink);
-      border-radius: 50%;
-      margin: 10px auto;
-      position: relative;
-      background: radial-gradient(circle, #fbf4e6 0%, #e6dac1 100%);
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .compass-needle {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 4px; height: 50px;
-      background: var(--wine);
-      transform-origin: bottom center;
-      margin-left: -2px; margin-top: -50px;
-      border-radius: 2px;
-      transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
-    }
-
-    .compass-needle::after {
-      content: "";
-      position: absolute;
-      top: -8px; left: -4px;
-      width: 0; height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 10px solid var(--wine);
-    }
-
-    .compass-cardinal {
-      position: absolute;
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      font-weight: bold;
-      color: var(--ink-soft);
-    }
-
-    .cardinal-n { top: 4px; left: 50%; transform: translateX(-50%); color: var(--wine); }
-    .cardinal-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
-    .cardinal-e { right: 6px; top: 50%; transform: translateY(-50%); }
-    .cardinal-w { left: 6px; top: 50%; transform: translateY(-50%); }
-
-    /* Motus Grid UI */
-    .motus-grid {
-      display: flex;
-      gap: 4px;
-      justify-content: center;
-      margin: 8px 0;
-    }
-
-    .motus-tile {
-      width: 32px;
-      height: 32px;
-      border: 1px solid var(--ink);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 15px;
-      text-transform: uppercase;
-      background: var(--cream);
-    }
-
-    .m-correct { background: var(--moss); color: #fff; border-color: #1b3822; }
-    .m-present { background: var(--gold); color: var(--ink); border-color: #8c6a1e; }
-    .m-absent { background: var(--slate); color: #fff; border-color: #4a443a; }
-
-    /* Tableau du classement */
-    .leaderboard-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      margin-top: 6px;
-    }
-
-    .leaderboard-table th, .leaderboard-table td {
-      padding: 10px 8px;
-      text-align: center;
-      border-bottom: 1px solid rgba(82, 63, 47, 0.2);
-    }
-
-    .leaderboard-table th {
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      color: var(--wine);
-      background: rgba(120, 29, 42, 0.08);
-      border-bottom: 2px solid var(--wine);
-    }
-
-    .medal {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      font-family: 'Cinzel', serif;
-      font-weight: bold;
-      font-size: 12px;
-    }
-
-    .medal-1 { background: var(--gold); color: var(--ink); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    .medal-2 { background: #c0c0c0; color: #222; }
-    .medal-3 { background: #cd7f32; color: #fff; }
-
-    /* Photo Preview */
-    .photo-preview {
-      width: 100%;
-      max-height: 160px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid var(--ink);
-      margin: 8px 0;
-      display: none;
-    }
-
-    /* Carte SVG Conteneur */
-    .map-container {
-      width: 100%;
-      background: #ebd9b5;
-      border: 2px solid var(--ink);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: inset 0 0 12px rgba(0,0,0,0.15);
-    }
-
-    /* Controls pour Labyrinthe */
-    .d-pad {
-      display: grid;
-      grid-template-columns: repeat(3, 40px);
-      grid-template-rows: repeat(3, 40px);
-      gap: 6px;
-      justify-content: center;
-      margin: 10px auto;
-    }
-
-    .d-btn {
-      background: var(--paper-dark);
-      border: 1px solid var(--ink);
-      border-radius: 6px;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .d-btn:active { background: var(--wine); color: #fff; }
-
-    /* Canvas confettis */
-    #canvas-confetti {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 3000;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Barathon Caennais — Carnet de route</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2b1d0e;
+    --ink-soft: #5b4632;
+    --paper: #ece0c0;
+    --paper-card: #f8f1dc;
+    --wine: #7a2333;
+    --wine-light: #9c3449;
+    --brass: #a9822d;
+    --brass-light: #d4ab5c;
+    --moss: #3e5b44;
+    --slate: #8b8171;
+    --radius-sm: 5px;
+    --radius-md: 9px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(43,29,14,.10), 0 1px 1px rgba(43,29,14,.06);
+    --shadow-md: 0 6px 16px rgba(43,29,14,.16), 0 2px 4px rgba(43,29,14,.08);
+    --shadow-lg: 0 20px 48px rgba(20,14,7,.35), 0 4px 12px rgba(43,29,14,.14);
+    --ease: cubic-bezier(.22,.9,.32,1);
+  }
+  * { box-sizing: border-box; }
+  @keyframes shimmer { 0% { background-position: -300px 0; } 100% { background-position: 300px 0; } }
+  @keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(540deg); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } }
+  body {
+    margin: 0; min-height: 100vh; padding: 12px 10px 24px;
+    color: var(--ink);
+    font-family: 'Special Elite', 'Courier New', monospace;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(255,255,255,.5), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(43,29,14,.12), transparent 55%);
+    background-attachment: fixed;
+  }
+  
+  /* BANDEAU RÉSEAU */
+  #net-banner {
+    max-width: 440px; margin: 0 auto 8px; padding: 4px 10px; font-size: 11px; text-align: center;
+    border-radius: 3px; font-weight: bold; transition: all .3s; display: none;
+  }
+  .net-offline { background: var(--wine); color: #fff; display: block !important; }
+  .net-online { background: var(--moss); color: #fff; }
+
+  .container {
+    position: relative; max-width: 440px; margin: 0 auto;
+    background: var(--paper-card);
+    border: 1px solid rgba(43,29,14,.35);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), inset 0 0 40px rgba(169,130,45,.06);
+    padding: 20px 18px 22px;
+    overflow: hidden;
+    animation: fade-in-up .5s var(--ease);
+  }
+
+  /* BARRE DE PROGRESSION */
+  #progress-wrap { margin: 2px 0 16px; }
+  #progress-labels { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-soft); margin-bottom: 5px; letter-spacing: .3px; }
+  #progress-track { height: 8px; border-radius: 10px; background: rgba(43,29,14,.12); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.1); }
+  #progress-fill { height: 100%; width: 0%; border-radius: 10px; background: linear-gradient(90deg, var(--brass), var(--wine-light)); transition: width .6s var(--ease); box-shadow: 0 0 8px rgba(169,130,45,.5); }
+  .container::after {
+    content: ""; position: absolute; top: 0; right: 0; width: 0; height: 0;
+    border-style: solid; border-width: 0 28px 28px 0;
+    border-color: transparent rgba(43,29,14,.2) transparent transparent;
+  }
+  .brand-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px; cursor: pointer; user-select: none; }
+  .brand-row svg { color: var(--wine); flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
+  h1 { font-family: 'IM Fell English SC', serif; font-size: 26px; margin: 0; text-align: center; letter-spacing: .5px; text-shadow: 1px 1px 0 rgba(169,130,45,.2); }
+  .tagline { text-align: center; font-style: italic; color: var(--ink-soft); font-size: 12.5px; margin: 6px 0 16px; line-height: 1.4; }
+
+  .ledger-line { background: rgba(255,253,246,.7); border: 1px solid rgba(43,29,14,.18); border-radius: var(--radius-md); padding: 11px 14px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+  .ledger-line label { display: block; font-size: 12.5px; margin-bottom: 5px; color: var(--ink-soft); }
+  select, input[type="text"] {
+    width: 100%; padding: 9px; font-family: inherit; font-size: 13.5px;
+    border: 1px solid rgba(43,29,14,.4); border-radius: 3px; background: #fffdf6; color: var(--ink);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+  }
+  #global-participant { border: none; border-bottom: 2px solid var(--ink); border-radius: 0; background: transparent; padding: 6px 2px; font-weight: bold; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; padding: 4px; background: rgba(43,29,14,.07); border-radius: var(--radius-md); box-shadow: inset 0 1px 3px rgba(0,0,0,.08); }
+  .tab-btn { flex: 1; background: none; border: none; padding: 9px 4px; font-family: 'Special Elite', monospace; font-size: 13px; color: var(--ink-soft); cursor: pointer; border-radius: 6px; transition: all .22s var(--ease); }
+  .tab-btn.active { color: #fdf6e8; font-weight: bold; background: linear-gradient(180deg, var(--wine-light), var(--wine)); box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.18); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fade-in-up .3s var(--ease); }
+
+  .trail { display: flex; flex-direction: column; }
+  .waypoint { display: flex; align-items: center; gap: 10px; background: #fffdf6; border: 1px solid rgba(43,29,14,.25); border-left: 5px solid var(--slate); border-radius: var(--radius-sm); padding: 11px 13px; margin-bottom: 9px; box-shadow: var(--shadow-sm); transition: transform .12s var(--ease), box-shadow .12s var(--ease); opacity: 0; animation: fade-in-up .35s var(--ease) forwards; }
+  .waypoint.open { border-left-color: var(--moss); cursor: pointer; }
+  .waypoint.open:active { transform: translateY(1px) scale(.995); box-shadow: var(--shadow-sm); }
+  .waypoint.locked { filter: blur(2px); opacity: .5 !important; pointer-events: none; user-select: none; animation: none; }
+
+  .skeleton-row { height: 56px; border-radius: var(--radius-sm); margin-bottom: 9px; background: linear-gradient(90deg, #ece0c6 25%, #f6eed6 37%, #ece0c6 63%); background-size: 400px 100%; animation: shimmer 1.4s infinite linear; }
+  .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg, #ece0c6 25%, #f6eed6 37%, #ece0c6 63%); background-size: 400px 100%; animation: shimmer 1.4s infinite linear; }
+
+  .seal { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'IM Fell English SC', serif; font-size: 15px; background: radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass)); border: 1px solid rgba(43,29,14,.4); color: var(--ink); box-shadow: 0 2px 5px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 3px rgba(43,29,14,.18); }
+  .seal-locked { background: var(--slate); color: #fff; }
+
+  .waypoint-info { flex: 1; min-width: 0; }
+  .waypoint-info strong { display: block; font-family: 'IM Fell English SC', serif; font-size: 15px; }
+  .waypoint-info small { color: var(--ink-soft); font-size: 11px; }
+
+  .status { font-size: 10.5px; font-weight: bold; white-space: nowrap; }
+  .status-open { color: var(--moss); }
+  .status-locked { color: var(--slate); }
+
+  .unlock-call { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #fffdf6 0%, #f6ecd0 100%); border: 1.5px solid var(--wine); border-radius: var(--radius-md); padding: 13px 14px; margin-bottom: 11px; cursor: pointer; text-align: left; animation: seal-pulse 2s infinite, fade-in-up .35s var(--ease) both; box-shadow: var(--shadow-md); transition: transform .12s var(--ease); }
+  .unlock-call:active { transform: scale(.985); }
+  .unlock-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fdf6e8; background: linear-gradient(135deg, var(--wine-light), var(--wine)); box-shadow: 0 2px 6px rgba(122,35,51,.4), inset 0 1px 0 rgba(255,255,255,.25); }
+  .unlock-text { flex: 1; min-width: 0; }
+  .unlock-text strong { display: block; font-family: 'IM Fell English SC', serif; font-size: 15.5px; color: var(--wine); margin-bottom: 2px; }
+  .unlock-text small { color: var(--ink-soft); font-size: 11.5px; line-height: 1.3; display: block; }
+  .unlock-chevron { font-size: 26px; color: var(--wine); line-height: 1; opacity: .7; }
+  @keyframes seal-pulse { 0% { box-shadow: 0 0 0 0 rgba(122,35,51,.35); } 70% { box-shadow: 0 0 0 12px rgba(122,35,51,0); } 100% { box-shadow: 0 0 0 0 rgba(122,35,51,0); } }
+  @media (prefers-reduced-motion: reduce) { .unlock-call { animation: none; } }
+
+  .ledger-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 4px; font-size: 12.5px; border: 1px solid rgba(43,29,14,.3); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .ledger-table th, .ledger-table td { border-bottom: 1px solid rgba(43,29,14,.12); padding: 10px 8px; text-align: center; }
+  .ledger-table tbody tr:last-child td { border-bottom: none; }
+  .ledger-table th { background: var(--ink); color: var(--paper-card); font-weight: normal; font-family: 'IM Fell English SC', serif; font-size: 14px; }
+  .ledger-table tbody tr:nth-child(even) { background: rgba(43,29,14,.04); }
+
+  .medal { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-family: 'IM Fell English SC', serif; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .medal-gold { background: var(--brass); color: var(--ink); }
+  .medal-silver { background: #b9b2a0; color: var(--ink); }
+  .medal-bronze { background: #9c6b3e; color: #fff; }
+
+  /* TOAST NOTIFICATION STYLISÉ */
+  #toast-container { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: 92%; max-width: 380px; pointer-events: none; }
+  .toast { display: flex; align-items: center; gap: 10px; background: rgba(43,29,14,.96); color: var(--paper-card); padding: 11px 14px; border-radius: var(--radius-md); font-size: 12.5px; text-align: left; border: 1px solid var(--brass); box-shadow: var(--shadow-lg); animation: toast-in .35s var(--ease); pointer-events: auto; backdrop-filter: blur(6px); }
+  .toast-icon { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; background: var(--brass); color: var(--ink); }
+  .toast-good .toast-icon { background: var(--moss); color: #fff; }
+  .toast-bad .toast-icon { background: var(--wine-light); color: #fff; }
+  .toast.leaving { opacity: 0; transform: translateY(8px); transition: all .25s var(--ease); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* MODALES */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(20,14,7,.0); backdrop-filter: blur(0px); z-index: 100; align-items: center; justify-content: center; padding: 16px; transition: background .28s var(--ease), backdrop-filter .28s var(--ease); }
+  .modal.is-open { background: rgba(20,14,7,.78); backdrop-filter: blur(4px); }
+  .modal-content { background: var(--paper-card); border: 1px solid var(--brass); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg), inset 0 0 50px rgba(169,130,45,.10); padding: 22px 20px 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; opacity: 0; transform: translateY(24px) scale(.96); transition: opacity .28s var(--ease), transform .32s var(--ease); scrollbar-width: thin; scrollbar-color: var(--brass) transparent; }
+  .modal.is-open .modal-content { opacity: 1; transform: translateY(0) scale(1); }
+  .modal-content::before, .modal-content::after { content: "§"; position: absolute; top: 8px; font-family: 'IM Fell English SC', serif; color: var(--brass); opacity: .4; font-size: 16px; }
+  .modal-content::before { left: 12px; }
+  .modal-content::after { right: 12px; }
+  .modal-content h3 { font-family: 'IM Fell English SC', serif; font-size: 19px; margin: 0 0 14px; color: var(--wine); border-bottom: 1px solid rgba(169,130,45,.4); padding-bottom: 8px; }
+
+  .file-label { display: block; font-size: 12.5px; margin: 10px 0 5px; color: var(--ink-soft); text-align: left; }
+  .btn { width: 100%; padding: 12px; margin-top: 10px; border-radius: var(--radius-md); border: 1px solid var(--ink); font-family: 'Special Elite', monospace; font-size: 13.5px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform .12s var(--ease), box-shadow .12s var(--ease), filter .12s; position: relative; overflow: hidden; }
+  .btn:active { transform: translateY(1px) scale(.99); box-shadow: none; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-primary { background: linear-gradient(180deg, var(--wine-light) 0%, var(--wine) 100%); border-color: #5a1824; color: #fdf6e8; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,.3); box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.18); }
+  .btn-primary::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent); transform: skewX(-20deg); animation: btn-shine 4.5s infinite; }
+  @keyframes btn-shine { 0%, 70% { left: -60%; } 100% { left: 130%; } }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border-color: rgba(43,29,14,.3); box-shadow: none; }
+
+  .feedback { margin-top: 10px; font-weight: bold; font-size: 12.5px; min-height: 18px; }
+  .feedback-good { color: var(--moss); }
+  .feedback-bad { color: var(--wine); }
+  .feedback-info { color: #345066; }
+  .feedback-warn { color: #8a6a1e; }
+
+  /* ÉPREUVE MOTUS */
+  .motus-grid { display: flex; gap: 5px; justify-content: center; margin: 12px 0; }
+  .motus-tile { width: 32px; height: 32px; border: 2px solid var(--ink); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; font-size: 14px; box-shadow: 0 2px 3px rgba(0,0,0,.15); }
+  .m-correct { background: var(--moss); color: #fff; border-color: #26382a; }
+  .m-present { background: #d4a017; color: var(--ink); border-color: #9c730e; }
+  .m-absent { background: var(--slate); color: #fff; border-color: #5c5549; }
+
+  /* ÉPREUVE BOUSSOLE */
+  /* INSTRUMENT BOUSSOLE */
+  .compass-instrument { position: relative; width: 100%; max-width: 250px; margin: 6px auto 4px; filter: drop-shadow(0 12px 14px rgba(43,29,14,.38)); }
+  .compass-instrument svg { display: block; width: 100%; height: auto; position: relative; z-index: 2; }
+  .compass-glow { position: absolute; inset: 3%; border-radius: 50%; pointer-events: none; opacity: 0; z-index: 1; transition: opacity .5s; }
+  .compass-ping { position: absolute; inset: 2%; border-radius: 50%; border: 2px solid rgba(169,130,45,.0); pointer-events: none; z-index: 1; opacity: 0; }
+  .compass-ping.p2 { animation-delay: .9s !important; }
+  .compass-instrument[data-heat="1"] .compass-glow { opacity: 1; box-shadow: 0 0 26px 8px rgba(212,171,92,.55); animation: glow-pulse 2.4s ease-in-out infinite; }
+  .compass-instrument[data-heat="2"] .compass-glow { opacity: 1; box-shadow: 0 0 30px 10px rgba(178,56,80,.6); animation: glow-pulse 1.3s ease-in-out infinite; }
+  .compass-instrument[data-heat="3"] .compass-glow { opacity: 1; box-shadow: 0 0 36px 14px rgba(255,216,128,.9); animation: glow-pulse .7s ease-in-out infinite; }
+  .compass-instrument[data-heat="2"] .compass-ping, .compass-instrument[data-heat="3"] .compass-ping { animation: radar-ping 1.8s ease-out infinite; }
+  .compass-instrument[data-heat="3"] .compass-ping { animation-duration: 1s; border-color: rgba(255,216,128,.9); }
+  @keyframes glow-pulse { 0%, 100% { transform: scale(1); opacity: .55; } 50% { transform: scale(1.035); opacity: 1; } }
+  @keyframes radar-ping { 0% { transform: scale(1); opacity: .85; border-color: rgba(178,56,80,.8); } 100% { transform: scale(1.32); opacity: 0; border-color: rgba(178,56,80,0); } }
+  #compass-rose, #compass-needle, #compass-sweep, .needle-wobble { transform-box: view-box; transform-origin: 130px 130px; }
+  #compass-rose { transition: transform .35s ease-out; }
+  #compass-needle { transition: transform .4s cubic-bezier(.3,1.4,.5,1); }
+  #compass-sweep { animation: radar-sweep 5s linear infinite; opacity: .55; }
+  .compass-instrument.standby #compass-sweep { opacity: 0; animation-play-state: paused; }
+  .compass-instrument.standby .needle-wobble { animation: needle-idle 3.4s ease-in-out infinite; }
+  @keyframes radar-sweep { to { transform: rotate(360deg); } }
+  @keyframes needle-idle { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(20deg); } }
+
+  .compass-readout { margin: 8px auto 0; padding: 9px 14px 8px; max-width: 250px; border-radius: var(--radius-md); background: linear-gradient(180deg, #2f2113 0%, #1f160c 100%); border: 1.5px solid var(--brass); box-shadow: inset 0 2px 8px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.35), var(--shadow-sm); }
+  .ro-label { font-size: 9.5px; letter-spacing: 1.6px; color: #b79b62; }
+  .ro-value { font-family: 'IM Fell English SC', serif; font-size: 34px; line-height: 1.05; color: var(--brass-light); text-shadow: 0 0 12px rgba(212,171,92,.55); }
+  .ro-unit { font-size: 16px; margin-left: 4px; opacity: .8; }
+  .compass-instrument[data-heat="2"] ~ .compass-readout .ro-value { color: #ffb3a0; text-shadow: 0 0 14px rgba(255,120,100,.7); }
+  .compass-instrument[data-heat="3"] ~ .compass-readout .ro-value { color: #fff1c4; text-shadow: 0 0 16px rgba(255,226,140,.95); }
+
+  .heat-meter { display: flex; gap: 3px; max-width: 250px; margin: 10px auto 0; padding: 4px; background: rgba(43,29,14,.12); border-radius: 7px; box-shadow: inset 0 1px 3px rgba(0,0,0,.18); }
+  .heat-meter i { flex: 1; height: 11px; border-radius: 3px; opacity: .22; transition: opacity .3s, box-shadow .3s; }
+  .heat-meter i.lit { opacity: 1; box-shadow: 0 0 6px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.35); }
+  .heat-scale { display: flex; justify-content: space-between; max-width: 250px; margin: 3px auto 0; font-size: 9.5px; color: var(--ink-soft); letter-spacing: .6px; }
+  .gps-tip { font-size: 11px; color: var(--ink-soft); background: rgba(212,171,92,.14); border-left: 3px solid var(--brass); padding: 7px 10px; border-radius: 3px; margin: 10px 0 0; text-align: left; line-height: 1.35; }
+
+  .riddle-parchment { background: #fcf8ee; border: 1px dashed rgba(43,29,14,.35); padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 13px; text-align: left; line-height: 1.4; }
+  
+  .maze-svg-wrap { margin: 10px 0; text-align: center; border: 2px solid var(--brass); border-radius: 4px; background: #f5ecc7; padding: 4px; box-shadow: inset 0 0 10px rgba(43,29,14,.1); }
+  
+  /* CARTE */
+  .carte-head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 8px; font-size: 12px; color: var(--ink-soft); }
+  .carte-head strong { font-family: 'IM Fell English SC', serif; font-size: 16px; color: var(--wine); }
+  .map-frame { border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(43,29,14,.45); box-shadow: var(--shadow-md); background: #241709; line-height: 0; }
+  .map-frame svg { display: block; width: 100%; height: auto; }
+  .carte-info { margin-top: 12px; padding: 12px 14px; background: #fffdf6; border: 1px solid rgba(43,29,14,.2); border-left: 5px solid var(--brass); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); }
+  #carte-info-title { font-family: 'IM Fell English SC', serif; font-size: 17px; color: var(--ink); }
+  #carte-info-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 3px; line-height: 1.4; }
+  .carte-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(43,29,14,.28); background: #fffdf6; border-radius: 999px; padding: 4px 11px 4px 4px; font-family: inherit; font-size: 11px; color: var(--ink); cursor: pointer; box-shadow: var(--shadow-sm); transition: all .15s var(--ease); }
+  .chip-n { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass)); font-family: 'IM Fell English SC', serif; font-size: 11px; color: var(--ink); }
+  .chip.active { border-color: var(--wine); background: #fbeee6; }
+  .chip-more { padding: 4px 11px; color: var(--slate); border-style: dashed; cursor: default; box-shadow: none; background: transparent; }
+  .pin { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .pin.selected .pin-ring { opacity: 1; }
+  .pin-new { animation: pin-drop .65s var(--ease) both; }
+  .trail-new { opacity: 0; animation: soft-in .7s ease forwards; }
+  #fog-layer { transition: opacity 2.6s ease; }
+  #carte-complete { transition: opacity 1.4s ease 1.4s; }
+  @keyframes pin-drop { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes soft-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* CONFETTIS DE VICTOIRE */
+  .confetti-piece { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 400; pointer-events: none; animation: confetti-fall linear forwards; border-radius: 2px; }
+
+  /* CANVAS CACHÉ POUR LA COMPRESSION */
+  #resize-canvas { display: none; }
+</style>
 </head>
 <body>
 
-<canvas id="canvas-confetti"></canvas>
+<div id="net-banner">Connexion au serveur...</div>
+<canvas id="resize-canvas"></canvas>
+<div id="toast-container"></div>
 
-<div class="journal-wrapper">
-  <header>
-    <div class="brand-title">
-      <svg viewBox="0 0 40 40" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="20" cy="20" r="17"></circle>
-        <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
-        <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.4"></path>
-      </svg>
-      <h1>Le Barathon Caennais</h1>
-    </div>
-    <p class="tagline">Huit tavernes. Une seule règle : personne n'avance seul.</p>
-  </header>
+<div class="container">
+  <div class="brand-row" onclick="gererClicAdmin()">
+    <svg viewBox="0 0 40 40" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
+      <circle cx="20" cy="20" r="17"></circle>
+      <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
+      <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.35"></path>
+    </svg>
+    <h1>Le Barathon Caennais</h1>
+  </div>
+  <p class="tagline">Huit tavernes. Une seule règle : personne n'avance seul.</p>
 
-  <div class="profile-bar">
-    <label for="global-participant">📜 Corsaire au gouvernail :</label>
-    <div class="select-wrapper">
-      <select id="global-participant" onchange="sauvegarderParticipant()">
-        <option value="">-- Choisis ton nom --</option>
-        <option value="Majid">Majid</option>
-        <option value="Alexandre">Alexandre</option>
-        <option value="Jeremy S">Jeremy S</option>
-        <option value="Romain R">Romain R</option>
-        <option value="Théo M">Théo M</option>
-        <option value="Pepette">Pepette</option>
-        <option value="Jules D">Jules D</option>
-        <option value="Daubeuf">Daubeuf</option>
-        <option value="Zaza">Zaza</option>
-        <option value="Emy">Emy</option>
-        <option value="Mama">Mama</option>
-        <option value="David M">David M</option>
-      </select>
+  <div id="progress-wrap">
+    <div id="progress-labels"><span id="progress-label-text">Étape 1 / 8</span><span id="progress-label-pct">0 %</span></div>
+    <div id="progress-track"><div id="progress-fill"></div></div>
+  </div>
+
+  <div class="ledger-line">
+    <label for="global-participant">Qui tient la plume ce soir ?</label>
+    <select id="global-participant" onchange="sauvegarderParticipant()">
+      <option value="">-- Choisis ton nom --</option>
+      <option value="Majid">Majid</option>
+      <option value="Alexandre">Alexandre</option>
+      <option value="Jeremy S">Jeremy S</option>
+      <option value="Romain R">Romain R</option>
+      <option value="Théo M">Théo M</option>
+      <option value="Pepette">Pepette</option>
+      <option value="Jules D">Jules D</option>
+      <option value="Daubeuf">Daubeuf</option>
+      <option value="Zaza">Zaza</option>
+      <option value="Emy">Emy</option>
+      <option value="Mama">Mama</option>
+      <option value="David M">David M</option>
+    </select>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('accueil')">Parcours</button>
+    <button class="tab-btn" onclick="switchTab('scores')">Classement</button>
+    <button class="tab-btn" onclick="switchTab('carte')">Carte</button>
+  </div>
+
+  <div id="tab-accueil" class="tab-content active">
+    <div id="bars-list" class="trail">
+      <div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>
     </div>
   </div>
 
-  <div class="progress-strip">
-    <span><span class="status-indicator" id="sync-status"></span> <span id="sync-text">Synchronisé</span></span>
-    <span class="progress-badge" id="step-badge">Étape 1 / 8</span>
-  </div>
-
-  <nav class="tabs">
-    <button class="tab-btn active" onclick="switchTab('accueil')">📍 Parcours</button>
-    <button class="tab-btn" onclick="switchTab('scores')">🏆 Classement</button>
-    <button class="tab-btn" onclick="switchTab('carte')">🗺️ Carte</button>
-  </nav>
-
-  <!-- Onglet 1: Parcours -->
-  <main id="tab-accueil" class="tab-content active">
-    <div id="bars-list" class="trail-list">
-      <!-- Rempli dynamiquement en JS -->
-    </div>
-  </main>
-
-  <!-- Onglet 2: Classement -->
-  <main id="tab-scores" class="tab-content">
-    <table class="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rang</th>
-          <th>Corsaire</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody id="ranking-body">
-        <tr><td colspan="3">Chargement du livre des comptes…</td></tr>
-      </tbody>
+  <div id="tab-scores" class="tab-content">
+    <table class="ledger-table">
+      <thead><tr><th>Rang</th><th>Corsaire</th><th>Points</th></tr></thead>
+      <tbody id="ranking-body"><tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr></tbody>
     </table>
-    <button class="btn btn-secondary" onclick="chargerClassement()">🔄 Actualiser les rangs</button>
-  </main>
+  </div>
 
-  <!-- Onglet 3: Carte -->
-  <main id="tab-carte" class="tab-content">
-    <div class="map-container">
-      <svg viewBox="0 0 400 500" width="100%" style="display:block;">
-        <defs>
-          <radialGradient id="sealGrad" cx="35%" cy="30%" r="70%">
-            <stop offset="0%" stop-color="#f0d287"></stop>
-            <stop offset="100%" stop-color="#c29532"></stop>
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="400" height="500" fill="#f2e6c8"></rect>
-        <rect x="6" y="6" width="388" height="488" fill="none" stroke="#523f2f" stroke-width="2"></rect>
-        
-        <!-- Rivière l'Orne -->
-        <path d="M0,470 C60,440 90,480 150,450 C210,420 240,460 300,430 C340,410 370,430 400,415" fill="none" stroke="#527d8d" stroke-width="8" opacity="0.65"></path>
-        <text x="55" y="465" font-size="10" font-style="italic" fill="#2a4550" font-family="'Cinzel', serif">l'Orne</text>
-        
-        <!-- Rose des vents -->
-        <g transform="translate(355,42)" stroke="#781d2a" fill="#781d2a">
-          <circle cx="0" cy="0" r="18" fill="none" stroke-width="1.5"></circle>
-          <path d="M0,-14 L3,0 L0,14 L-3,0 Z"></path>
-          <path d="M-14,0 L0,-3 L14,0 L0,3 Z" opacity="0.4"></path>
-        </g>
-        
-        <!-- Château de Caen -->
-        <g transform="translate(185,85)">
-          <rect x="10" y="0" width="10" height="22" fill="#523f2f"></rect>
-          <rect x="-4" y="10" width="10" height="14" fill="#523f2f"></rect>
-          <rect x="24" y="10" width="10" height="14" fill="#523f2f"></rect>
-          <rect x="-2" y="20" width="34" height="8" fill="#523f2f"></rect>
-          <text x="15" y="42" font-size="9" text-anchor="middle" font-family="'Cinzel', serif" font-weight="bold" fill="#1f140e">Château de Caen</text>
-        </g>
-
-        <!-- Dynamic trail & markers layer -->
-        <g id="carte-markers"></g>
+  <div id="tab-carte" class="tab-content">
+    <div class="carte-head"><span>Territoire exploré</span><strong id="carte-count">1 / 8</strong></div>
+    <div class="map-frame">
+      <svg id="carte-svg" viewBox="0 0 400 560" role="img" aria-label="Carte de Caen, dévoilée au fil des épreuves">
+<defs>
+<radialGradient id="mPaper" cx="50%" cy="42%" r="78%"><stop offset="0" stop-color="#f8eed2"/><stop offset=".65" stop-color="#ecdcae"/><stop offset="1" stop-color="#d3bb88"/></radialGradient>
+<radialGradient id="mBurn" cx="50%" cy="50%" r="74%"><stop offset=".58" stop-color="#4a2c0c" stop-opacity="0"/><stop offset="1" stop-color="#3d2308" stop-opacity=".62"/></radialGradient>
+<radialGradient id="mSeal" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#e3be6c"/><stop offset="1" stop-color="#a9822d"/></radialGradient>
+<radialGradient id="mSealHot" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#b94a5f"/><stop offset="1" stop-color="#7a2333"/></radialGradient>
+<radialGradient id="mHole" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#000" stop-opacity="1"/><stop offset=".55" stop-color="#000" stop-opacity="1"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<linearGradient id="mTable" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a17"/><stop offset="1" stop-color="#241709"/></linearGradient>
+<filter id="mRough" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="3" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="mGrain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="11" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .25  0 0 0 0 .15  0 0 0 0 .05  0 0 0 .6 -.2"/></filter>
+<filter id="mFog" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".012 .016" numOctaves="3" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values=".46 0 0 0 .10  .35 0 0 0 .075  .21 0 0 0 .04  0 0 0 0 .94"/></filter>
+<clipPath id="mInner"><rect x="19" y="19" width="362" height="522"/></clipPath>
+<pattern id="mHouses" width="20" height="16" patternUnits="userSpaceOnUse">
+<path d="M2 8 L2 5 L5 2.6 L8 5 L8 8 Z" fill="#dfcb9c" stroke="#6b5030" stroke-width=".6"/><path d="M2 5 L5 2.6 L8 5 Z" fill="#a5583f" stroke="#6b5030" stroke-width=".5"/>
+<path d="M12 16 L12 13 L15 10.6 L18 13 L18 16 Z" fill="#dfcb9c" stroke="#6b5030" stroke-width=".6"/><path d="M12 13 L15 10.6 L18 13 Z" fill="#a5583f" stroke="#6b5030" stroke-width=".5"/>
+</pattern>
+<g id="mHill"><path d="M-13 0 C-10 -9,-5 -16,0 -16 C5 -16,10 -9,13 0 Z" fill="#d5c293" stroke="#5b4632" stroke-width="1"/><path d="M0 -16 C3 -10,5 -5,7 0 L13 0 C10 -9,5 -16,0 -16Z" fill="#a98f60" opacity=".55"/><path d="M-7 -3 L-4 -9 M-4 -2 L-1 -9 M-10 -1 L-7 -7" stroke="#5b4632" stroke-width=".6" opacity=".7" fill="none"/></g>
+<g id="mTree"><ellipse cx="0" cy="3.6" rx="4.6" ry="1.4" fill="#000" opacity=".15"/><line x1="0" y1="1" x2="0" y2="4" stroke="#4a3520" stroke-width="1.2"/><circle cx="0" cy="-2.4" r="4.7" fill="#8aa561" stroke="#3f5530" stroke-width=".9"/><circle cx="-1.5" cy="-3.9" r="1.8" fill="#aac47e" opacity=".75"/></g>
+<g id="mPine"><ellipse cx="0" cy="3.4" rx="4" ry="1.2" fill="#000" opacity=".15"/><path d="M0 -10 L5.2 -1 L-5.2 -1 Z" fill="#6f8f58" stroke="#3a5030" stroke-width=".8"/><path d="M0 -6 L6 3 L-6 3 Z" fill="#7da164" stroke="#3a5030" stroke-width=".8"/><line x1="0" y1="3" x2="0" y2="5" stroke="#4a3520" stroke-width="1.2"/></g>
+<path id="mWave" d="M0 0 q3 -3.6 6 0 t6 0" fill="none" stroke="#3f6568" stroke-width=".9" opacity=".75"/>
+<g id="mPt"><path d="M0 -38 L4.8 -4.8 L0 0 Z" fill="#5b2a1c"/><path d="M0 -38 L-4.8 -4.8 L0 0 Z" fill="#f4e8c8" stroke="#5b2a1c" stroke-width=".6"/></g>
+<g id="mPt2"><path d="M0 -24 L3.4 -3.4 L0 0 Z" fill="#a9822d"/><path d="M0 -24 L-3.4 -3.4 L0 0 Z" fill="#f4e8c8" stroke="#a9822d" stroke-width=".6"/></g>
+<g id="mAbbey">
+<rect x="5" y="19" width="42" height="14" fill="#dac99d" stroke="#3a2a17" stroke-width="1.1"/><path d="M5 19 L26 12 L47 19 Z" fill="#9b5e49" stroke="#3a2a17" stroke-width="1.1"/>
+<rect x="7" y="6" width="10" height="27" fill="#d2bf90" stroke="#3a2a17" stroke-width="1.1"/><path d="M6 6 L12 -9 L18 6 Z" fill="#7a2333" stroke="#3a2a17" stroke-width="1"/>
+<rect x="35" y="6" width="10" height="27" fill="#d2bf90" stroke="#3a2a17" stroke-width="1.1"/><path d="M34 6 L40 -9 L46 6 Z" fill="#7a2333" stroke="#3a2a17" stroke-width="1"/>
+<rect x="22" y="8" width="8" height="12" fill="#d2bf90" stroke="#3a2a17" stroke-width="1"/><path d="M21.5 8 L26 -2 L30.5 8 Z" fill="#7a2333" stroke="#3a2a17" stroke-width="1"/>
+<path d="M23 33 L23 27 Q26 23 29 27 L29 33 Z" fill="#3a2a17"/><path d="M9.5 14 L9.5 11 M37.5 14 L37.5 11" stroke="#3a2a17" stroke-width="1.2"/>
+</g>
+<g id="mShip"><path d="M-13 0 L13 0 L10 6.5 L-10 6.5 Z" fill="#6b4a2a" stroke="#2b1d0e" stroke-width="1"/><line x1="-4" y1="0" x2="-4" y2="-22" stroke="#2b1d0e" stroke-width="1.2"/><line x1="5" y1="0" x2="5" y2="-17" stroke="#2b1d0e" stroke-width="1.2"/><path d="M-3.5 -20 C-12 -15 -12 -7 -3.5 -3 Z" fill="#f4ead0" stroke="#2b1d0e" stroke-width=".9"/><path d="M5.5 -16 C13.5 -11 13.5 -5 5.5 -2 Z" fill="#f4ead0" stroke="#2b1d0e" stroke-width=".9"/><path d="M-4 -22 L-4 -26 L2 -24.2 Z" fill="#7a2333"/><path d="M-9 8 q3 -2.5 6 0 t6 0 t6 0 t6 0" fill="none" stroke="#3f6568" stroke-width=".9"/></g>
+<g id="mSerpent"><path d="M0 0 C1 -9,9 -9,10 0 C11 -9,19 -9,20 0 C21 -9,29 -9,30 0" fill="none" stroke="#2f5a4d" stroke-width="3.4" stroke-linecap="round"/><path d="M0 0 C1 -9,9 -9,10 0 C11 -9,19 -9,20 0 C21 -9,29 -9,30 0" fill="none" stroke="#6f9d86" stroke-width="1.3" stroke-linecap="round"/><path d="M30 0 C32 -4,34 -9,38 -10 C40 -10,41 -8,39.5 -7 L37 -6.5" fill="none" stroke="#2f5a4d" stroke-width="3.2" stroke-linecap="round"/><circle cx="37.2" cy="-9.2" r=".9" fill="#f4e8c8"/><path d="M-8 3 q3 -2.5 6 0 t6 0 M24 3 q3 -2.5 6 0 t6 0" fill="none" stroke="#3f6568" stroke-width=".9"/></g>
+<path id="mOrne" d="M10 440 C50 428,90 452,135 436 S205 408,245 402 S300 396,322 362 S338 296,350 246 S368 190,385 150"/>
+<path id="mOdon" d="M10 316 C56 320,92 336,118 358 S160 396,190 412"/>
+</defs>
+<rect x="0" y="0" width="400" height="560" fill="url(#mTable)"/>
+<rect x="6" y="6" width="388" height="548" fill="url(#mPaper)" filter="url(#mRough)"/>
+<g id="map-art">
+<g clip-path="url(#mInner)">
+<path d="M19 350 C60 352,96 372,128 398 S122 440,62 430 S22 410,19 350 Z" fill="#c4d094" opacity=".65"/>
+<path d="M240 236 C290 226,330 240,352 262 S340 300,300 304 S236 290,240 236 Z" fill="#d6dca4" opacity=".4"/>
+<path d="M381 19 L381 152 C364 142,348 122,336 98 C326 78,314 40,298 19 Z" fill="#a9c6be" stroke="#46696c" stroke-width="1.3"/>
+<use href="#mWave" x="323.3" y="43.2"/>
+<use href="#mWave" x="346.9" y="34.3"/>
+<use href="#mWave" x="338.6" y="67.7"/>
+<use href="#mWave" x="341.6" y="71.2"/>
+<use href="#mWave" x="370.3" y="31.3"/>
+<use href="#mWave" x="361.8" y="59.0"/>
+<use href="#mWave" x="346.0" y="68.5"/>
+<use href="#mWave" x="339.4" y="33.2"/>
+<use href="#mWave" x="349.0" y="74.7"/>
+<use href="#mWave" x="332.6" y="60.2"/>
+<use href="#mWave" x="357.2" y="105.7"/>
+<use href="#mWave" x="352.5" y="58.8"/>
+<use href="#mWave" x="370.6" y="39.5"/>
+<use href="#mShip" x="336" y="76"/>
+<use href="#mSerpent" x="340" y="112"/>
+<text x="346" y="30" font-size="8.5" font-style="italic" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#2f5256" opacity=".9">La Manche</text>
+<use href="#mOrne" fill="none" stroke="#56747a" stroke-width="17" stroke-linecap="round"/>
+<use href="#mOrne" fill="none" stroke="#a5c4c2" stroke-width="11" stroke-linecap="round"/>
+<use href="#mOdon" fill="none" stroke="#56747a" stroke-width="9" stroke-linecap="round"/>
+<use href="#mOdon" fill="none" stroke="#a5c4c2" stroke-width="5.4" stroke-linecap="round"/>
+<use href="#mOrne" fill="none" stroke="#e6f0ea" stroke-width="1.3" stroke-dasharray="5 10" opacity=".7"/>
+<path d="M246 336 C245 362,252 382,256 402" fill="none" stroke="#56747a" stroke-width="10" stroke-linecap="round"/><path d="M246 336 C245 362,252 382,256 402" fill="none" stroke="#a5c4c2" stroke-width="6" stroke-linecap="round"/>
+<rect x="228" y="282" width="36" height="60" rx="10" fill="#a5c4c2" stroke="#56747a" stroke-width="2.4"/>
+<path d="M234 296 q3 -2.6 6 0 t6 0 M236 312 q3 -2.6 6 0 t6 0 M234 328 q3 -2.6 6 0 t6 0" fill="none" stroke="#3f6568" stroke-width=".8" opacity=".75"/>
+<path d="M19 456 C55 444,92 466,138 452 S208 424,248 418 S306 412,332 378 S348 312,358 262 L381 258 L381 541 L19 541 Z" fill="#e4d3a3" opacity=".5"/>
+<path d="M19 466 C55 454,92 476,138 462 S208 436,248 430 S306 424,334 392 S350 326,360 280 L381 276 L381 541 L19 541 Z" fill="url(#mHouses)" opacity=".5"/>
+<polygon points="112,168 190,152 262,168 276,232 266,300 206,352 136,332 104,262" fill="#e7d6a6" opacity=".55"/>
+<polygon points="112,168 190,152 262,168 276,232 266,300 206,352 136,332 104,262" fill="url(#mHouses)" opacity=".55"/>
+<path d="M190 142 C196 190,214 240,224 300" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M126 205 C170 198,220 206,262 214" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M120 256 C170 262,220 260,270 262" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M150 176 C142 222,150 286,160 336" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M232 166 C240 210,242 270,238 330" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M104 262 L72 276" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M276 232 L292 226" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M200 352 C210 372,230 392,252 404" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M136 332 C120 360,110 380,100 400" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M160 216 L214 222" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M170 300 L226 306" fill="none" stroke="#7a6240" stroke-width="1.5" opacity=".6"/>
+<path d="M92 252 C92 336,148 380,206 384 S300 350,304 280" fill="none" stroke="#7a6240" stroke-width="1.3" stroke-dasharray="6 4" opacity=".5"/>
+<polygon points="112,168 190,152 262,168 276,232 266,300 206,352 136,332 104,262" fill="none" stroke="#6b5030" stroke-width="3.2" stroke-dasharray="7 3" stroke-linejoin="round"/>
+<circle cx="112" cy="168" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M107.8 163.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="190" cy="152" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M185.8 147.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="262" cy="168" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M257.8 163.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="276" cy="232" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M271.8 227.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="266" cy="300" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M261.8 295.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="206" cy="352" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M201.8 347.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="136" cy="332" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M131.8 327.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="104" cy="262" r="4.2" fill="#b9a67c" stroke="#3a2a17" stroke-width="1.2"/><path d="M99.8 257.8 l2 -2.4 l2.2 2.4 l2 -2.4 l2.2 2.4" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<use href="#mHill" x="46" y="92"/>
+<use href="#mHill" x="70" y="108"/>
+<use href="#mHill" x="92" y="88"/>
+<use href="#mHill" x="54" y="128"/>
+<use href="#mHill" x="80" y="140"/>
+<use href="#mHill" x="36" y="162"/>
+<use href="#mHill" x="104" y="120"/>
+<use href="#mHill" x="334" y="320"/>
+<use href="#mHill" x="352" y="338"/>
+<use href="#mHill" x="318" y="342"/>
+<use href="#mTree" x="54.9" y="291.1"/>
+<use href="#mPine" x="93.1" y="237.5"/>
+<use href="#mTree" x="29.7" y="259.3"/>
+<use href="#mTree" x="49.2" y="226.0"/>
+<use href="#mTree" x="66.9" y="243.0"/>
+<use href="#mPine" x="93.9" y="245.9"/>
+<use href="#mTree" x="28.8" y="287.0"/>
+<use href="#mTree" x="71.9" y="328.9"/>
+<use href="#mPine" x="45.1" y="231.7"/>
+<use href="#mTree" x="49.7" y="320.5"/>
+<use href="#mTree" x="36.4" y="188.7"/>
+<use href="#mPine" x="40.1" y="216.0"/>
+<use href="#mTree" x="42.3" y="232.6"/>
+<use href="#mPine" x="30.0" y="241.9"/>
+<use href="#mTree" x="44.6" y="191.9"/>
+<use href="#mTree" x="87.9" y="214.5"/>
+<use href="#mTree" x="97.0" y="279.2"/>
+<use href="#mTree" x="94.9" y="194.1"/>
+<use href="#mTree" x="35.2" y="275.4"/>
+<use href="#mTree" x="59.9" y="264.3"/>
+<use href="#mPine" x="44.9" y="193.3"/>
+<use href="#mTree" x="51.3" y="260.6"/>
+<use href="#mPine" x="75.1" y="252.5"/>
+<use href="#mTree" x="72.5" y="288.4"/>
+<use href="#mPine" x="90.6" y="294.8"/>
+<use href="#mTree" x="83.0" y="232.8"/>
+<use href="#mTree" x="330.0" y="381.9"/>
+<use href="#mTree" x="304.7" y="311.4"/>
+<use href="#mPine" x="333.5" y="318.7"/>
+<use href="#mTree" x="304.0" y="300.0"/>
+<use href="#mTree" x="346.6" y="312.0"/>
+<use href="#mTree" x="346.7" y="325.3"/>
+<use href="#mTree" x="372.6" y="402.4"/>
+<use href="#mTree" x="375.5" y="379.2"/>
+<use href="#mPine" x="323.7" y="324.5"/>
+<use href="#mPine" x="326.0" y="345.0"/>
+<use href="#mPine" x="312.3" y="303.9"/>
+<use href="#mTree" x="327.5" y="417.3"/>
+<use href="#mPine" x="357.6" y="350.7"/>
+<use href="#mTree" x="365.6" y="418.4"/>
+<use href="#mPine" x="327.0" y="337.9"/>
+<use href="#mTree" x="359.2" y="356.0"/>
+<use href="#mTree" x="357.6" y="333.2"/>
+<use href="#mTree" x="317.2" y="388.0"/>
+<use href="#mTree" x="360.0" y="380.3"/>
+<use href="#mTree" x="327.7" y="337.5"/>
+<use href="#mTree" x="335.7" y="357.4"/>
+<use href="#mPine" x="363.9" y="381.5"/>
+<use href="#mPine" x="100.5" y="484.5"/>
+<use href="#mTree" x="42.0" y="452.2"/>
+<use href="#mPine" x="86.6" y="484.7"/>
+<use href="#mPine" x="37.9" y="441.4"/>
+<use href="#mTree" x="123.0" y="481.6"/>
+<use href="#mTree" x="50.7" y="468.1"/>
+<use href="#mPine" x="110.4" y="489.6"/>
+<use href="#mPine" x="37.9" y="454.6"/>
+<use href="#mTree" x="26.0" y="482.3"/>
+<use href="#mPine" x="39.9" y="453.6"/>
+<use href="#mPine" x="58.6" y="489.8"/>
+<use href="#mTree" x="44.3" y="444.1"/>
+<use href="#mPine" x="77.6" y="489.2"/>
+<use href="#mTree" x="53.4" y="488.8"/>
+<use href="#mPine" x="275.4" y="47.3"/>
+<use href="#mTree" x="293.8" y="96.0"/>
+<use href="#mTree" x="296.1" y="92.5"/>
+<use href="#mTree" x="292.0" y="39.6"/>
+<use href="#mPine" x="269.6" y="52.1"/>
+<use href="#mPine" x="262.0" y="35.1"/>
+<use href="#mTree" x="265.1" y="38.6"/>
+<use href="#mTree" x="297.0" y="75.0"/>
+<use href="#mTree" x="257.1" y="91.8"/>
+<use href="#mTree" x="261.0" y="96.7"/>
+<use href="#mPine" x="294.2" y="41.4"/>
+<use href="#mTree" x="291.6" y="41.3"/>
+<use href="#mTree" x="61.0" y="80.2"/>
+<use href="#mTree" x="81.4" y="80.5"/>
+<use href="#mTree" x="29.9" y="68.0"/>
+<use href="#mPine" x="48.6" y="81.8"/>
+<use href="#mTree" x="65.5" y="71.1"/>
+<use href="#mTree" x="60.8" y="73.8"/>
+<use href="#mPine" x="92.8" y="84.6"/>
+<use href="#mTree" x="88.6" y="81.9"/>
+<use href="#mTree" x="144.9" y="84.2"/>
+<use href="#mTree" x="117.5" y="84.9"/>
+<use href="#mPine" x="51.0" y="78.7"/>
+<use href="#mPine" x="138.4" y="78.0"/>
+<use href="#mTree" x="24.5" y="46.6"/>
+<use href="#mTree" x="57.2" y="83.9"/>
+<use href="#mTree" x="281.2" y="247.7"/>
+<use href="#mPine" x="295.6" y="266.4"/>
+<use href="#mTree" x="319.7" y="251.9"/>
+<use href="#mTree" x="270.0" y="288.3"/>
+<use href="#mTree" x="297.2" y="238.7"/>
+<use href="#mTree" x="288.4" y="276.3"/>
+<use href="#mTree" x="313.5" y="269.9"/>
+<use href="#mPine" x="319.9" y="281.8"/>
+<use href="#mTree" x="296.3" y="256.9"/>
+<use href="#mPine" x="275.2" y="282.3"/>
+<path d="M44.4 412.8 l-1.6 -3.2 M44.4 412.8 l0 -3.8 M44.4 412.8 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M93.5 392.8 l-1.6 -3.2 M93.5 392.8 l0 -3.8 M93.5 392.8 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M68.9 404.9 l-1.6 -3.2 M68.9 404.9 l0 -3.8 M68.9 404.9 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M75.5 418.2 l-1.6 -3.2 M75.5 418.2 l0 -3.8 M75.5 418.2 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M96.7 396.4 l-1.6 -3.2 M96.7 396.4 l0 -3.8 M96.7 396.4 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M101.9 361.0 l-1.6 -3.2 M101.9 361.0 l0 -3.8 M101.9 361.0 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M91.0 411.1 l-1.6 -3.2 M91.0 411.1 l0 -3.8 M91.0 411.1 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M93.2 421.2 l-1.6 -3.2 M93.2 421.2 l0 -3.8 M93.2 421.2 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M87.3 365.4 l-1.6 -3.2 M87.3 365.4 l0 -3.8 M87.3 365.4 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M35.6 400.8 l-1.6 -3.2 M35.6 400.8 l0 -3.8 M35.6 400.8 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M114.5 384.1 l-1.6 -3.2 M114.5 384.1 l0 -3.8 M114.5 384.1 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M70.8 363.2 l-1.6 -3.2 M70.8 363.2 l0 -3.8 M70.8 363.2 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M33.6 394.0 l-1.6 -3.2 M33.6 394.0 l0 -3.8 M33.6 394.0 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M53.0 376.9 l-1.6 -3.2 M53.0 376.9 l0 -3.8 M53.0 376.9 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M71.3 364.5 l-1.6 -3.2 M71.3 364.5 l0 -3.8 M71.3 364.5 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M112.2 417.5 l-1.6 -3.2 M112.2 417.5 l0 -3.8 M112.2 417.5 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M39.9 393.7 l-1.6 -3.2 M39.9 393.7 l0 -3.8 M39.9 393.7 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<path d="M96.1 390.3 l-1.6 -3.2 M96.1 390.3 l0 -3.8 M96.1 390.3 l1.6 -3.2" stroke="#6f8450" stroke-width=".7" fill="none"/>
+<use href="#mAbbey" x="286" y="128"/>
+<use href="#mAbbey" x="286" y="204"/>
+<g id="mCastle">
+<ellipse cx="190" cy="132" rx="66" ry="13" fill="#c9b684" stroke="#6b5030" stroke-width="1"/>
+<path d="M140 130 q6 -4 12 0 M226 130 q6 -4 12 0 M160 136 q8 -3 16 0 M206 136 q8 -3 16 0" stroke="#6b5030" stroke-width=".7" fill="none" opacity=".7"/>
+<rect x="146" y="102" width="88" height="28" fill="#cbb98f" stroke="#3a2a17" stroke-width="1.4"/>
+<path d="M146 102 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h5 v-3 h5 v3 h4" fill="none" stroke="#3a2a17" stroke-width="1.1"/>
+<rect x="140" y="88" width="14" height="42" fill="#c1ae82" stroke="#3a2a17" stroke-width="1.4"/><path d="M138 88 L147 72 L156 88 Z" fill="#7a2333" stroke="#3a2a17" stroke-width="1.2"/>
+<rect x="226" y="88" width="14" height="42" fill="#c1ae82" stroke="#3a2a17" stroke-width="1.4"/><path d="M224 88 L233 72 L242 88 Z" fill="#7a2333" stroke="#3a2a17" stroke-width="1.2"/>
+<rect x="177" y="82" width="26" height="48" fill="#d3c196" stroke="#3a2a17" stroke-width="1.5"/>
+<path d="M177 82 h4 v-3 h4 v3 h4 v-3 h4 v3 h4 v-3 h4 v3 h2" fill="none" stroke="#3a2a17" stroke-width="1.1"/>
+<line x1="190" y1="79" x2="190" y2="62" stroke="#3a2a17" stroke-width="1.3"/><path d="M190 62 L204 66 L190 70 Z" fill="#7a2333" stroke="#3a2a17" stroke-width=".8"/>
+<path d="M183 130 L183 119 Q190 110 197 119 L197 130 Z" fill="#3a2a17"/>
+<rect x="186" y="92" width="3" height="7" fill="#3a2a17"/><rect x="192" y="92" width="3" height="7" fill="#3a2a17"/>
+</g>
+<text x="200" y="56" font-size="11.5" textLength="84" lengthAdjust="spacingAndGlyphs" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" stroke="#f2e6c8" stroke-width="3" paint-order="stroke" letter-spacing=".8">Château de Caen</text>
+<text x="318" y="246" font-size="8" text-anchor="middle" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.85" letter-spacing="1.2">Abbaye aux Hommes</text>
+<text x="312" y="176" font-size="8" text-anchor="middle" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.85" letter-spacing="1.2">Abbaye aux Dames</text>
+<text x="62" y="402" font-size="9" text-anchor="middle" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.85" letter-spacing="1.8">La Prairie</text>
+<text x="205" y="508" font-size="11" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.75" letter-spacing="3.5">Vaucelles</text>
+<text x="284" y="324" font-size="7.5" text-anchor="start" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.85" letter-spacing="1.2">Bassin Saint-Pierre</text>
+<text x="212" y="372" font-size="6.8" text-anchor="end" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#4a3520" stroke="#f2e6c8" stroke-width="2.4" paint-order="stroke" opacity="0.7" letter-spacing="1.2">Quai Vendeuvre</text>
+<text font-size="8.5" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#2f5256" letter-spacing="1.6"><textPath href="#mOrne" startOffset="14%">L’Orne</textPath></text>
+<text font-size="7.5" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#2f5256" letter-spacing="1.4"><textPath href="#mOdon" startOffset="22%" dy="-6">L’Odon</textPath></text>
+<g transform="translate(332,492)"><circle r="35" fill="#f4e8c8" opacity=".9" stroke="#5b4632" stroke-width="1.2"/><circle r="30" fill="none" stroke="#5b4632" stroke-width=".6"/>
+<use href="#mPt2" transform="rotate(45)"/>
+<use href="#mPt2" transform="rotate(135)"/>
+<use href="#mPt2" transform="rotate(225)"/>
+<use href="#mPt2" transform="rotate(315)"/>
+<use href="#mPt" transform="rotate(0)"/>
+<use href="#mPt" transform="rotate(90)"/>
+<use href="#mPt" transform="rotate(180)"/>
+<use href="#mPt" transform="rotate(270)"/>
+<circle r="3.2" fill="#a9822d" stroke="#3a2a17" stroke-width=".8"/><text y="-41.5" font-size="10" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#7a2333" font-weight="bold">N</text></g>
+<g id="mCartouche"><path d="M24 28 L150 28 L143 44 L150 60 L24 60 L31 44 Z" fill="#dcc690" stroke="#3a2a17" stroke-width="1.5"/>
+<path d="M28 32 L146 32 L140 44 L146 56 L28 56 L34 44 Z" fill="none" stroke="#3a2a17" stroke-width=".6"/>
+<text x="87" y="45" font-size="14" textLength="98" lengthAdjust="spacingAndGlyphs" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" letter-spacing=".6">Terres de Caen</text>
+<text x="87" y="55" font-size="6.6" textLength="84" lengthAdjust="spacingAndGlyphs" font-style="italic" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#5b4632" letter-spacing="1.2">royaume des corsaires</text></g>
+<g transform="translate(34,516)"><rect x="0" y="0" width="38" height="4.5" fill="#3a2a17"/><rect x="38" y="0" width="38" height="4.5" fill="#f4e8c8" stroke="#3a2a17" stroke-width=".8"/>
+<text x="0" y="-3" font-size="6.8" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" text-anchor="middle">0</text><text x="38" y="-3" font-size="6.8" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" text-anchor="middle">250</text><text x="76" y="-3" font-size="6.8" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" text-anchor="middle">500 m</text></g>
+</g>
+<rect x="14" y="14" width="372" height="532" fill="none" stroke="#3a2a17" stroke-width="2.4"/><rect x="19" y="19" width="362" height="522" fill="none" stroke="#3a2a17" stroke-width=".8"/>
+<circle cx="14" cy="14" r="5.2" fill="#a9822d" stroke="#3a2a17" stroke-width="1.2"/><circle cx="14" cy="14" r="1.8" fill="#3a2a17"/>
+<circle cx="386" cy="14" r="5.2" fill="#a9822d" stroke="#3a2a17" stroke-width="1.2"/><circle cx="386" cy="14" r="1.8" fill="#3a2a17"/>
+<circle cx="14" cy="546" r="5.2" fill="#a9822d" stroke="#3a2a17" stroke-width="1.2"/><circle cx="14" cy="546" r="1.8" fill="#3a2a17"/>
+<circle cx="386" cy="546" r="5.2" fill="#a9822d" stroke="#3a2a17" stroke-width="1.2"/><circle cx="386" cy="546" r="1.8" fill="#3a2a17"/>
+<rect x="6" y="6" width="388" height="548" fill="url(#mBurn)" filter="url(#mRough)"/>
+<rect x="6" y="6" width="388" height="548" filter="url(#mGrain)" opacity=".5"/>
+</g>
+<mask id="mFogMask" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="560"><rect x="0" y="0" width="400" height="560" fill="#fff"/><g id="fog-holes"></g></mask>
+<g id="fog-layer" mask="url(#mFogMask)">
+<rect x="6" y="6" width="388" height="548" fill="#3b2a16" opacity=".95" filter="url(#mRough)"/>
+<rect x="6" y="6" width="388" height="548" filter="url(#mFog)"/>
+<text x="200" y="300" font-size="26" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#e9d9aa" opacity=".22" letter-spacing="4" transform="rotate(-12 200 300)">Terra incognita</text>
+<text x="120" y="470" font-size="14" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" font-style="italic" fill="#e9d9aa" opacity=".2" letter-spacing="2">Hic sunt dracones</text>
+<text x="330" y="190" font-size="13" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#e9d9aa" opacity=".18" letter-spacing="3" transform="rotate(14 330 190)">Terra incognita</text>
+<text x="90" y="110" font-size="13" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#e9d9aa" opacity=".18" letter-spacing="3" transform="rotate(-8 90 110)">Terra incognita</text>
+</g>
+<g id="carte-trail"></g><g id="carte-pins"></g>
+<g id="carte-complete" style="opacity:0"><path d="M92 522 L308 522 L298 536 L308 550 L92 550 L102 536 Z" fill="#dcc690" stroke="#3a2a17" stroke-width="1.4"/><text x="200" y="540" font-size="12" textLength="130" lengthAdjust="spacingAndGlyphs" text-anchor="middle" font-family="'IM Fell English SC', Georgia, serif" fill="#3a2a17" letter-spacing=".8">Territoire exploré</text></g>
       </svg>
     </div>
-    <p class="tagline" style="margin-top:10px; text-align:center;">La carte se dévoile au fil de votre progression…</p>
-  </main>
+    <div class="carte-info">
+      <div id="carte-info-title">Terres inconnues</div>
+      <div id="carte-info-sub">Résous les épreuves pour dévoiler la carte, taverne après taverne.</div>
+    </div>
+    <div class="carte-legend" id="carte-legend"></div>
+  </div>
 </div>
 
-<!-- MODALE ÉNIGME / ÉPREUVE -->
-<div id="modal-riddle" class="modal-overlay">
-  <div class="modal-card">
-    <h3 id="riddle-title">Épreuve du Corsaire</h3>
+<!-- MODALE ÉNIGME -->
+<div id="modal-riddle" class="modal">
+  <div class="modal-content">
+    <h3 id="riddle-title">Épreuve</h3>
     <div id="riddle-content"></div>
-    <div id="riddle-msg" style="margin-top:10px; font-size:13px; text-align:center; min-height:18px;"></div>
+    <div id="riddle-msg" class="feedback"></div>
     <button class="btn btn-ghost" onclick="fermerModales()">Fermer</button>
   </div>
 </div>
 
-<!-- MODALE BOISSON / PHOTO -->
-<div id="modal-drink" class="modal-overlay">
-  <div class="modal-card">
-    <h3 id="drink-bar-title">Valider ma consommation</h3>
-    
-    <div style="margin-bottom:12px;">
-      <label style="font-size:12px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">Qu'as-tu bu à cette halte ?</label>
-      <div class="select-wrapper">
-        <select id="drink-select">
-          <option value="Ricard / Pastis">Ricard / Pastis</option>
-          <option value="Pinte de bière blonde">Pinte de bière blonde</option>
-          <option value="Pinte de bière IPA / Spéciale">Pinte de bière IPA / Spéciale</option>
-          <option value="Bière d'abbaye / Trappiste">Bière d'abbaye / Trappiste</option>
-          <option value="Shot / Shooter">Shot / Shooter</option>
-          <option value="Cocktail maison">Cocktail maison</option>
-          <option value="Embuscade / Cocktail">Embuscade / Cocktail</option>
-          <option value="Rhum arrangé">Rhum arrangé</option>
-          <option value="Soft / Sans alcool">Soft / Sans alcool</option>
-        </select>
-      </div>
-    </div>
+<!-- MODALE BOISSON -->
+<div id="modal-drink" class="modal">
+  <div class="modal-content">
+    <h3 id="drink-bar-title">Enregistrer ma consommation</h3>
+    <label for="drink-select">Qu'as-tu bu ?</label>
+    <select id="drink-select">
+      <option value="Ricard / Pastis">Ricard / Pastis</option>
+      <option value="Pinte de bière blonde">Pinte de bière blonde</option>
+      <option value="Pinte de bière IPA / Spéciale">Pinte de bière IPA / Spéciale</option>
+      <option value="Bière d'abbaye / Trappiste">Bière d'abbaye / Trappiste</option>
+      <option value="Shot / Shooter">Shot / Shooter</option>
+      <option value="Cocktail maison">Cocktail maison</option>
+      <option value="Embuscade / Cocktail">Embuscade / Cocktail</option>
+      <option value="Rhum arrangé">Rhum arrangé</option>
+      <option value="Soft / Sans alcool">Soft / Sans alcool</option>
+    </select>
 
-    <div style="margin-bottom:12px;">
-      <label style="font-size:12px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">Preuve visuelle (Photo) :</label>
-      <input type="file" id="drink-photo" accept="image/*" capture="environment" style="padding:6px;">
-      <img id="photo-preview-img" class="photo-preview" alt="Aperçu preuve">
-    </div>
+    <label class="file-label" for="drink-photo">Preuve en image</label>
+    <input type="file" id="drink-photo" accept="image/*" capture="environment">
 
-    <button class="btn btn-primary" id="btn-submit-drink" onclick="envoyerBoisson()">📸 Envoyer la preuve (+10 pts)</button>
+    <button class="btn btn-primary" id="btn-submit-drink" onclick="envoyerBoisson()">Envoyer la preuve (+10 pts)</button>
     <button class="btn btn-ghost" onclick="fermerModales()">Annuler</button>
   </div>
 </div>
 
-<div class="toast-container" id="toast-container"></div>
-
 <script>
-  // Configuration API & Données
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw93vfV2-3SW1bYJHEP_3NpXX8_O1MUJYF_YHzBnsj82FBmjJghvenZjUll1dQDgfLjIw/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw93vfV2-3SW1bYJHEP_3NpXX8_O1MUJYF_YHzBnsj82FBmjJghvenZjUll1dQDgfLjIw/exec";
 
-  const INDICES_PERSO = {
-    "Majid": "Cherche sous la 2ème pierre du banc en face du bar.",
-    "Alexandre": "Regarde derrière le poteau métallique du vieux panneau.",
-    "Jeremy S": "Inspecte le muret en pierre à hauteur de genou.",
-    "Romain R": "La fiole est au pied du grand arbre du square.",
-    "Théo M": "Cherche sous la grille au niveau des pavés.",
-    "Pepette": "Derrière le bac à fleurs près de la terrasse.",
-    "Jules D": "Regarde sous la gouttière au coin de la rue.",
-    "Daubeuf": "Fouille dans le creux du mur en briques.",
-    "Zaza": "Inspecte le dessous du rebord de fenêtre.",
-    "Emy": "Cherche derrière le panneau à droite.",
-    "Mama": "Regarde au pied de la statue sur le renfoncement.",
-    "David M": "Sous le banc en bois en sortant du Spark."
-  };
+    const BARS_DATA = [
+        { id: 1, name: "Café du Théâtre", spec: "Cocktail maison" },
+        { id: 2, name: "La Tour Solidor", spec: "Bière d'abbaye / Trappiste" },
+        { id: 3, name: "Le Modjo", spec: "Shot / Shooter" },
+        { id: 4, name: "Bar de la Fac", spec: "Pinte de bière blonde" },
+        { id: 5, name: "Kokomo", spec: "Pinte de bière IPA / Spéciale" },
+        { id: 6, name: "Papa Jerry", spec: "Rhum arrangé" },
+        { id: 7, name: "Delirium Café Caen", spec: "Pinte de bière spéciale" },
+        { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
+    ];
 
-  const BARS_DATA = [
-    { id: 1, name: "Spark Bar", spec: "Ricard / Pastis", address: "51 r. St-Michel" },
-    { id: 2, name: "Le Bon Prétexte", spec: "Pinte de bière blonde", address: "33 r. du Havre" },
-    { id: 3, name: "Café du Théâtre", spec: "Cocktail maison", address: "Pl. du Théâtre" },
-    { id: 4, name: "Le Sémaphore", spec: "Shot / Shooter", address: "44 r. de Bras" },
-    { id: 5, name: "La Tour Solidor", spec: "Bière d'abbaye / Trappiste", address: "24 r. Écuyère" },
-    { id: 6, name: "Kokomo", spec: "Pinte de bière IPA / Spéciale", address: "47 r. de Geôle" },
-    { id: 7, name: "Papa Jerry", spec: "Rhum arrangé", address: "6 r. de Bernières" },
-    { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail", address: "18 r. Écuyère" }
-  ];
+    const TARGET_COORDS = { lat: 49.174139, lng: -0.357083 };
 
-  const TARGET_COORDS = { lat: 49.1829, lng: -0.3707 };
-
-  const BAR_MAP_POINTS = {
-    1: { x: 220, y: 430 }, 2: { x: 300, y: 340 }, 3: { x: 250, y: 260 }, 4: { x: 165, y: 230 },
-    5: { x: 172, y: 193 }, 6: { x: 200, y: 165 }, 7: { x: 285, y: 150 }, 8: { x: 198, y: 215 }
-  };
-
-  // État de l'application
-  let currentGlobalStep = 1;
-  let activeBarIdForRiddle = null;
-  let selectedBarForDrink = null;
-  let base64Photo = null, mimeType = null, fileName = null;
-  let mockMode = false;
-
-  // Labyrinthe state
-  const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
-  let mazePos = { r: 0, c: 0 }, mazeTimer = null, mazeGamma = 0, mazeBeta = 0;
-  let MAZE_GRID = generateMaze(MAZE_COLS, MAZE_ROWS, MAZE_SEED);
-
-  // Boussole state
-  let geoWatchId = null, lastLat = null, lastLng = null, lastHeading = null, compassActive = false;
-
-  // Audio Context pour effets sonores Web Audio
-  let audioCtx = null;
-
-  function playSound(type) {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      if (type === 'unlock') {
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      } else if (type === 'click') {
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.08);
-      } else if (type === 'bird') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
-        osc.frequency.linearRampToValueAtTime(700, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      }
-    } catch(e) {}
-  }
-
-  function showToast(msg, isSuccess = true) {
-    const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.style.borderLeftColor = isSuccess ? "var(--moss)" : "var(--wine)";
-    toast.innerHTML = msg;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  }
-
-  // Restauration du joueur au chargement
-  window.addEventListener('DOMContentLoaded', () => {
-    const savedName = localStorage.getItem('barathon_participant');
-    if (savedName) {
-      document.getElementById('global-participant').value = savedName;
+    const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
+    function seededRandom(seed) {
+        let s = seed % 2147483647; if (s <= 0) s += 2147483646;
+        return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
     }
-    renderBars();
-    renderCarte();
+    function shuffleWithRng(arr, rng) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+    }
+    function generateMaze(cols, rows, seed) {
+        const rng = seededRandom(seed);
+        const grid = [];
+        for (let r = 0; r < rows; r++) { const row = []; for (let c = 0; c < cols; c++) row.push({ N: true, S: true, E: true, W: true, v: false }); grid.push(row); }
+        const opp = { N: 'S', S: 'N', E: 'W', W: 'E' };
+        (function carve(r, c) {
+            grid[r][c].v = true;
+            for (const d of shuffleWithRng(['N', 'S', 'E', 'W'], rng)) {
+                let nr = r, nc = c;
+                if (d === 'N') nr--; else if (d === 'S') nr++; else if (d === 'E') nc++; else nc--;
+                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || grid[nr][nc].v) continue;
+                grid[r][c][d] = false; grid[nr][nc][opp[d]] = false;
+                carve(nr, nc);
+            }
+        })(0, 0);
+        return grid;
+    }
+    const MAZE_GRID = generateMaze(MAZE_COLS, MAZE_ROWS, MAZE_SEED);
+
+    // Emplacements sur la carte stylisée (positions relatives approximatives, pas des GPS exacts).
+    // lx/ly/a = position et ancrage de l'étiquette du sceau.
+    const BAR_MAP_POINTS = {
+        1: { x: 150, y: 318, lx: 134, ly: 321, a: 'end' },
+        2: { x: 138, y: 216, lx: 122, ly: 219, a: 'end' },
+        3: { x: 110, y: 290, lx: 96,  ly: 293, a: 'end' },
+        4: { x: 242, y: 202, lx: 256, ly: 205, a: 'start' },
+        5: { x: 206, y: 176, lx: 220, ly: 168, a: 'start' },
+        6: { x: 212, y: 296, lx: 198, ly: 299, a: 'end' },
+        7: { x: 212, y: 330, lx: 228, ly: 349, a: 'end' },
+        8: { x: 162, y: 246, lx: 176, ly: 249, a: 'start' }
+    };
+    const CARTE_HOLE_R = 86;
+    let carteSeenStep = 0, carteAnimId = null, carteSelected = null, carteLastStep = 0;
+
+    let currentGlobalStep = 1;
+    let activeBarIdForRiddle = null;
+    let selectedBarForDrink = null;
+    let base64Photo = null, mimeType = null, fileName = null;
+
+    let mazeAnimId = null, mazeGamma = 0, mazeBeta = 0;
+    let px = 15, py = 15;
+    const mazeKeys = {};
+
+    let geoWatchId = null, lastLat = null, lastLng = null, lastHeading = null, compassActive = false, needleRotation = 0, roseRotation = 0, lastVibe = 0, gpsFallbackTimer = null;
+    let adminClicks = 0, adminTimer = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('barathon_participant');
+        if (savedName) document.getElementById('global-participant').value = savedName;
+        verifierFileAttenteHorsLigne();
+        verifierConnexionReseau();
+        setInterval(verifierConnexionReseau, 10000);
+    });
+
+    function sauvegarderParticipant() {
+        const name = document.getElementById('global-participant').value;
+        if (name) localStorage.setItem('barathon_participant', name);
+    }
+
+    function showToast(text, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        const icon = document.createElement('span');
+        icon.className = 'toast-icon';
+        icon.textContent = type === 'good' ? '\u2713' : type === 'bad' ? '!' : 'i';
+        const label = document.createElement('span');
+        label.textContent = text;
+        toast.appendChild(icon); toast.appendChild(label);
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.add('leaving'); }, 3200);
+        setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    function showModal(id) {
+        const m = document.getElementById(id);
+        if (!m) return;
+        m.style.display = 'flex';
+        requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('is-open')));
+    }
+
+    function hideModal(id) {
+        const m = document.getElementById(id);
+        if (!m || m.style.display !== 'flex') return;
+        m.classList.remove('is-open');
+        setTimeout(() => { if (!m.classList.contains('is-open')) m.style.display = 'none'; }, 300);
+    }
+
+    function lancerConfettis() {
+        const colors = ['#a9822d', '#d4ab5c', '#7a2333', '#3e5b44', '#f8f1dc'];
+        for (let i = 0; i < 40; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti-piece';
+            c.style.left = Math.random() * 100 + 'vw';
+            c.style.background = colors[i % colors.length];
+            c.style.animationDuration = (2.4 + Math.random() * 2.2) + 's';
+            c.style.animationDelay = (Math.random() * 0.8) + 's';
+            c.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 6000);
+        }
+    }
+
+    function verifierConnexionReseau() {
+        const banner = document.getElementById('net-banner');
+        if (navigator.onLine) {
+            banner.className = 'net-online';
+            banner.textContent = "⚡ Réseau opérationnel - Synchronisé";
+            setTimeout(() => { banner.style.display = 'none'; }, 2000);
+            verifierFileAttenteHorsLigne();
+        } else {
+            banner.className = 'net-offline';
+            banner.textContent = "⚓ Mode Hors-ligne actif - Les données sont stockées localement";
+            banner.style.display = 'block';
+        }
+    }
+
+    function gererClicAdmin() {
+        adminClicks++;
+        clearTimeout(adminTimer);
+        adminTimer = setTimeout(() => { adminClicks = 0; }, 2000);
+        if (adminClicks >= 5) {
+            adminClicks = 0;
+            const codeSecours = prompt("🔐 Code Administrateur secret : À quelle étape faut-il forcer le passage ? (1 à 8)");
+            let stepNum = parseInt(codeSecours);
+            if (stepNum >= 1 && stepNum <= 8) {
+                currentGlobalStep = stepNum;
+                renderBars();
+                renderCarte();
+                showToast(`Passage forcé à l'étape ${stepNum}`, 'good');
+            }
+        }
+    }
+
+    setInterval(fetchGameState, 4000);
     fetchGameState();
-    setInterval(fetchGameState, 5000);
-  });
 
-  function sauvegarderParticipant() {
-    const val = document.getElementById('global-participant').value;
-    if (val) localStorage.setItem('barathon_participant', val);
-    playSound('click');
-  }
-
-  async function fetchGameState() {
-    const syncStatus = document.getElementById("sync-status");
-    const syncText = document.getElementById("sync-text");
-    try {
-      const res = await fetch(WEB_APP_URL + "?action=get_state");
-      const data = await res.json();
-      mockMode = false;
-      syncStatus.style.background = "#27ae60";
-      syncText.textContent = "En ligne";
-
-      if (data.currentStep != null) {
-        const newStep = parseInt(data.currentStep, 10) || 1;
-        if (newStep !== currentGlobalStep) {
-          const wasStep = currentGlobalStep;
-          currentGlobalStep = newStep;
-          localStorage.setItem('barathon_step', currentGlobalStep);
-          renderBars();
-          renderCarte();
-          if (currentGlobalStep > wasStep) {
-            playSound('unlock');
-            showToast(`🎉 L'étape ${currentGlobalStep} a été débloquée !`);
-          }
+    async function fetchGameState() {
+        try {
+            const res = await fetch(WEB_APP_URL + "?action=get_state");
+            const data = await res.json();
+            if (data.currentStep && data.currentStep > currentGlobalStep) {
+                currentGlobalStep = data.currentStep;
+                renderBars();
+                renderCarte();
+                if (currentGlobalStep >= BARS_DATA.length) declencherVictoire();
+            } else if (!document.getElementById("bars-list").innerHTML.includes("waypoint")) {
+                renderBars();
+                renderCarte();
+            }
+        } catch (e) {
+            const list = document.getElementById("bars-list");
+            if (!list.innerHTML.includes("waypoint")) renderBars();
         }
-      }
-    } catch (e) {
-      mockMode = true;
-      syncStatus.style.background = "#f39c12";
-      syncText.textContent = "Mode Local";
-      const savedStep = localStorage.getItem('barathon_step');
-      if (savedStep) {
-        currentGlobalStep = parseInt(savedStep, 10);
-        renderBars();
-        renderCarte();
-      }
     }
-  }
 
-  function renderBars() {
-    const container = document.getElementById("bars-list");
-    document.getElementById("step-badge").textContent = `Étape ${currentGlobalStep} / 8`;
-    container.innerHTML = "";
+    function updateProgress() {
+        const total = BARS_DATA.length;
+        const done = Math.min(currentGlobalStep, total);
+        const pct = Math.round((done / total) * 100);
+        const fill = document.getElementById("progress-fill");
+        const lt = document.getElementById("progress-label-text");
+        const lp = document.getElementById("progress-label-pct");
+        if (fill) fill.style.width = pct + "%";
+        if (lt) lt.textContent = `Étape ${done} / ${total}`;
+        if (lp) lp.textContent = `${pct} %`;
+    }
 
-    BARS_DATA.forEach(bar => {
-      if (bar.id <= currentGlobalStep) {
-        container.innerHTML += `
-          <div class="waypoint-card open" onclick="ouvrirValidationBoisson(${bar.id})">
-            <div class="seal-icon">${bar.id}</div>
-            <div class="waypoint-details">
-              <div class="waypoint-title">
-                ${bar.name}
-                <span class="status-tag open">Ouvert</span>
-              </div>
-              <div class="waypoint-sub">📍 ${bar.address} • Spécialité : <b>${bar.spec}</b></div>
-            </div>
-          </div>`;
+    function renderBars() {
+        const container = document.getElementById("bars-list");
+        container.innerHTML = "";
+        let delay = 0;
+        BARS_DATA.forEach(bar => {
+            if (bar.id <= currentGlobalStep) {
+                container.innerHTML += `<div class="waypoint open" style="animation-delay:${delay}ms" onclick="ouvrirValidationBoisson(${bar.id})">
+                    <div class="seal">${bar.id}</div>
+                    <div class="waypoint-info"><strong>${bar.name}</strong><small>Spécialité : ${bar.spec}</small></div>
+                    <div class="status status-open">Ouvert</div>
+                </div>`;
+                delay += 55;
+                if (bar.id === currentGlobalStep && currentGlobalStep < BARS_DATA.length) {
+                    let prochainId = currentGlobalStep + 1;
+                    container.innerHTML += `<div class="unlock-call" style="animation-delay:${delay}ms" onclick="ouvrirEnigme(${prochainId})">
+                        <div class="unlock-icon">⚔</div>
+                        <div class="unlock-text"><strong>Débloquer l'étape ${prochainId}</strong><small>Une épreuve t'attend — résous-la pour tout le monde.</small></div>
+                        <div class="unlock-chevron">&#8250;</div>
+                    </div>`;
+                    delay += 55;
+                }
+            } else {
+                container.innerHTML += `<div class="waypoint locked">
+                    <div class="seal seal-locked">${bar.id}</div>
+                    <div class="waypoint-info"><strong>Étape scellée</strong><small>Spécialité : à découvrir</small></div>
+                    <div class="status status-locked">Verrouillé</div>
+                </div>`;
+            }
+        });
+        updateProgress();
+    }
 
-        if (bar.id === currentGlobalStep && currentGlobalStep < BARS_DATA.length) {
-          let nextId = currentGlobalStep + 1;
-          container.innerHTML += `
-            <div class="unlock-banner" onclick="ouvrirEnigme(${nextId})">
-              <h3>🗝️ Débloquer l'Étape ${nextId} : ${BARS_DATA[nextId - 1].name}</h3>
-              <p>Une épreuve attend la guilde. Résous-la pour faire progresser tout le groupe !</p>
-            </div>`;
+    function renderCarte() {
+        const holesG = document.getElementById("fog-holes");
+        const pinsG = document.getElementById("carte-pins");
+        const trailG = document.getElementById("carte-trail");
+        if (!holesG || !pinsG || !trailG) return;
+
+        const total = BARS_DATA.length;
+        const step = Math.max(0, Math.min(currentGlobalStep, total));
+        const tab = document.getElementById("tab-carte");
+        const visible = !!tab && tab.classList.contains("active");
+        const fromStep = visible ? Math.min(carteSeenStep, step) : step;
+        const newIds = [];
+        for (let id = fromStep + 1; id <= step; id++) newIds.push(id);
+
+        if (carteAnimId) { cancelAnimationFrame(carteAnimId); carteAnimId = null; }
+        if (step > carteLastStep || carteSelected === null || carteSelected > step) carteSelected = step || null;
+        carteLastStep = step;
+
+        const fog = document.getElementById("fog-layer");
+        const banner = document.getElementById("carte-complete");
+        if (visible && newIds.length && fog) {
+            fog.style.transition = "none"; fog.style.opacity = "1"; void fog.getBoundingClientRect(); fog.style.transition = "";
+            if (banner) { banner.style.transition = "none"; banner.style.opacity = "0"; void banner.getBoundingClientRect(); banner.style.transition = ""; }
         }
-      } else {
-        container.innerHTML += `
-          <div class="waypoint-card locked">
-            <div class="seal-icon seal-locked">🔒</div>
-            <div class="waypoint-details">
-              <div class="waypoint-title">
-                Étape ${bar.id} : Scellée
-                <span class="status-tag locked">Verrouillé</span>
-              </div>
-              <div class="waypoint-sub">Résolvez l'énigme de l'étape précédente pour dévoiler cette taverne.</div>
-            </div>
-          </div>`;
-      }
-    });
-  }
 
-  function renderCarte() {
-    const wrap = document.getElementById("carte-markers");
-    if (!wrap) return;
-    let markers = "", trail = "", prevPt = null;
+        let holes = "", trail = "", pins = "";
+        for (let id = 1; id <= step; id++) {
+            const p = BAR_MAP_POINTS[id], bar = BARS_DATA[id - 1];
+            if (!p || !bar) continue;
+            const isNew = newIds.indexOf(id) !== -1;
+            const delay = isNew ? (id - fromStep - 1) * 450 + 500 : 0;
+            const latest = id === step;
+            const selected = id === carteSelected;
 
-    BARS_DATA.forEach(bar => {
-      if (bar.id > currentGlobalStep) return;
-      const pt = BAR_MAP_POINTS[bar.id];
-      if (!pt) return;
-      if (prevPt) {
-        trail += `<line x1="${prevPt.x}" y1="${prevPt.y}" x2="${pt.x}" y2="${pt.y}" stroke="#781d2a" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round" opacity="0.8"></line>`;
-      }
-      markers += `
-        <g style="cursor:pointer;" onclick="ouvrirValidationBoisson(${bar.id})">
-          <circle cx="${pt.x}" cy="${pt.y}" r="12" fill="url(#sealGrad)" stroke="#1f140e" stroke-width="1.5"></circle>
-          <text x="${pt.x}" y="${pt.y + 4}" font-size="10" text-anchor="middle" font-family="'Cinzel', serif" font-weight="bold" fill="#1f140e">${bar.id}</text>
-          <text x="${pt.x}" y="${pt.y + 22}" font-size="9" text-anchor="middle" font-weight="bold" fill="#1f140e">${bar.name}</text>
-        </g>`;
-      prevPt = pt;
-    });
-    wrap.innerHTML = `<g>${trail}</g><g>${markers}</g>`;
-  }
+            holes += `<circle id="hole-${id}" cx="${p.x}" cy="${p.y}" r="${isNew ? 0 : CARTE_HOLE_R}" fill="url(#mHole)"></circle>`;
 
-  function switchTab(tab) {
-    playSound('click');
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    const idx = tab === 'accueil' ? 0 : tab === 'scores' ? 1 : 2;
-    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-    document.getElementById('tab-' + tab).classList.add('active');
+            if (id > 1) {
+                const a = BAR_MAP_POINTS[id - 1];
+                const dx = p.x - a.x, dy = p.y - a.y, len = Math.hypot(dx, dy) || 1;
+                const off = (id % 2 === 0 ? 1 : -1) * Math.min(26, len * 0.22);
+                const cx = ((a.x + p.x) / 2 - dy / len * off).toFixed(1), cy = ((a.y + p.y) / 2 + dx / len * off).toFixed(1);
+                const d = `M${a.x} ${a.y} Q${cx} ${cy} ${p.x} ${p.y}`;
+                trail += `<g class="${isNew ? "trail-new" : ""}" style="${isNew ? `animation-delay:${delay + 300}ms` : ""}">
+                    <path d="${d}" fill="none" stroke="#f2e6c8" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 7"></path>
+                    <path d="${d}" fill="none" stroke="#7a2333" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0.1 7"></path></g>`;
+            }
 
-    if (tab === 'scores') chargerClassement();
-    if (tab === 'carte') renderCarte();
-  }
+            pins += `<g class="pin${isNew ? " pin-new" : ""}${selected ? " selected" : ""}" id="pin-${id}" style="${isNew ? `animation-delay:${delay}ms` : ""}" onclick="selectCartePin(${id})">
+                <ellipse cx="${p.x}" cy="${p.y + 11}" rx="9" ry="2.8" fill="#000" opacity=".3"></ellipse>
+                <circle cx="${p.x}" cy="${p.y}" r="21" fill="#fff" fill-opacity="0.001"></circle>
+                <circle class="pin-ring" cx="${p.x}" cy="${p.y}" r="16.5" fill="none" stroke="#7a2333" stroke-width="1.7" stroke-dasharray="3.2 3" opacity="0"></circle>
+                ${latest ? `<circle cx="${p.x}" cy="${p.y}" r="12" fill="none" stroke="#7a2333" stroke-width="1.6" opacity=".7"><animate attributeName="r" values="12;27" dur="2s" repeatCount="indefinite"></animate><animate attributeName="opacity" values=".75;0" dur="2s" repeatCount="indefinite"></animate></circle>` : ""}
+                <circle cx="${p.x}" cy="${p.y}" r="11.5" fill="url(#${latest ? "mSealHot" : "mSeal"})" stroke="#2b1d0e" stroke-width="1.3"></circle>
+                <circle cx="${p.x}" cy="${p.y}" r="8" fill="none" stroke="#2b1d0e" stroke-opacity=".35" stroke-width=".8"></circle>
+                <text x="${p.x}" y="${p.y + 3.9}" text-anchor="middle" font-size="11" font-family="'IM Fell English SC', Georgia, serif" fill="${latest ? "#fdf3dc" : "#2b1d0e"}">${id}</text>
+                <text x="${p.lx}" y="${p.ly}" text-anchor="${p.a}" font-size="8.8" font-style="italic" font-family="'IM Fell English SC', Georgia, serif" fill="#2b1d0e" stroke="#f2e6c8" stroke-width="2.8" paint-order="stroke">${bar.name}</text>
+            </g>`;
+        }
+        holesG.innerHTML = holes;
+        trailG.innerHTML = trail;
+        pinsG.innerHTML = pins;
 
-  // ---------- GESTION DES ÉPRREUVES / MODALES ----------
+        const count = document.getElementById("carte-count");
+        if (count) count.textContent = `${step} / ${total}`;
+        renderCarteLegend(step, total);
+        updateCarteInfo();
 
-  function ouvrirEnigme(barId) {
-    const joueur = document.getElementById("global-participant").value;
-    if (!joueur) {
-      showToast("⚠️ Choisis d'abord ton nom de corsaire !", false);
-      return;
+        if (newIds.length) animateCarteHoles(newIds, step, visible);
+        else carteFinish(step, visible);
     }
 
-    playSound('click');
-    activeBarIdForRiddle = barId;
-    const c = document.getElementById("riddle-content");
-    document.getElementById("riddle-title").textContent = `Épreuve pour le Bar ${barId} : ${BARS_DATA[barId - 1].name}`;
-    document.getElementById("riddle-msg").textContent = "";
-
-    if (barId === 2) {
-      let indice = INDICES_PERSO[joueur] || "Inspecte les environs de la zone de départ !";
-      c.innerHTML = `
-        <p style="font-size:13px; margin-bottom:8px;"><b>🧭 Géocaching du Corsaire</b><br>Retrouve la fiole cachée sur le parcours grâce à ton indice secret.</p>
-        <div class="clue-box"><span class="label">Ton Indice Secret</span>${indice}</div>
-        <div class="compass-container">
-          <button id="btn-compass" class="btn btn-secondary" onclick="demarrerBoussole()">📍 Activer le GPS / Boussole</button>
-          <div id="compass-dial-wrap" style="display:none;">
-            <div class="compass-dial">
-              <span class="compass-cardinal cardinal-n">N</span>
-              <span class="compass-cardinal cardinal-e">E</span>
-              <span class="compass-cardinal cardinal-s">S</span>
-              <span class="compass-cardinal cardinal-w">O</span>
-              <div id="compass-needle" class="compass-needle"></div>
-            </div>
-            <div id="compass-info" style="font-size:12px; color:var(--wine); font-weight:bold;">Analyse de la position…</div>
-          </div>
-        </div>
-        <input type="text" id="ans" placeholder="Entre le code à 4 chiffres (Ex: 1715)" maxlength="4" style="text-align:center; letter-spacing:4px; font-size:16px;">
-        <button class="btn btn-primary" onclick="verifierReponse()">🔓 Valider le code secret</button>`;
-    }
-    else if (barId === 3) {
-      c.innerHTML = `
-        <p style="font-size:13px; margin-bottom:8px;">Écoute le cri du volatile des mers. Quel oiseau légendaire impose un cul-sec à l'assemblée ?</p>
-        <div style="background:#f2e6c8; padding:10px; border-radius:6px; margin:10px 0; text-align:center;">
-          <audio controls style="width:100%; margin-bottom:6px;"><source src="pelican.mp3" type="audio/mpeg"></audio>
-          <button class="btn btn-secondary" onclick="playSound('bird')" style="font-size:12px; padding:6px;">🔊 Écouter le signal audio alternatif</button>
-        </div>
-        <input type="text" id="ans" placeholder="Nom de l'oiseau…" style="text-align:center;">
-        <button class="btn btn-primary" onclick="verifierReponse()">Valider la réponse</button>`;
-    }
-    else if (barId === 4) {
-      c.innerHTML = `
-        <p style="font-size:13px; margin-bottom:8px;"><em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. » (9 lettres)</em></p>
-        <input type="text" id="ans" maxlength="9" placeholder="Mot de 9 lettres…" style="text-transform:uppercase; text-align:center; font-size:16px; letter-spacing:2px;">
-        <button class="btn btn-primary" onclick="verifierReponse()">Proposer le mot</button>
-        <div id="motus-histo" style="margin-top:10px;"></div>`;
-    }
-    else if (barId === 5) {
-      mazePos = { r: 0, c: 0 };
-      c.innerHTML = `
-        <p style="font-size:13px; margin-bottom:8px;"><b>🏴‍☠️ Le Labyrinthe du Port</b><br>Guide la frégate jusqu'au coffre aux trésors 💰 sans toucher les récifs !</p>
-        <div style="text-align:center;">${buildMazeSVG()}</div>
-        <div id="maze-hint" style="font-size:12px; text-align:center; margin:6px 0; color:var(--wine); font-weight:bold;">Utilise les boutons ou le gyroscope.</div>
-        <div class="d-pad">
-          <div></div><button class="d-btn" onclick="tryMoveMaze('U')">▲</button><div></div>
-          <button class="d-btn" onclick="tryMoveMaze('L')">◀</button><div></div><button class="d-btn" onclick="tryMoveMaze('R')">▶</button>
-          <div></div><button class="d-btn" onclick="tryMoveMaze('D')">▼</button><div></div>
-        </div>
-        <button class="btn btn-secondary" onclick="demarrerGyroscope()">📱 Activer le Gyroscope</button>`;
-      window.addEventListener('keydown', handleMazeKeydown);
-    }
-    else if (barId === 6 || barId === 7) {
-      c.innerHTML = `
-        <p style="font-size:14px; text-align:center; margin-bottom:12px;">🍻 <b>Étape de Transition et Convivialité</b><br>Toutes les troupes sont arrivées à bon port. Rassemblez les chopes et trinquez !</p>
-        <button class="btn btn-primary" onclick="unlockGlobalStep()">🍻 Trinquer et débloquer la suite</button>`;
-    }
-    else if (barId === 8) {
-      c.innerHTML = `
-        <p style="font-size:13px; margin-bottom:8px;">Devine le nom du breuvage emblématique de la cité caennaise grâce aux symboles :</p>
-        <div class="clue-box" style="font-size:24px; text-align:center; letter-spacing:8px;">🍂 + 🚌 + 🪟 + 🎲</div>
-        <input type="text" id="ans" placeholder="Nom du cocktail…" style="text-align:center;">
-        <button class="btn btn-primary" onclick="verifierReponse()">🏆 Terminer le Barathon !</button>`;
+    function animateCarteHoles(newIds, step, visible) {
+        const t0 = performance.now(), dur = 1200, stagger = 450;
+        function frame(now) {
+            let done = true;
+            newIds.forEach((id, i) => {
+                const p = Math.min(1, Math.max(0, (now - t0 - i * stagger) / dur));
+                const e = 1 - Math.pow(1 - p, 3);
+                const el = document.getElementById("hole-" + id);
+                if (el) el.setAttribute("r", (CARTE_HOLE_R * e).toFixed(1));
+                if (p < 1) done = false;
+            });
+            if (done) { carteAnimId = null; carteFinish(step, visible); }
+            else carteAnimId = requestAnimationFrame(frame);
+        }
+        carteAnimId = requestAnimationFrame(frame);
     }
 
-    document.getElementById("modal-riddle").classList.add("active");
-  }
-
-  function verifierReponse() {
-    let ans = document.getElementById("ans") ? document.getElementById("ans").value.toLowerCase().trim() : "";
-    let msg = document.getElementById("riddle-msg");
-    let ok = false;
-
-    if (activeBarIdForRiddle === 2 && ans === "1715") ok = true;
-    if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
-
-    if (activeBarIdForRiddle === 4) {
-      if (ans.length !== 9) {
-        msg.textContent = "⚠️ Il faut exactement 9 lettres.";
-        msg.style.color = "var(--wine)";
-        return;
-      }
-      if (ans.toUpperCase() === "PIRATERIE") ok = true;
-      else {
-        let row = `<div class="motus-grid">`;
-        let target = "PIRATERIE".split("");
-        ans.toUpperCase().split("").forEach((l, i) => {
-          let stat = "m-absent";
-          if (l === target[i]) stat = "m-correct";
-          else if (target.includes(l)) stat = "m-present";
-          row += `<div class="motus-tile ${stat}">${l}</div>`;
-        });
-        row += `</div>`;
-        document.getElementById("motus-histo").innerHTML = row;
-        msg.textContent = "Mot incorrect. Observe la couleur des lettres !";
-        msg.style.color = "var(--wine)";
-        return;
-      }
+    function carteFinish(step, visible) {
+        if (visible) carteSeenStep = step;
+        const complete = step >= BARS_DATA.length;
+        const fog = document.getElementById("fog-layer");
+        const banner = document.getElementById("carte-complete");
+        if (fog) fog.style.opacity = complete ? "0" : "1";
+        if (banner) banner.style.opacity = complete ? "1" : "0";
     }
 
-    if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
-
-    if (ok) {
-      msg.textContent = "✨ Bonne réponse ! Validation en cours…";
-      msg.style.color = "var(--moss)";
-      unlockGlobalStep();
-    } else {
-      msg.textContent = "❌ Ce n'est pas la bonne réponse, réessaie !";
-      msg.style.color = "var(--wine)";
-    }
-  }
-
-  async function unlockGlobalStep() {
-    const p = document.getElementById("global-participant").value;
-    playSound('unlock');
-
-    currentGlobalStep = Math.max(currentGlobalStep, activeBarIdForRiddle);
-    localStorage.setItem('barathon_step', currentGlobalStep);
-
-    if (currentGlobalStep === 8) {
-      lancerConfettis();
+    function renderCarteLegend(step, total) {
+        const el = document.getElementById("carte-legend");
+        if (!el) return;
+        let html = "";
+        for (let id = 1; id <= step; id++) {
+            html += `<button class="chip" data-id="${id}" onclick="selectCartePin(${id})"><span class="chip-n">${id}</span>${BARS_DATA[id - 1].name}</button>`;
+        }
+        if (step < total) html += `<span class="chip chip-more">+ ${total - step} terre${total - step > 1 ? "s" : ""} inconnue${total - step > 1 ? "s" : ""}</span>`;
+        el.innerHTML = html;
     }
 
-    if (!mockMode) {
-      try {
-        await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "resolve_riddle", step: activeBarIdForRiddle, participant: p })
-        });
-      } catch (e) {}
+    function selectCartePin(id) {
+        const step = Math.min(currentGlobalStep, BARS_DATA.length);
+        if (id < 1 || id > step) return;
+        carteSelected = id;
+        document.querySelectorAll("#carte-pins .pin").forEach(g => g.classList.toggle("selected", g.id === "pin-" + id));
+        updateCarteInfo();
     }
 
-    showToast(`🎉 Étape ${activeBarIdForRiddle} débloquée avec succès par ${p} ! (+20 pts)`);
-    fermerModales();
-    renderBars();
-    renderCarte();
-  }
-
-  // ---------- LABYRINTHE LOGIC ----------
-  function generateMaze(cols, rows, seed) {
-    let s = seed % 2147483647;
-    function rng() { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }
-    
-    const grid = [];
-    for (let r = 0; r < rows; r++) {
-      const row = [];
-      for (let c = 0; c < cols; c++) row.push({ N: true, S: true, E: true, W: true, v: false });
-      grid.push(row);
+    function updateCarteInfo() {
+        const step = Math.min(currentGlobalStep, BARS_DATA.length);
+        const t = document.getElementById("carte-info-title"), s = document.getElementById("carte-info-sub");
+        document.querySelectorAll("#carte-legend .chip[data-id]").forEach(c => c.classList.toggle("active", Number(c.dataset.id) === carteSelected));
+        if (!t || !s) return;
+        if (!carteSelected || carteSelected > step) {
+            t.textContent = "Terres inconnues";
+            s.textContent = "Résous les épreuves pour dévoiler la carte, taverne après taverne.";
+            return;
+        }
+        const bar = BARS_DATA[carteSelected - 1];
+        t.textContent = bar.name;
+        s.textContent = `Étape ${bar.id} sur ${BARS_DATA.length} · Spécialité : ${bar.spec}` + (bar.id === step ? (step < BARS_DATA.length ? " · Dernière taverne découverte" : " · Dernière étape du parcours") : "");
     }
-    const opp = { N: 'S', S: 'N', E: 'W', W: 'E' };
 
-    (function carve(r, c) {
-      grid[r][c].v = true;
-      const dirs = ['N', 'S', 'E', 'W'].sort(() => rng() - 0.5);
-      for (const d of dirs) {
-        let nr = r, nc = c;
-        if (d === 'N') nr--; else if (d === 'S') nr++; else if (d === 'E') nc++; else nc--;
-        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || grid[nr][nc].v) continue;
-        grid[r][c][d] = false; grid[nr][nc][opp[d]] = false;
-        carve(nr, nc);
-      }
-    })(0, 0);
-    return grid;
-  }
+    function ouvrirEnigme(barId) {
+        const joueur = document.getElementById("global-participant").value;
+        if (!joueur) { showToast("Choisis d'abord ton nom, en haut du carnet !", "bad"); return; }
 
-  function buildMazeSVG() {
-    const cs = 32;
-    let svg = `<svg viewBox="0 0 ${MAZE_COLS * cs} ${MAZE_ROWS * cs}" width="100%" style="max-width:240px; background:#f2e6c8; border:2px solid var(--ink); border-radius:6px;">`;
-    for (let r = 0; r < MAZE_ROWS; r++) {
-      for (let c = 0; c < MAZE_COLS; c++) {
-        const cell = MAZE_GRID[r][c], x = c * cs, y = r * cs;
-        if (cell.N) svg += `<line x1="${x}" y1="${y}" x2="${x + cs}" y2="${y}" stroke="#523f2f" stroke-width="2"></line>`;
-        if (cell.W) svg += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + cs}" stroke="#523f2f" stroke-width="2"></line>`;
-      }
+        activeBarIdForRiddle = barId;
+        const c = document.getElementById("riddle-content");
+        document.getElementById("riddle-title").textContent = `Épreuve de l'étape ${barId}`;
+        document.getElementById("riddle-msg").textContent = "";
+        document.getElementById("riddle-msg").className = "feedback";
+
+        if (barId === 2) {
+            lastLat = null; lastLng = null; lastHeading = null; compassActive = false; needleRotation = 0; roseRotation = 0;
+            c.innerHTML = `<div class="riddle-parchment">
+                             <strong>Le Radar du Corsaire</strong><br>
+                             Suis l'aiguille jusqu'à la cache. Plus tu t'approches, plus l'instrument s'enflamme.
+                           </div>
+                           <div class="compass-instrument standby" id="compass-instrument" data-heat="0">
+                             <div class="compass-glow"></div><div class="compass-ping"></div><div class="compass-ping p2"></div>
+                             ${buildCompassSVG()}
+                           </div>
+                           <div class="compass-readout">
+                             <div class="ro-label" id="ro-label">Radar en veille</div>
+                             <div class="ro-value"><span id="ro-digits">---</span><span class="ro-unit" id="ro-unit">m</span></div>
+                           </div>
+                           <div class="heat-meter" id="heat-meter">${buildHeatSegments()}</div>
+                           <div class="heat-scale"><span>Froid</span><span>Brûlant</span></div>
+                           <div id="compass-msg" class="feedback feedback-info">Active le radar pour lancer la recherche.</div>
+                           <button id="btn-compass" class="btn btn-primary" onclick="demarrerBoussole()">Activer le radar</button>
+                           <div id="gps-fallback-container"></div>
+                           <input type="text" id="ans" placeholder="Code relevé sur la cache" style="text-transform:uppercase; margin-top:14px;">
+                           <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Valider le code</button>`;
+        }
+        else if (barId === 3) {
+            c.innerHTML = `<div class="riddle-parchment">
+                             🦜 <strong>Le Chant des Profondeurs</strong><br>
+                             Écoute attentivement le cri mystère. Quel oiseau légendaire oblige au cul-sec ?
+                           </div>
+                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="XC1083381 - Pélican blanc - Pelecanus onocrotalus.wav" type="audio/wav"></audio>
+                           <div id="audio-fallback-msg" style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;"></div>
+                           <input type="text" id="ans" placeholder="Nom de l'oiseau…">
+                           <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Valider</button>`;
+        }
+        else if (barId === 4) {
+            c.innerHTML = `<div class="riddle-parchment">
+                             📜 <strong>L'Énigme du Verbe</strong><br>
+                             <em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. » </em> (9 lettres)
+                           </div>
+                           <input type="text" id="ans" maxlength="9" placeholder="Mot en 9 lettres…" style="text-transform:uppercase; margin-top:4px;">
+                           <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Proposer le mot</button>
+                           <div id="motus-histo"></div>`;
+        }
+        else if (barId === 5) {
+            px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
+            c.innerHTML = `<div class="riddle-parchment" style="margin-bottom:6px;">
+                             🗺️️ <strong>Le Vrai Labyrinthe</strong><br>
+                             Incline ton mobile pour guider ton pirate à travers les coursives vers le magot.
+                           </div>
+                           <div class="maze-svg-wrap">${buildMazeSVG()}</div>
+                           <div id="maze-hint" class="feedback feedback-info" style="margin:6px 0;">Glisse doucement dans les couloirs.</div>
+                           <button class="btn btn-primary" id="btn-maze" onclick="demarrerLabyrinthe()">Activer le gyroscope</button>`;
+            startSmoothMazeLoop();
+            window.addEventListener('keydown', handleMazeKeydown);
+            window.addEventListener('keyup', handleMazeKeyup);
+        }
+        else if (barId === 6 || barId === 7) {
+            c.innerHTML = `<div class="riddle-parchment" style="text-align:center;">
+                             ⚓ <strong>Escale de Transition</strong><br><br>
+                             Reprenez des forces dans cette taverne, aucune épreuve secrète n'exige votre sang-froid ici.
+                           </div>
+                           <button class="btn btn-primary" onclick="unlockGlobalStep()" style="margin-top:12px;">Trinquer et débloquer la suite</button>`;
+        }
+        else if (barId === 8) {
+            c.innerHTML = `<div class="riddle-parchment">
+                             ☠️ <strong>Le Piège Ultime</strong><br>
+                             Quel est le nom de ce cocktail traquenard emblématique de la région ?
+                           </div>
+                           <img src="Embuscade.jpg" alt="Indice visuel" style="width:100%; border-radius:4px; margin:8px 0; border:2px solid var(--brass); box-shadow: 0 4px 10px rgba(0,0,0,.2);">
+                           <input type="text" id="ans" placeholder="Nom du cocktail…" style="margin-top:4px;">
+                           <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Terminer le jeu !</button>`;
+        }
+        showModal("modal-riddle");
     }
-    for (let c = 0; c < MAZE_COLS; c++) { if (MAZE_GRID[MAZE_ROWS - 1][c].S) svg += `<line x1="${c * cs}" y1="${MAZE_ROWS * cs}" x2="${(c + 1) * cs}" y2="${MAZE_ROWS * cs}" stroke="#523f2f" stroke-width="2"></line>`; }
-    for (let r = 0; r < MAZE_ROWS; r++) { if (MAZE_GRID[r][MAZE_COLS - 1].E) svg += `<line x1="${MAZE_COLS * cs}" y1="${r * cs}" x2="${MAZE_COLS * cs}" y2="${(r + 1) * cs}" stroke="#523f2f" stroke-width="2"></line>`; }
-    
-    svg += `<text x="${cs / 2}" y="${cs / 2 + 5}" font-size="14" text-anchor="middle">⛵</text>`;
-    svg += `<text x="${(MAZE_COLS - 0.5) * cs}" y="${(MAZE_ROWS - 0.5) * cs + 6}" font-size="16" text-anchor="middle">💰</text>`;
-    svg += `<g id="pirate-token" transform="translate(${cs / 2},${cs / 2})"><text font-size="16" text-anchor="middle" dy="5">🏴‍☠️</text></g>`;
-    svg += `</svg>`;
-    return svg;
-  }
 
-  function tryMoveMaze(dir) {
-    if (activeBarIdForRiddle !== 5) return;
-    const cell = MAZE_GRID[mazePos.r][mazePos.c];
-    let moved = false;
-
-    if (dir === 'U' && !cell.N && mazePos.r > 0) { mazePos.r--; moved = true; }
-    if (dir === 'D' && !cell.S && mazePos.r < MAZE_ROWS - 1) { mazePos.r++; moved = true; }
-    if (dir === 'L' && !cell.W && mazePos.c > 0) { mazePos.c--; moved = true; }
-    if (dir === 'R' && !cell.E && mazePos.c < MAZE_COLS - 1) { mazePos.c++; moved = true; }
-
-    if (moved) {
-      playSound('click');
-      const token = document.getElementById("pirate-token");
-      if (token) token.setAttribute("transform", `translate(${mazePos.c * 32 + 16},${mazePos.r * 32 + 16})`);
-
-      if (mazePos.r === MAZE_ROWS - 1 && mazePos.c === MAZE_COLS - 1) {
-        window.removeEventListener('keydown', handleMazeKeydown);
-        unlockGlobalStep();
-      }
+    function fallbackAudio(audioEl) {
+        audioEl.style.display = 'none';
+        document.getElementById('audio-fallback-msg').textContent = "Le son n'a pas pu être chargé. Réessaie dans un instant ou demande à l'organisateur.";
     }
-  }
 
-  function handleMazeKeydown(e) {
-    if (activeBarIdForRiddle !== 5) return;
-    const dirs = { ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'L', ArrowRight: 'R' };
-    if (dirs[e.key]) { e.preventDefault(); tryMoveMaze(dirs[e.key]); }
-  }
+    function verifierReponse() {
+        let ans = document.getElementById("ans") ? document.getElementById("ans").value.toLowerCase().trim() : "";
+        let msg = document.getElementById("riddle-msg");
+        let ok = false;
 
-  function demarrerGyroscope() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().then(res => {
-        if (res === 'granted') window.addEventListener('deviceorientation', handleGyro);
-      });
-    } else {
-      window.addEventListener('deviceorientation', handleGyro);
+        if (activeBarIdForRiddle === 2 && ans === "tour solidor") ok = true;
+        if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
+        if (activeBarIdForRiddle === 4) {
+            if (ans.length !== 9) { msg.textContent = "Il faut exactement 9 lettres."; msg.className = "feedback feedback-bad"; if (navigator.vibrate) navigator.vibrate(100); return; }
+            if (ans.toUpperCase() === "PIRATERIE") ok = true;
+            else {
+                let row = `<div class="motus-grid">`;
+                let sec = "PIRATERIE".split("");
+                ans.toUpperCase().split("").forEach((l, i) => {
+                    let stat = "m-absent";
+                    if (l === sec[i]) stat = "m-correct"; else if (sec.includes(l)) stat = "m-present";
+                    row += `<div class="motus-tile ${stat}">${l}</div>`;
+                });
+                row += `</div>`;
+                document.getElementById("motus-histo").innerHTML = row;
+                msg.textContent = "Mot incorrect — observe les lettres bien placées.";
+                msg.className = "feedback feedback-bad";
+                if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                return;
+            }
+        }
+        if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
+
+        if (ok) {
+            msg.textContent = "Bonne réponse — déblocage en cours…";
+            msg.className = "feedback feedback-good";
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            unlockGlobalStep();
+        } else {
+            msg.textContent = "Mauvaise réponse…";
+            msg.className = "feedback feedback-bad";
+            if (navigator.vibrate) navigator.vibrate(150);
+        }
     }
-    showToast("📱 Gyroscope activé ! Incline ton téléphone.");
-  }
 
-  let mazeLastMoveTime = 0;
-  function handleGyro(e) {
-    if (activeBarIdForRiddle !== 5) return;
-    const now = Date.now();
-    if (now - mazeLastMoveTime < 300) return;
-    let moved = false;
-    if (Math.abs(e.gamma) > 20) { tryMoveMaze(e.gamma > 0 ? 'R' : 'L'); moved = true; }
-    else if (Math.abs(e.beta) > 20) { tryMoveMaze(e.beta > 0 ? 'D' : 'U'); moved = true; }
-    if (moved) mazeLastMoveTime = now;
-  }
+    function buildMazeSVG() {
+        const cs = 30;
+        let svg = `<svg viewBox="0 0 ${MAZE_COLS * cs} ${MAZE_ROWS * cs}" width="100%" height="${Math.min(240, MAZE_ROWS * cs)}" style="max-height:240px;background:#f5ecc7;">`;
+        for (let r = 0; r < MAZE_ROWS; r++) {
+            for (let c = 0; c < MAZE_COLS; c++) {
+                const cell = MAZE_GRID[r][c], x = c * cs, y = r * cs;
+                if (cell.N) svg += `<line x1="${x}" y1="${y}" x2="${x + cs}" y2="${y}" stroke="#5b4632" stroke-width="2.5" stroke-linecap="round"></line>`;
+                if (cell.W) svg += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + cs}" stroke="#5b4632" stroke-width="2.5" stroke-linecap="round"></line>`;
+            }
+        }
+        for (let c = 0; c < MAZE_COLS; c++) { if (MAZE_GRID[MAZE_ROWS - 1][c].S) svg += `<line x1="${c * cs}" y1="${MAZE_ROWS * cs}" x2="${(c + 1) * cs}" y2="${MAZE_ROWS * cs}" stroke="#5b4632" stroke-width="2.5" stroke-linecap="round"></line>`; }
+        for (let r = 0; r < MAZE_ROWS; r++) { if (MAZE_GRID[r][MAZE_COLS - 1].E) svg += `<line x1="${MAZE_COLS * cs}" y1="${r * cs}" x2="${MAZE_COLS * cs}" y2="${(r + 1) * cs}" stroke="#5b4632" stroke-width="2.5" stroke-linecap="round"></line>`; }
+        svg += `<text x="${cs / 2}" y="${cs / 2 + 5}" font-size="14" text-anchor="middle">🏁</text>`;
+        svg += `<text x="${(MAZE_COLS - 0.5) * cs}" y="${(MAZE_ROWS - 0.5) * cs + 6}" font-size="16" text-anchor="middle">💰</text>`;
+        svg += `<g id="pirate-token" transform="translate(15,15)"><text font-size="16" text-anchor="middle" dy="5">🏴‍☠️</text></g>`;
+        svg += `</svg>`;
+        return svg;
+    }
 
-  // ---------- BOUSSOLE & GEOLOCALISATION ----------
-  function demarrerBoussole() {
-    document.getElementById("btn-compass").style.display = "none";
-    document.getElementById("compass-dial-wrap").style.display = "block";
+    function demarrerLabyrinthe() {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(res => {
+                if (res === 'granted') window.addEventListener('deviceorientation', handleMazeOrientation);
+            }).catch(() => {});
+        } else { window.addEventListener('deviceorientation', handleMazeOrientation); }
+        const btn = document.getElementById("btn-maze");
+        if (btn) btn.style.display = "none";
+    }
 
-    if (navigator.geolocation) {
-      geoWatchId = navigator.geolocation.watchPosition(pos => {
-        const lat = pos.coords.latitude, lng = pos.coords.longitude;
-        const dist = Math.round(haversine(lat, lng, TARGET_COORDS.lat, TARGET_COORDS.lng));
-        const brg = Math.round(bearingTo(lat, lng, TARGET_COORDS.lat, TARGET_COORDS.lng));
+    function handleMazeOrientation(event) {
+        if (activeBarIdForRiddle !== 5) return;
+        mazeGamma = event.gamma || 0;
+        mazeBeta = event.beta || 0;
+    }
+
+    function handleMazeKeydown(event) {
+        if (activeBarIdForRiddle !== 5) return;
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+            event.preventDefault();
+            mazeKeys[event.key] = true;
+        }
+    }
+
+    function handleMazeKeyup(event) {
+        if (activeBarIdForRiddle !== 5) return;
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+            mazeKeys[event.key] = false;
+        }
+    }
+
+    function startSmoothMazeLoop() {
+        if (mazeAnimId) cancelAnimationFrame(mazeAnimId);
+        function loop() {
+            if (activeBarIdForRiddle !== 5) return;
+            const cs = 30, radius = 7, speed = 1.8;
+            let vx = 0, vy = 0;
+            const THRESH = 4;
+            if (Math.abs(mazeGamma) > THRESH) vx = (mazeGamma / 30) * speed;
+            if (Math.abs(mazeBeta) > THRESH) vy = (mazeBeta / 30) * speed;
+            if (mazeKeys['ArrowLeft']) vx = speed;
+            if (mazeKeys['ArrowRight']) vx = -speed;
+            if (mazeKeys['ArrowUp']) vy = speed;
+            if (mazeKeys['ArrowDown']) vy = -speed;
+
+            if (vx !== 0 || vy !== 0) {
+                let nextPx = px + vx;
+                let curC = Math.floor(px / cs), curR = Math.floor(py / cs);
+                let targetC = Math.floor(nextPx / cs);
+                if (nextPx - radius >= 0 && nextPx + radius <= MAZE_COLS * cs) {
+                    if (targetC !== curC) {
+                        let cell = MAZE_GRID[curR][curC];
+                        if (targetC > curC && !cell.E) px = nextPx;
+                        else if (targetC < curC && !cell.W) px = nextPx;
+                    } else { px = nextPx; }
+                }
+
+                let nextPy = py + vy;
+                curC = Math.floor(px / cs); curR = Math.floor(py / cs);
+                let targetR = Math.floor(nextPy / cs);
+                if (nextPy - radius >= 0 && nextPy + radius <= MAZE_ROWS * cs) {
+                    if (targetR !== curR) {
+                        let cell = MAZE_GRID[curR][curC];
+                        if (targetR > curR && !cell.S) py = nextPy;
+                        else if (targetR < curR && !cell.N) py = nextPy;
+                    } else { py = nextPy; }
+                }
+
+                const token = document.getElementById("pirate-token");
+                if (token) token.setAttribute("transform", `translate(${px},${py})`);
+
+                let finalC = Math.floor(px / cs);
+                let finalR = Math.floor(py / cs);
+                if (finalR === MAZE_ROWS - 1 && finalC === MAZE_COLS - 1) {
+                    cancelAnimationFrame(mazeAnimId);
+                    mazeAnimId = null;
+                    const hint = document.getElementById("maze-hint");
+                    if (hint) { hint.textContent = "Le trésor est à toi !"; hint.className = "feedback feedback-good"; }
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    unlockGlobalStep();
+                    return;
+                }
+            }
+            mazeAnimId = requestAnimationFrame(loop);
+        }
+        mazeAnimId = requestAnimationFrame(loop);
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; const toRad = d => d * Math.PI / 180;
+        const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function bearingTo(lat1, lon1, lat2, lon2) {
+        const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
+        const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+        const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+        return (toDeg(Math.atan2(y, x)) + 360) % 360;
+    }
+
+    function buildCompassSVG() {
+        const cx = 130, cy = 130, F = "'IM Fell English SC', Georgia, serif";
+        const pt = (r, deg) => { const a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+        let ticks = "", nums = "", rivets = "";
+        for (let a = 0; a < 360; a += 5) {
+            const major = a % 30 === 0, mid = a % 10 === 0;
+            const p1 = pt(99, a), p2 = pt(major ? 87 : mid ? 92.5 : 95.5, a);
+            ticks += `<line x1="${p1[0].toFixed(2)}" y1="${p1[1].toFixed(2)}" x2="${p2[0].toFixed(2)}" y2="${p2[1].toFixed(2)}" stroke="#3a2a17" stroke-width="${major ? 1.7 : 0.8}" opacity="${major ? 1 : 0.65}"></line>`;
+            if (major && a % 90 !== 0) { const t = pt(78, a); nums += `<text x="${t[0].toFixed(1)}" y="${(t[1] + 2.3).toFixed(1)}" text-anchor="middle" font-size="6.6" fill="#5b4632" font-family="'Special Elite', monospace">${a}</text>`; }
+        }
+        for (let a = 15; a < 360; a += 30) { const r = pt(120, a); rivets += `<circle cx="${r[0].toFixed(1)}" cy="${r[1].toFixed(1)}" r="2.5" fill="url(#cHub)" stroke="#3a2808" stroke-width=".7"></circle>`; }
+        const half = (len, w, rot, c1, c2) => `<g transform="rotate(${rot} ${cx} ${cy})"><path d="M${cx} ${cy - len} L${cx + w} ${cy - w} L${cx} ${cy} Z" fill="${c1}" stroke="#3a2a17" stroke-width=".7"></path><path d="M${cx} ${cy - len} L${cx - w} ${cy - w} L${cx} ${cy} Z" fill="${c2}" stroke="#3a2a17" stroke-width=".7"></path></g>`;
+        let star = "";
+        [45, 135, 225, 315].forEach(r => { star += half(40, 6, r, "#a9822d", "#f4e8c8"); });
+        [0, 90, 180, 270].forEach(r => { star += half(58, 9, r, "#5b2a1c", "#f4e8c8"); });
+        return `<svg viewBox="0 0 260 260" role="img" aria-label="Boussole du corsaire">
+          <defs>
+            <linearGradient id="cBezel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7e5a8"></stop><stop offset=".28" stop-color="#c99c3f"></stop><stop offset=".52" stop-color="#7b5619"></stop><stop offset=".78" stop-color="#e4c36e"></stop><stop offset="1" stop-color="#9a7227"></stop></linearGradient>
+            <radialGradient id="cDial" cx="50%" cy="46%" r="62%"><stop offset="0" stop-color="#fcf3da"></stop><stop offset=".75" stop-color="#ecd7a4"></stop><stop offset="1" stop-color="#d4b87c"></stop></radialGradient>
+            <linearGradient id="cGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".62"></stop><stop offset=".55" stop-color="#fff" stop-opacity=".07"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+            <linearGradient id="cNeedle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bf4f64"></stop><stop offset=".5" stop-color="#7a2333"></stop><stop offset="1" stop-color="#4a1020"></stop></linearGradient>
+            <radialGradient id="cHub" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff0b8"></stop><stop offset=".5" stop-color="#cfa447"></stop><stop offset="1" stop-color="#7a561a"></stop></radialGradient>
+            <radialGradient id="cJewel" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#f08aa0"></stop><stop offset=".55" stop-color="#7a2333"></stop><stop offset="1" stop-color="#3a0f18"></stop></radialGradient>
+            <linearGradient id="cSweepG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d4ab5c" stop-opacity="0"></stop><stop offset="1" stop-color="#d4ab5c" stop-opacity=".8"></stop></linearGradient>
+            <clipPath id="cDialClip"><circle cx="130" cy="130" r="104.5"></circle></clipPath>
+          </defs>
+          <circle cx="130" cy="130" r="127" fill="url(#cBezel)" stroke="#3a2808" stroke-width="1.6"></circle>
+          <circle cx="130" cy="130" r="123" fill="none" stroke="#fbe9ae" stroke-opacity=".5" stroke-width="1"></circle>
+          ${rivets}
+          <circle cx="130" cy="130" r="113" fill="#2a1d0e" stroke="#5a3f10" stroke-width="1.2"></circle>
+          <circle cx="130" cy="130" r="108.5" fill="url(#cBezel)" stroke="#3a2808" stroke-width="1"></circle>
+          <circle cx="130" cy="130" r="104.5" fill="url(#cDial)" stroke="#6b5030" stroke-width="1.2"></circle>
+          <g clip-path="url(#cDialClip)">
+            <g id="compass-rose">
+              <circle cx="130" cy="130" r="100" fill="none" stroke="#5b4632" stroke-width=".9"></circle>
+              <circle cx="130" cy="130" r="64" fill="none" stroke="#a9822d" stroke-width=".8" stroke-dasharray="2 3"></circle>
+              <circle cx="130" cy="130" r="26" fill="none" stroke="#5b4632" stroke-width=".7"></circle>
+              ${ticks}${nums}${star}
+              <path d="M130 44 L134 51 L130 58 L126 51 Z" fill="#7a2333" stroke="#3a0f18" stroke-width=".6"></path>
+              <text x="130" y="76" text-anchor="middle" font-size="15" fill="#7a2333" font-family="${F}" font-weight="bold">N</text>
+              <text x="193" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">E</text>
+              <text x="130" y="198" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">S</text>
+              <text x="67" y="135" text-anchor="middle" font-size="14" fill="#3a2a17" font-family="${F}">O</text>
+            </g>
+            <g id="compass-sweep"><path d="M130 130 L130 30 A100 100 0 0 1 200 58.6 Z" fill="url(#cSweepG)"></path></g>
+            <ellipse cx="94" cy="76" rx="64" ry="30" transform="rotate(-34 94 76)" fill="url(#cGlass)"></ellipse>
+          </g>
+          <circle cx="130" cy="130" r="103" fill="none" stroke="#2a1d0e" stroke-opacity=".28" stroke-width="3.5"></circle>
+          <g id="compass-needle"><g class="needle-wobble">
+            <path d="M133 34 L144 134 L133 128 L122 134 Z" fill="#000" opacity=".18"></path>
+            <path d="M130 30 L140 130 L130 123 L120 130 Z" fill="url(#cNeedle)" stroke="#2e0c14" stroke-width="1.1" stroke-linejoin="round"></path>
+            <path d="M130 34 L130 120" stroke="#f2a9b8" stroke-opacity=".55" stroke-width="1"></path>
+            <path d="M130 196 L138 130 L130 137 L122 130 Z" fill="#dcc88f" stroke="#3a2a17" stroke-width="1" stroke-linejoin="round"></path>
+            <circle cx="130" cy="34" r="7" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.2"></circle>
+            <path d="M126.4 30.4 L133.6 37.6 M133.6 30.4 L126.4 37.6" stroke="#7a2333" stroke-width="1.9" stroke-linecap="round"></path>
+          </g></g>
+          <circle cx="130" cy="130" r="12.5" fill="url(#cHub)" stroke="#3a2808" stroke-width="1.3"></circle>
+          <circle cx="130" cy="130" r="6" fill="url(#cJewel)" stroke="#2e0c14" stroke-width=".8"></circle>
+          <circle cx="128" cy="128" r="1.6" fill="#fff" opacity=".7"></circle>
+        </svg>`;
+    }
+
+    function buildHeatSegments() {
+        const colors = ["#7fa6b5", "#8fb0a8", "#a3b98f", "#c3c273", "#d9bb56", "#dfa33f", "#d9822f", "#cc5f2f", "#b93c33", "#8f1f2e"];
+        return colors.map(c => `<i style="background:${c}"></i>`).join("");
+    }
+
+    function setCompassStatus(text, kind) {
+        const m = document.getElementById("compass-msg");
+        if (m) { m.textContent = text; m.className = "feedback feedback-" + kind; }
+    }
+
+    function demarrerBoussole() {
+        if (!navigator.geolocation) { setCompassStatus("Géolocalisation indisponible sur cet appareil.", "warn"); return; }
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(res => {
+                if (res === 'granted') window.addEventListener('deviceorientation', handleCompassOrientation);
+            }).catch(() => {});
+        } else { window.addEventListener('deviceorientation', handleCompassOrientation); }
+
+        geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
+        compassActive = true;
+        const inst = document.getElementById("compass-instrument"), btn = document.getElementById("btn-compass");
+        if (inst) { inst.classList.remove("standby"); inst.classList.add("active"); }
+        if (btn) btn.style.display = "none";
+        const lab = document.getElementById("ro-label");
+        if (lab) lab.textContent = "Recherche du signal";
+        setCompassStatus("Acquisition du signal GPS…", "info");
+
+        gpsFallbackTimer = setTimeout(() => {
+            if (lastLat == null) {
+                const fc = document.getElementById("gps-fallback-container");
+                if (fc) fc.innerHTML = `<p class="gps-tip">Signal lent ? Place-toi à découvert, loin des hauts murs, et patiente quelques secondes.</p>`;
+            }
+        }, 8000);
+    }
+
+    function updateCompassPosition(pos) {
+        lastLat = pos.coords.latitude; lastLng = pos.coords.longitude;
+        if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
+        const fc = document.getElementById("gps-fallback-container");
+        if (fc) fc.innerHTML = "";
+        const lab = document.getElementById("ro-label");
+        if (lab) lab.textContent = "Distance de la cache";
+        refreshCompassUI();
+    }
+
+    function geoErr(err) {
+        if (err && err.code === 1) setCompassStatus("Localisation refusée : autorise-la dans les réglages du navigateur.", "bad");
+        else setCompassStatus("Signal GPS faible — place-toi à découvert.", "warn");
+    }
+
+    function smoothAngle(prev, next, alpha) {
+        if (prev == null) return next;
+        const diff = ((next - prev + 540) % 360) - 180;
+        return (prev + alpha * diff + 360) % 360;
+    }
+
+    function setNeedleRotation(targetDeg) {
         const needle = document.getElementById("compass-needle");
-        const info = document.getElementById("compass-info");
-
-        if (needle) needle.style.transform = `rotate(${brg}deg)`;
-        if (info) info.textContent = dist < 30 ? `🔥 Ça brûle ! Distance : ${dist}m` : `🧭 Cap : ${brg}° • Distance : ${dist}m`;
-      }, err => {
-        document.getElementById("compass-info").textContent = "GPS indisponible — utilise l'indice secret !";
-      });
-    }
-  }
-
-  function haversine(lat1, lon1, lat2, lon2) {
-    const R = 6371000, toRad = d => d * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
-  function bearingTo(lat1, lon1, lat2, lon2) {
-    const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
-    const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
-    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
-    return (toDeg(Math.atan2(y, x)) + 360) % 360;
-  }
-
-  // ---------- ENVOI CONSUMMATION & PHOTO ----------
-  function ouvrirValidationBoisson(barId) {
-    const p = document.getElementById("global-participant").value;
-    if (!p) {
-      showToast("⚠️ Choisis ton nom en haut de la page d'abord !", false);
-      return;
+        if (!needle) return;
+        const current = ((needleRotation % 360) + 360) % 360;
+        const delta = ((targetDeg - current + 540) % 360) - 180;
+        needleRotation += delta;
+        needle.style.transform = `rotate(${needleRotation}deg)`;
     }
 
-    selectedBarForDrink = BARS_DATA.find(b => b.id === barId);
-    document.getElementById("drink-bar-title").textContent = `Consommation : ${selectedBarForDrink.name}`;
-    document.getElementById("photo-preview-img").style.display = "none";
-    document.getElementById("drink-photo").value = "";
-    base64Photo = null;
-    document.getElementById("modal-drink").classList.add("active");
-  }
-
-  document.getElementById('drink-photo').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      mimeType = file.type;
-      fileName = file.name || "preuve.jpg";
-      
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          // Compression Canvas Client
-          const canvas = document.createElement('canvas');
-          const maxDim = 800;
-          let w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-            else { w = Math.round((w * maxDim) / h); h = maxDim; }
-          }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          
-          const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
-          base64Photo = compressedUrl.split(',')[1];
-          mimeType = 'image/jpeg';
-
-          const preview = document.getElementById("photo-preview-img");
-          preview.src = compressedUrl;
-          preview.style.display = "block";
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  async function envoyerBoisson() {
-    if (!base64Photo) {
-      showToast("⚠️ N'oublie pas la photo de ton verre en preuve !", false);
-      return;
+    function setRoseRotation(targetDeg) {
+        const rose = document.getElementById("compass-rose");
+        if (!rose) return;
+        const current = ((roseRotation % 360) + 360) % 360;
+        const delta = ((targetDeg - current + 540) % 360) - 180;
+        roseRotation += delta;
+        rose.style.transform = `rotate(${roseRotation}deg)`;
     }
 
-    const p = document.getElementById("global-participant").value;
-    const verre = document.getElementById("drink-select").value;
-    const btn = document.getElementById("btn-submit-drink");
-
-    let points = 10;
-    if (verre === selectedBarForDrink.spec) points += 5;
-
-    btn.disabled = true;
-    btn.textContent = "⏳ Envoi en cours…";
-
-    if (!mockMode) {
-      try {
-        await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "validate_drink", participant: p, bar: selectedBarForDrink.name,
-            verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName
-          })
-        });
-      } catch(e) {}
+    function handleCompassOrientation(event) {
+        const heading = (typeof event.webkitCompassHeading === 'number') ? event.webkitCompassHeading : (event.alpha != null ? (360 - event.alpha) : null);
+        if (heading != null) lastHeading = smoothAngle(lastHeading, heading, 0.3);
+        refreshCompassUI();
     }
 
-    // Sauvegarde des points en local
-    let userScores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
-    userScores[p] = (userScores[p] || 0) + points;
-    localStorage.setItem('barathon_scores', JSON.stringify(userScores));
+    function refreshCompassUI() {
+        if (activeBarIdForRiddle !== 2 || !compassActive) return;
+        const inst = document.getElementById("compass-instrument");
+        if (!inst) return;
+        if (lastHeading != null) setRoseRotation((360 - lastHeading) % 360);
+        if (lastLat == null) { setCompassStatus("Acquisition du signal GPS…", "info"); return; }
 
-    showToast(`🍺 Consommation enregistrée pour ${p} ! (+${points} pts)`);
-    btn.disabled = false;
-    btn.textContent = "📸 Envoyer la preuve (+10 pts)";
-    fermerModales();
-    switchTab('scores');
-  }
+        const dist = haversineDistance(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
+        const brg = bearingTo(lastLat, lastLng, TARGET_COORDS.lat, TARGET_COORDS.lng);
+        setNeedleRotation(lastHeading != null ? (brg - lastHeading + 360) % 360 : brg);
 
-  function chargerClassement() {
-    const tbody = document.getElementById('ranking-body');
-    tbody.innerHTML = `<tr><td colspan="3">Chargement du registre…</td></tr>`;
+        const heat = dist <= 5 ? 3 : dist <= 15 ? 2 : dist <= 30 ? 1 : 0;
+        inst.dataset.heat = String(heat);
 
-    if (mockMode) {
-      let scores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
-      let sorted = Object.entries(scores).map(([p, pts]) => ({ participant: p, points: pts })).sort((a,b) => b.points - a.points);
-      
-      if (sorted.length === 0) {
-        sorted = [
-          { participant: "Majid", points: 45 },
-          { participant: "Alexandre", points: 35 },
-          { participant: "Pepette", points: 25 },
-          { participant: "Jules D", points: 10 }
-        ];
-      }
-      renderRankingTable(sorted);
-      return;
+        const val = document.getElementById("ro-digits"), unit = document.getElementById("ro-unit");
+        if (val) val.textContent = dist >= 1000 ? (dist / 1000).toFixed(1) : String(Math.round(dist));
+        if (unit) unit.textContent = dist >= 1000 ? "km" : "m";
+
+        const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
+        document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
+
+        const texts = ["Suis l'aiguille, la cache t'attend quelque part…", "Tu t'approches de la zone critique…", "Ça brûle ! Fouille les environs.", "Tu y es presque — ouvre l'œil !"];
+        setCompassStatus(texts[heat], heat === 0 ? "info" : heat === 3 ? "good" : "warn");
+
+        const now = Date.now();
+        if (heat >= 2 && navigator.vibrate && now - lastVibe > 4000) { lastVibe = now; navigator.vibrate([100, 50, 100]); }
     }
 
-    fetch(WEB_APP_URL + "?action=classement")
-      .then(r => r.json())
-      .then(data => renderRankingTable(data))
-      .catch(() => {
-        let scores = JSON.parse(localStorage.getItem('barathon_scores') || '{}');
-        let sorted = Object.entries(scores).map(([p, pts]) => ({ participant: p, points: pts })).sort((a,b) => b.points - a.points);
-        renderRankingTable(sorted);
-      });
-  }
-
-  function renderRankingTable(data) {
-    const tbody = document.getElementById('ranking-body');
-    tbody.innerHTML = "";
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="3">Aucune tournée enregistrée pour l'instant.</td></tr>`;
-      return;
-    }
-    data.forEach((row, i) => {
-      let medal = i === 0 ? '<span class="medal medal-1">I</span>' :
-                  i === 1 ? '<span class="medal medal-2">II</span>' :
-                  i === 2 ? '<span class="medal medal-3">III</span>' : `#${i + 1}`;
-      tbody.innerHTML += `
-        <tr>
-          <td>${medal}</td>
-          <td><b>${row.participant}</b></td>
-          <td><b>${row.points}</b> pts</td>
-        </tr>`;
-    });
-  }
-
-  function fermerModales() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-    window.removeEventListener('keydown', handleMazeKeydown);
-    window.removeEventListener('deviceorientation', handleGyro);
-    if (geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-  }
-
-  // ---------- ANIMATION CONFETTIS DE VICTOIRE ----------
-  function lancerConfettis() {
-    const canvas = document.getElementById('canvas-confetti');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles = [];
-    const colors = ['#c29532', '#781d2a', '#2f5a38', '#ebd9b5', '#ffffff'];
-
-    for (let i = 0; i < 100; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height,
-        r: Math.random() * 6 + 2,
-        d: Math.random() * 10,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        tilt: Math.random() * 10 - 10,
-        tiltAngle: 0,
-        tiltAngleIncremental: Math.random() * 0.07 + 0.05
-      });
-    }
-
-    let animationFrame;
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => {
-        p.tiltAngle += p.tiltAngleIncremental;
-        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-        p.tilt = Math.sin(p.tiltAngle) * 15;
-
-        ctx.beginPath();
-        ctx.lineWidth = p.r;
-        ctx.strokeStyle = p.color;
-        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
-        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
-        ctx.stroke();
-
-        if (p.y > canvas.height) {
-          particles[i] = { ...p, y: -20, x: Math.random() * canvas.width };
+    async function unlockGlobalStep() {
+        const p = document.getElementById("global-participant").value;
+        const payload = { action: "resolve_riddle", step: activeBarIdForRiddle, participant: p };
+        try {
+            const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (data.status === "success" || data.status === "already_unlocked") {
+                showToast(`${p} a validé l'étape ! (+20 pts)`, "good");
+                fermerModales(); fetchGameState();
+            }
+        } catch (error) {
+            stockerHorsLigne(payload);
+            currentGlobalStep = Math.min(BARS_DATA.length, activeBarIdForRiddle + 1);
+            showToast("Hors-ligne : étape validée sur le carnet !", "info");
+            fermerModales(); renderBars(); renderCarte();
         }
-      });
-      animationFrame = requestAnimationFrame(draw);
     }
-    draw();
-    setTimeout(() => { cancelAnimationFrame(animationFrame); ctx.clearRect(0,0,canvas.width,canvas.height); }, 6000);
-  }
+
+    function ouvrirValidationBoisson(barId) {
+        const p = document.getElementById("global-participant").value;
+        if (!p) { showToast("Choisis d'abord ton nom, en haut du carnet !", "bad"); return; }
+        selectedBarForDrink = BARS_DATA.find(b => b.id === barId);
+        document.getElementById("drink-bar-title").textContent = `Consommation : ${selectedBarForDrink.name}`;
+        document.getElementById("drink-photo").value = ""; base64Photo = null;
+        showModal("modal-drink");
+    }
+
+    // Compression d'image automatique via Canvas
+    document.getElementById('drink-photo').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        mimeType = file.type || "image/jpeg";
+        fileName = file.name || "preuve.jpg";
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.getElementById('resize-canvas');
+                const ctx = canvas.getContext('2d');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 900;
+                const MAX_HEIGHT = 900;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                base64Photo = dataUrl.split(',')[1];
+                showToast("Preuve photo compressée avec succès.", "good");
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    async function envoyerBoisson() {
+        if (!base64Photo) { showToast("Il manque la preuve en image !", "bad"); return; }
+        const p = document.getElementById("global-participant").value;
+        const verre = document.getElementById("drink-select").value;
+        const btn = document.getElementById("btn-submit-drink");
+
+        let points = 10;
+        if (verre === selectedBarForDrink.spec) points += 5;
+
+        const payload = { action: "validate_drink", participant: p, bar: selectedBarForDrink.name, verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName };
+
+        btn.disabled = true; btn.textContent = "Envoi…";
+        try {
+            await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+            showToast("Conso enregistrée avec succès !", "good");
+            fermerModales(); switchTab('scores');
+        } catch (error) {
+            stockerHorsLigne(payload);
+            showToast("Réseau indisponible : conso stockée localement.", "info");
+            fermerModales(); switchTab('scores');
+        }
+        btn.disabled = false; btn.textContent = "Envoyer la preuve (+10 pts)";
+    }
+
+    function stockerHorsLigne(payload) {
+        let queue = JSON.parse(localStorage.getItem('barathon_offline_queue') || '[]');
+        queue.push(payload);
+        localStorage.setItem('barathon_offline_queue', JSON.stringify(queue));
+    }
+
+    async function verifierFileAttenteHorsLigne() {
+        let queue = JSON.parse(localStorage.getItem('barathon_offline_queue') || '[]');
+        if (queue.length === 0) return;
+        try {
+            for (let payload of queue) {
+                await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+            }
+            localStorage.removeItem('barathon_offline_queue');
+            showToast("Données hors-ligne synchronisées avec succès !", "good");
+        } catch (e) {
+            console.log("Toujours hors-ligne, synchro reportée.");
+        }
+    }
+
+    function declencherVictoire() {
+        if (!window.victoireAffichee) {
+            window.victoireAffichee = true;
+            const c = document.getElementById("riddle-content");
+            document.getElementById("riddle-title").textContent = "🏆 Le Pacte des Corsaires";
+            c.innerHTML = `<div class="riddle-parchment" style="text-align:center;">
+                             <strong>FÉLICITATIONS !</strong><br><br>
+                             Toutes les tavernes de Caen ont été convoitées. Le trésor suprême est atteint, l'équipage est légendaire !
+                           </div>`;
+            showModal("modal-riddle");
+            lancerConfettis();
+        }
+    }
+
+    function fermerModales() {
+        hideModal("modal-riddle");
+        hideModal("modal-drink");
+
+        if (mazeAnimId) { cancelAnimationFrame(mazeAnimId); mazeAnimId = null; }
+        window.removeEventListener('deviceorientation', handleMazeOrientation);
+        window.removeEventListener('keydown', handleMazeKeydown);
+        window.removeEventListener('keyup', handleMazeKeyup);
+        px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
+
+        if (geoWatchId != null) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
+        if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
+        window.removeEventListener('deviceorientation', handleCompassOrientation);
+        compassActive = false; lastLat = null; lastLng = null; lastHeading = null; needleRotation = 0; roseRotation = 0;
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const idx = tab === 'accueil' ? 0 : tab === 'scores' ? 1 : 2;
+        document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'scores') chargerClassement();
+        if (tab === 'carte') renderCarte();
+    }
+
+    async function chargerClassement() {
+        const tbody = document.getElementById('ranking-body'); 
+        tbody.innerHTML = `<tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr>`;
+        try {
+            const res = await fetch(WEB_APP_URL + "?action=classement"); 
+            const data = await res.json(); 
+            tbody.innerHTML = "";
+            data.forEach((row, i) => {
+                let rang = i === 0 ? '<span class="medal medal-gold">I</span>' : i === 1 ? '<span class="medal medal-silver">II</span>' : i === 2 ? '<span class="medal medal-bronze">III</span>' : `#${i + 1}`;
+                tbody.innerHTML += `<tr><td>${rang}</td><td><b>${row.participant}</b></td><td>${row.points} pts</td></tr>`;
+            });
+        } catch (e) { 
+            tbody.innerHTML = `<tr><td colspan="3">Mode hors-ligne actif<br><button class="btn btn-ghost" onclick="chargerClassement()">Réessayer</button></td></tr>`; 
+        }
+    }
 </script>
 </body>
 </html>
