@@ -637,7 +637,7 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    // Nouvelle localisation cible mise à jour
+    // Nouvelles coordonnées cibles mises à jour
     const TARGET_COORDS = { lat: 49.1558834, lng: -0.4743557 };
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
@@ -698,7 +698,7 @@
     let targetRoseRot = 0, currentRoseRot = 0;
     let rawHeading = null, smoothedHeading = null, rawBearing = 0;
     let gpsHistory = [];
-    const GPS_HISTORY_SIZE = 4;
+    const GPS_HISTORY_SIZE = 3; // Réduit à 3 pour plus de réactivité en direct
 
     let adminClicks = 0, adminTimer = null;
 
@@ -1322,7 +1322,7 @@
             }).catch(() => {});
         } else { window.addEventListener('deviceorientation', handleCompassOrientation, { passive: true }); }
 
-        // Options GPS strictes pour forcer la précision maximale
+        // GPS ultra-réactif sans cache
         geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { 
             enableHighAccuracy: true, 
             maximumAge: 0, 
@@ -1348,18 +1348,18 @@
     }
 
     function updateCompassPosition(pos) {
-        let currentAccuracy = pos.coords.accuracy;
+        let currentAccuracy = pos.coords.accuracy || 15;
 
-        // Filtre de précision stricte pour écarter les sauts GPS majeurs
-        if (currentAccuracy > 6) {
-            setCompassStatus(`Signal GPS trop imprécis (${Math.round(currentAccuracy)}m). Bouge un peu...`, "warn");
+        // SEUIL ASSOUPLI : On accepte jusqu'à 40m pour ne plus JAMAIS bloquer l'affichage des mètres en ville
+        if (currentAccuracy > 40) {
+            setCompassStatus(`Signal GPS trop faible (${Math.round(currentAccuracy)}m). Déplace-toi un peu...`, "warn");
             return; 
         }
 
         let currentLat = pos.coords.latitude; 
         let currentLng = pos.coords.longitude;
 
-        // Moyenne glissante (lissage de position)
+        // Moyenne glissante plus courte (3 points) pour réagir instantanément aux déplacements
         gpsHistory.push({ lat: currentLat, lng: currentLng });
         if (gpsHistory.length > GPS_HISTORY_SIZE) {
             gpsHistory.shift();
@@ -1387,7 +1387,7 @@
     function handleCompassOrientation(event) {
         let heading = (typeof event.webkitCompassHeading === 'number') ? event.webkitCompassHeading : (event.alpha != null ? (360 - event.alpha) : null);
         if (heading != null) {
-            smoothedHeading = smoothAngle(smoothedHeading, heading, 0.2); 
+            smoothedHeading = smoothAngle(smoothedHeading, heading, 0.25); 
             updateTargets();
         }
     }
@@ -1409,7 +1409,7 @@
         function render() {
             if (!compassActive || activeBarIdForRiddle !== 2) return;
 
-            const lerpFactor = 0.15;
+            const lerpFactor = 0.2; // Légèrement plus réactif
             
             let diffNeedle = ((targetNeedleRot - currentNeedleRot + 540) % 360) - 180;
             currentNeedleRot += diffNeedle * lerpFactor;
