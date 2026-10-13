@@ -170,7 +170,7 @@
   .motus-tile { width: 32px; height: 32px; border: 2px solid var(--ink); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; font-size: 14px; box-shadow: 0 2px 3px rgba(0,0,0,.15); }
   .m-correct { background: var(--moss); color: #fff; border-color: #26382a; }
   .m-present { background: #d4a017; color: var(--ink); border-color: #9c730e; }
-  .m-absent { background: var(--slate); color: #fff; border-color: #5c5549; }
+  .m-absent { background: #b93c33; color: #fff; border-color: #7a1515; }
 
   /* ÉPREUVE BOUSSOLE */
   /* INSTRUMENT BOUSSOLE */
@@ -1026,7 +1026,7 @@
                              🦜 <strong>Le Chant des Profondeurs</strong><br>
                              Écoute attentivement le cri mystère. Quel oiseau légendaire oblige au cul-sec ?
                            </div>
-                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="son3.mp3" type="audio/mpeg"></audio>
+                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="son.mp3" type="audio/mpeg"></audio>
                            <div id="audio-fallback-msg" style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;"></div>
                            <input type="text" id="ans" placeholder="Nom de l'oiseau…">
                            <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Valider</button>`;
@@ -1034,16 +1034,16 @@
         else if (barId === 4) {
             c.innerHTML = `<div class="riddle-parchment">
                              📜 <strong>L'Énigme du Verbe</strong><br>
-                             <em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. » </em> (9 lettres)
+                             <em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. Et comme dirait un rappeur, elle n'est jamais fini.» </em>
                            </div>
-                           <input type="text" id="ans" maxlength="9" placeholder="Mot en 9 lettres…" style="text-transform:uppercase; margin-top:4px;">
+                           <input type="text" id="ans" maxlength="9" placeholder="Propose un mot..." style="text-transform:uppercase; margin-top:4px;">
                            <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Proposer le mot</button>
-                           <div id="motus-histo"></div>`;
+                           <div id="motus-histo" style="display:flex; flex-direction:column; gap:5px; margin-top:10px;"></div>`;
         }
         else if (barId === 5) {
             px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
             c.innerHTML = `<div class="riddle-parchment" style="margin-bottom:6px;">
-                             🗺️️ <strong>Le Vrai Labyrinthe</strong><br>
+                             🗺 <strong>Le Vrai Labyrinthe</strong><br>
                              Incline ton mobile pour guider ton pirate à travers les coursives vers le magot.
                            </div>
                            <div class="maze-svg-wrap">${buildMazeSVG()}</div>
@@ -1084,25 +1084,68 @@
 
         if (activeBarIdForRiddle === 2 && ans === "tour solidor") ok = true;
         if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
+        
         if (activeBarIdForRiddle === 4) {
-            if (ans.length !== 9) { msg.textContent = "Il faut exactement 9 lettres."; msg.className = "feedback feedback-bad"; if (navigator.vibrate) navigator.vibrate(100); return; }
-            if (ans.toUpperCase() === "PIRATERIE") ok = true;
-            else {
+            let motPropose = document.getElementById("ans") ? document.getElementById("ans").value.toUpperCase().trim() : "";
+            if (motPropose.length === 0) {
+                msg.textContent = "Entre un mot.";
+                msg.className = "feedback feedback-bad";
+                if (navigator.vibrate) navigator.vibrate(100);
+                return;
+            }
+
+            const target = "PIRATERIE";
+
+            if (motPropose === target) {
+                ok = true;
+            } else {
+                let guessArr = motPropose.split("");
+                let targetArr = target.split("");
+                let statuses = new Array(guessArr.length).fill("m-absent");
+                let targetMatched = new Array(target.length).fill(false);
+
+                // 1ère passe : lettres bien placées (Vert)
+                for (let i = 0; i < guessArr.length; i++) {
+                    if (i < target.length && guessArr[i] === targetArr[i]) {
+                        statuses[i] = "m-correct";
+                        targetMatched[i] = true;
+                    }
+                }
+
+                // 2ème passe : lettres présentes mais mal placées (Orange) ou absentes (Rouge)
+                for (let i = 0; i < guessArr.length; i++) {
+                    if (statuses[i] === "m-correct") continue;
+                    let foundIdx = -1;
+                    for (let j = 0; j < targetArr.length; j++) {
+                        if (!targetMatched[j] && targetArr[j] === guessArr[i]) {
+                            foundIdx = j;
+                            break;
+                        }
+                    }
+                    if (foundIdx !== -1) {
+                        statuses[i] = "m-present";
+                        targetMatched[foundIdx] = true;
+                    } else {
+                        statuses[i] = "m-absent"; // Rouge
+                    }
+                }
+
                 let row = `<div class="motus-grid">`;
-                let sec = "PIRATERIE".split("");
-                ans.toUpperCase().split("").forEach((l, i) => {
-                    let stat = "m-absent";
-                    if (l === sec[i]) stat = "m-correct"; else if (sec.includes(l)) stat = "m-present";
-                    row += `<div class="motus-tile ${stat}">${l}</div>`;
+                guessArr.forEach((l, i) => {
+                    row += `<div class="motus-tile ${statuses[i]}">${l}</div>`;
                 });
                 row += `</div>`;
-                document.getElementById("motus-histo").innerHTML = row;
-                msg.textContent = "Mot incorrect — observe les lettres bien placées.";
+
+                document.getElementById("motus-histo").innerHTML += row;
+                document.getElementById("ans").value = "";
+
+                msg.textContent = "Mot incorrect — Vert : bien placé | Orange : présent | Rouge : absent.";
                 msg.className = "feedback feedback-bad";
                 if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
                 return;
             }
         }
+
         if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
 
         if (ok) {
@@ -1349,10 +1392,6 @@
         }, 8000);
     }
 
-    // ---------- Estimation de position : filtre de Kalman « position + vitesse » ----------
-    // Repère local en mètres centré sur la cache (x = est, y = nord).
-    // Chaque point GPS est pondéré par sa précision, la vitesse Doppler du GPS (speed/heading) corrige
-    // le mouvement, et la position est prolongée jusqu'à l'instant présent (retard du GPS compensé).
     const M_PER_DEG = 111195;
     function toLocalXY(lat, lng) {
         return { x: (lng - TARGET_COORDS.lng) * M_PER_DEG * Math.cos(TARGET_COORDS.lat * Math.PI / 180), y: (lat - TARGET_COORDS.lat) * M_PER_DEG };
@@ -1382,9 +1421,8 @@
         if (!st) return { t: tms, X: { p: p.x, v: 0, P00: R0, P01: 0, P11: 4 }, Y: { p: p.y, v: 0, P00: R0, P01: 0, P11: 4 }, doppler: false };
         const dt = Math.max(0.05, Math.min(5, (tms - st.t) / 1000));
         st.t = tms;
-        const sa = st.doppler ? 0.5 : 0.3;                          // sans vitesse Doppler : filtre plus prudent
+        const sa = st.doppler ? 0.5 : 0.3;
         kf1Predict(st.X, dt, sa); kf1Predict(st.Y, dt, sa);
-        // un point très éloigné de la prédiction est probablement un rebond de signal : on lui fait moins confiance
         const nis = Math.pow(p.x - st.X.p, 2) / (st.X.P00 + R0) + Math.pow(p.y - st.Y.p, 2) / (st.Y.P00 + R0);
         const R = nis > 9 ? R0 * Math.min(16, nis / 3) : R0;
         kf1Update(st.X, p.x, R); kf1Update(st.Y, p.y, R);
@@ -1401,7 +1439,7 @@
         const dt = Math.max(0, Math.min(3, (nowMs - st.t) / 1000));
         let vx = st.X.v, vy = st.Y.v;
         if (Math.hypot(vx, vy) < 0.35) { vx = 0; vy = 0; }
-        const k = st.doppler ? 1.2 * (1 - Math.exp(-dt / 1.2)) : 0;   // prolongement seulement si la vitesse est mesurée
+        const k = st.doppler ? 1.2 * (1 - Math.exp(-dt / 1.2)) : 0;
         return { x: st.X.p + vx * k, y: st.Y.p + vy * k, vx: st.X.v, vy: st.Y.v, sigma: Math.sqrt((st.X.P00 + st.Y.P00) / 2) };
     }
 
@@ -1427,14 +1465,12 @@
         return (prev + alpha * diff + 360) % 360;
     }
 
-    // Cap compensé de l'inclinaison (alpha/beta/gamma) : à plat on suit le haut du téléphone,
-    // en position debout on suit son dos (là où pointe la caméra), avec fondu entre les deux.
     function headingFromEuler(alpha, beta, gamma) {
         const r = Math.PI / 180, a = alpha * r, b = (beta || 0) * r, g = (gamma || 0) * r;
         const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
-        const yE = -sA * cB, yN = cA * cB;                                   // haut du téléphone
-        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG); // dos du téléphone
-        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));  // 1 = à plat, 0 = debout (selon le tangage)
+        const yE = -sA * cB, yN = cA * cB;
+        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG);
+        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));
         const ly = Math.hypot(yE, yN), lz = Math.hypot(zE, zN);
         let e = 0, n = 0;
         if (ly > 1e-3) { e += w * yE / ly; n += w * yN / ly; }
@@ -1443,7 +1479,6 @@
         return (Math.atan2(e, n) / r + 360) % 360;
     }
 
-    // Les capteurs ne font que mémoriser le cap : l'affichage est calculé à chaque image (voir compassFrame).
     function handleCompassOrientation(event) {
         let heading = null;
         if (typeof event.webkitCompassHeading === 'number' && event.webkitCompassHeading >= 0) {
@@ -1455,7 +1490,6 @@
         }
         if (heading == null) return;
         if (lastHeading == null) { lastHeading = heading; return; }
-        // lissage adaptatif : petit écart = fort lissage (anti-tremblement), grand écart = suivi immédiat
         const d = Math.abs(((heading - lastHeading + 540) % 360) - 180);
         lastHeading = smoothAngle(lastHeading, heading, Math.min(0.85, 0.14 + d / 30));
     }
@@ -1477,12 +1511,11 @@
             const d = ((tgt - cur + 540) % 360) - 180;
             const boost = Math.abs(d) > 35 ? 1.8 : 1;
             let step = d * Math.min(1, ease(speed * boost));
-            const cap = 900 * dt;                                  // vitesse max 900°/s : même un grand virage reste fluide
+            const cap = 900 * dt;
             step = Math.max(-cap, Math.min(cap, step));
             return (cur + step + 360) % 360;
         };
 
-        // position estimée à l'instant présent : distance, direction et tendance partent de la même source
         if (kf) {
             const pp = kalmanPos(kf, Date.now());
             const d = Math.hypot(pp.x, pp.y);
@@ -1494,7 +1527,6 @@
 
         const rose = document.getElementById("compass-rose"), needle = document.getElementById("compass-needle");
         if (lastHeading != null) dispRose = turn(dispRose, (360 - lastHeading) % 360, 14);
-        // dans l'incertitude du GPS la direction n'est plus fiable : l'aiguille se calme au lieu de s'affoler
         const near = targetDist != null && targetDist < Math.max(3, sigmaDisp);
         if (bearingTarget != null) dispNeedle = turn(dispNeedle, bearingTarget, near ? 2.5 : 9);
         if (rose && dispRose != null) rose.style.transform = `rotate(${dispRose.toFixed(2)}deg)`;
@@ -1523,7 +1555,6 @@
         compassRaf = requestAnimationFrame(compassFrame);
     }
 
-    // Paliers de chaleur avec hystérésis : plus de clignotement quand on reste à la frontière d'un palier.
     function nextHeat(dist) {
         const up = [30, 15, 5], down = [34, 18, 7];
         let h = heatState;
@@ -1532,7 +1563,6 @@
         return h;
     }
 
-    // Partie « lente » de l'affichage (paliers, jauge, messages, cône d'incertitude) : ~5 fois par seconde.
     function refreshCompassUI() {
         if (activeBarIdForRiddle !== 2 || !compassActive) return;
         const inst = document.getElementById("compass-instrument");
@@ -1550,7 +1580,6 @@
         const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
         document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
 
-        // cône d'incertitude : plus on approche, plus la direction GPS est floue (honnête plutôt que trompeur)
         const half = Math.atan2(sigmaDisp, Math.max(dist, 0.3)) * 180 / Math.PI;
         const cone = document.getElementById("compass-cone");
         if (cone) cone.setAttribute("d", conePath(Math.max(3, half)));
@@ -1566,7 +1595,6 @@
         else { msg = "Suis l'aiguille, la cache t'attend quelque part…"; kind = "info"; }
         setCompassStatus(msg, kind);
 
-        // tendance : plus fiable que la distance brute quand le GPS hésite de quelques mètres
         const tr = document.getElementById("ro-trend");
         if (tr) {
             const sp = Math.hypot(kf.X.v, kf.Y.v);
@@ -1610,7 +1638,6 @@
         showModal("modal-drink");
     }
 
-    // Compression d'image automatique via Canvas
     document.getElementById('drink-photo').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
