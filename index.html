@@ -166,11 +166,28 @@
   .feedback-warn { color: #8a6a1e; }
 
   /* ÉPREUVE MOTUS */
-  .motus-grid { display: flex; gap: 5px; justify-content: center; margin: 12px 0; }
-  .motus-tile { width: 32px; height: 32px; border: 2px solid var(--ink); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; font-size: 14px; box-shadow: 0 2px 3px rgba(0,0,0,.15); }
-  .m-correct { background: var(--moss); color: #fff; border-color: #26382a; }
-  .m-present { background: #d4a017; color: var(--ink); border-color: #9c730e; }
-  .m-absent { background: #b93c33; color: #fff; border-color: #7a1515; }
+  .motus-cols { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin: 14px 0 6px; }
+  .motus-col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+  .motus-box { width: 100%; aspect-ratio: 1 / 1.2; padding: 0; text-align: center; font-family: 'IM Fell English SC', serif; font-size: 20px; font-weight: bold; text-transform: uppercase; border: none; border-bottom: 3px solid var(--ink); border-radius: 4px 4px 0 0; background: rgba(255,253,246,.92); color: var(--ink); caret-color: var(--wine); box-shadow: inset 0 1px 3px rgba(0,0,0,.08); }
+  .motus-box::placeholder { color: rgba(43,29,14,.4); font-weight: normal; }
+  .motus-box:focus { outline: none; background: #fff; border-bottom-color: var(--wine); box-shadow: 0 0 0 2px rgba(122,35,51,.18); }
+  .motus-box.locked { background: var(--moss); color: #fff; border-bottom-color: #26382a; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+  .motus-box.shake { animation: motus-shake .32s; }
+  .motus-wrong { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; min-height: 6px; }
+  .motus-chip { width: 100%; text-align: center; font-family: 'IM Fell English SC', serif; font-weight: bold; font-size: 15px; line-height: 1; padding: 3px 0; border-radius: 3px; }
+  .motus-chip.o { color: #cc6a0c; background: rgba(224,138,30,.17); }
+  .motus-chip.r { color: #b3243b; background: rgba(179,36,59,.12); }
+  .motus-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; font-size: 10.5px; color: var(--ink-soft); margin: 10px 0 4px; }
+  .motus-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  @keyframes motus-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+
+  /* ÉPREUVE DU TRINQUER (course au bouton) */
+  .toast-seal { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 176px; height: 176px; margin: 16px auto 8px; border-radius: 50%; border: 5px solid var(--brass); background: radial-gradient(circle at 35% 28%, #c8586e 0%, var(--wine) 55%, #4a1020 100%); color: #fdf3dc; font-family: 'IM Fell English SC', serif; font-size: 23px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .08s; animation: toast-pulse 1.7s ease-in-out infinite; box-shadow: 0 10px 22px rgba(122,35,51,.45), inset 0 3px 6px rgba(255,255,255,.28), inset 0 -8px 14px rgba(0,0,0,.35), 0 0 0 8px rgba(169,130,45,.25); }
+  .toast-seal svg { width: 68px; height: 68px; }
+  .toast-seal:active, .toast-seal.pressed { transform: scale(.94); }
+  .toast-seal:disabled { filter: grayscale(.35) brightness(.92); animation: none; cursor: default; }
+  .race-note { font-size: 11.5px; color: var(--ink-soft); text-align: center; margin-bottom: 4px; }
+  @keyframes toast-pulse { 0%, 100% { box-shadow: 0 10px 22px rgba(122,35,51,.45), inset 0 3px 6px rgba(255,255,255,.28), inset 0 -8px 14px rgba(0,0,0,.35), 0 0 0 8px rgba(169,130,45,.25); } 50% { box-shadow: 0 10px 22px rgba(122,35,51,.45), inset 0 3px 6px rgba(255,255,255,.28), inset 0 -8px 14px rgba(0,0,0,.35), 0 0 0 17px rgba(169,130,45,.04); } }
 
   /* ÉPREUVE BOUSSOLE */
   /* INSTRUMENT BOUSSOLE */
@@ -688,7 +705,7 @@
     const CARTE_HOLE_R = 86;
     let carteSeenStep = 0, carteAnimId = null, carteSelected = null, carteLastStep = 0;
 
-    let currentGlobalStep = 1;
+    let currentGlobalStep = 1, stateSynced = false;
     let activeBarIdForRiddle = null;
     let selectedBarForDrink = null;
     let base64Photo = null, mimeType = null, fileName = null;
@@ -797,10 +814,18 @@
         try {
             const res = await fetch(WEB_APP_URL + "?action=get_state");
             const data = await res.json();
+            const firstSync = !stateSynced;
+            stateSynced = true;
             if (data.currentStep && data.currentStep > currentGlobalStep) {
                 currentGlobalStep = data.currentStep;
                 renderBars();
                 renderCarte();
+                if (!firstSync) {
+                    // quelqu'un d'autre vient de débloquer : on prévient, et on ferme l'épreuve devenue inutile
+                    const riddle = document.getElementById("modal-riddle");
+                    if (riddle && riddle.classList.contains("is-open") && activeBarIdForRiddle !== null && activeBarIdForRiddle <= currentGlobalStep) fermerModales();
+                    showToast(`Un corsaire a débloqué l'étape ${currentGlobalStep} !`, "good");
+                }
                 if (currentGlobalStep >= BARS_DATA.length) declencherVictoire();
             } else if (!document.getElementById("bars-list").innerHTML.includes("waypoint")) {
                 renderBars();
@@ -1026,24 +1051,25 @@
                              🦜 <strong>Le Chant des Profondeurs</strong><br>
                              Écoute attentivement le cri mystère. Quel oiseau légendaire oblige au cul-sec ?
                            </div>
-                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="son.mp3" type="audio/mpeg"></audio>
+                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="son3.mp3" type="audio/mpeg"></audio>
                            <div id="audio-fallback-msg" style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;"></div>
                            <input type="text" id="ans" placeholder="Nom de l'oiseau…">
                            <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Valider</button>`;
         }
         else if (barId === 4) {
             c.innerHTML = `<div class="riddle-parchment">
-                             📜 <strong>L'Énigme du Verbe</strong><br>
-                             <em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. Et comme dirait un rappeur, elle n'est jamais fini.» </em>
+                             <strong>L'Énigme du Verbe</strong><br>
+                             <em>« Activité favorite des écumeurs des mers normandes pour détrousser le trésor des tavernes. » </em> (9 lettres)<br>
+                             <small style="color:var(--ink-soft);">Complète les 9 tirets. Les lettres vertes restent à leur place.</small>
                            </div>
-                           <input type="text" id="ans" maxlength="9" placeholder="Propose un mot..." style="text-transform:uppercase; margin-top:4px;">
-                           <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Proposer le mot</button>
-                           <div id="motus-histo" style="display:flex; flex-direction:column; gap:5px; margin-top:10px;"></div>`;
+                           ${buildMotusHTML()}
+                           <button class="btn btn-primary" onclick="motusSubmit()" style="margin-top:8px;">Proposer le mot</button>`;
+            motusInit();
         }
         else if (barId === 5) {
             px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
             c.innerHTML = `<div class="riddle-parchment" style="margin-bottom:6px;">
-                             🗺 <strong>Le Vrai Labyrinthe</strong><br>
+                             🗺️️ <strong>Le Vrai Labyrinthe</strong><br>
                              Incline ton mobile pour guider ton pirate à travers les coursives vers le magot.
                            </div>
                            <div class="maze-svg-wrap">${buildMazeSVG()}</div>
@@ -1055,10 +1081,11 @@
         }
         else if (barId === 6 || barId === 7) {
             c.innerHTML = `<div class="riddle-parchment" style="text-align:center;">
-                             ⚓ <strong>Escale de Transition</strong><br><br>
-                             Reprenez des forces dans cette taverne, aucune épreuve secrète n'exige votre sang-froid ici.
+                             <strong>Escale de Transition</strong><br>
+                             Trinquez tous ensemble ! Le premier corsaire qui appuie sur le sceau remporte l'étape.
                            </div>
-                           <button class="btn btn-primary" onclick="unlockGlobalStep()" style="margin-top:12px;">Trinquer et débloquer la suite</button>`;
+                           <button class="toast-seal" id="btn-toast" onclick="trinquer()">${buildMugsSVG()}<span>Trinquer !</span></button>
+                           <div class="race-note">Un seul gagnant : sois le plus rapide.</div>`;
         }
         else if (barId === 8) {
             c.innerHTML = `<div class="riddle-parchment">
@@ -1084,68 +1111,6 @@
 
         if (activeBarIdForRiddle === 2 && ans === "tour solidor") ok = true;
         if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
-        
-        if (activeBarIdForRiddle === 4) {
-            let motPropose = document.getElementById("ans") ? document.getElementById("ans").value.toUpperCase().trim() : "";
-            if (motPropose.length === 0) {
-                msg.textContent = "Entre un mot.";
-                msg.className = "feedback feedback-bad";
-                if (navigator.vibrate) navigator.vibrate(100);
-                return;
-            }
-
-            const target = "PIRATERIE";
-
-            if (motPropose === target) {
-                ok = true;
-            } else {
-                let guessArr = motPropose.split("");
-                let targetArr = target.split("");
-                let statuses = new Array(guessArr.length).fill("m-absent");
-                let targetMatched = new Array(target.length).fill(false);
-
-                // 1ère passe : lettres bien placées (Vert)
-                for (let i = 0; i < guessArr.length; i++) {
-                    if (i < target.length && guessArr[i] === targetArr[i]) {
-                        statuses[i] = "m-correct";
-                        targetMatched[i] = true;
-                    }
-                }
-
-                // 2ème passe : lettres présentes mais mal placées (Orange) ou absentes (Rouge)
-                for (let i = 0; i < guessArr.length; i++) {
-                    if (statuses[i] === "m-correct") continue;
-                    let foundIdx = -1;
-                    for (let j = 0; j < targetArr.length; j++) {
-                        if (!targetMatched[j] && targetArr[j] === guessArr[i]) {
-                            foundIdx = j;
-                            break;
-                        }
-                    }
-                    if (foundIdx !== -1) {
-                        statuses[i] = "m-present";
-                        targetMatched[foundIdx] = true;
-                    } else {
-                        statuses[i] = "m-absent"; // Rouge
-                    }
-                }
-
-                let row = `<div class="motus-grid">`;
-                guessArr.forEach((l, i) => {
-                    row += `<div class="motus-tile ${statuses[i]}">${l}</div>`;
-                });
-                row += `</div>`;
-
-                document.getElementById("motus-histo").innerHTML += row;
-                document.getElementById("ans").value = "";
-
-                msg.textContent = "Mot incorrect — Vert : bien placé | Orange : présent | Rouge : absent.";
-                msg.className = "feedback feedback-bad";
-                if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-                return;
-            }
-        }
-
         if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
 
         if (ok) {
@@ -1158,6 +1123,145 @@
             msg.className = "feedback feedback-bad";
             if (navigator.vibrate) navigator.vibrate(150);
         }
+    }
+
+    // ---------- Étape du trinquer : course au bouton ----------
+    function buildMugsSVG() {
+        const mug = `<path d="M12 22 h22 v26 a5 5 0 0 1 -5 5 h-12 a5 5 0 0 1 -5 -5 z" fill="#e8b24c" stroke="#fdf3dc" stroke-width="2.2" stroke-linejoin="round"/>
+                     <path d="M12 27 h-4 a4 4 0 0 0 -4 4 v7 a4 4 0 0 0 4 4 h4" fill="none" stroke="#fdf3dc" stroke-width="2.4" stroke-linecap="round"/>
+                     <path d="M11 22 q2 -9 8 -5 q4 -7 9 -1 q6 -3 6 6 z" fill="#fff6dc" stroke="#fdf3dc" stroke-width="1.4" stroke-linejoin="round"/>
+                     <path d="M18 30 v14 M25 30 v14" stroke="#fdf3dc" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>`;
+        return `<svg viewBox="0 0 80 64" aria-hidden="true">
+            <g transform="translate(3 4) rotate(14 22 48)">${mug}</g>
+            <g transform="translate(77 4) scale(-1 1) rotate(14 22 48)">${mug}</g>
+            <path d="M40 8 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z" fill="#fdf3dc"/>
+        </svg>`;
+    }
+
+    function trinquer() {
+        const b = document.getElementById("btn-toast");
+        if (!b || b.disabled) return;
+        b.disabled = true; b.classList.add("pressed");
+        const sp = b.querySelector("span"); if (sp) sp.textContent = "…";
+        if (navigator.vibrate) navigator.vibrate(80);
+        unlockGlobalStep({ race: true });
+    }
+
+    // ---------- Motus individuel : 9 tirets, vert verrouillé, orange / rouge en dessous ----------
+    const MOTUS_WORD = "PIRATERIE";
+    const MOTUS_TTL = 12 * 3600 * 1000;
+    let motusState = null;
+
+    function motusKey() { return "barathon_motus_" + (document.getElementById("global-participant").value || "anonyme"); }
+    function motusBlank() { return { greens: Array(9).fill(""), wrong: Array.from({ length: 9 }, () => []) }; }
+    function motusLoad() {
+        try {
+            const raw = JSON.parse(localStorage.getItem(motusKey()) || "null");
+            if (!raw || Date.now() - raw.t > MOTUS_TTL || !Array.isArray(raw.greens) || raw.greens.length !== 9) return motusBlank();
+            return { greens: raw.greens, wrong: raw.wrong };
+        } catch (e) { return motusBlank(); }
+    }
+    function motusSave() { try { localStorage.setItem(motusKey(), JSON.stringify({ t: Date.now(), greens: motusState.greens, wrong: motusState.wrong })); } catch (e) {} }
+    function motusClear() { try { localStorage.removeItem(motusKey()); } catch (e) {} }
+
+    function motusBoxes() { return Array.from(document.querySelectorAll("#motus-cols .motus-box")); }
+    function motusClean(str) { return (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toUpperCase(); }
+    function motusNeighbour(from, dir) {
+        const boxes = motusBoxes();
+        for (let j = from + dir; j >= 0 && j < 9; j += dir) if (!boxes[j].readOnly) return boxes[j];
+        return null;
+    }
+
+    function buildMotusHTML() {
+        let cols = "";
+        for (let i = 0; i < 9; i++) {
+            cols += `<div class="motus-col"><input class="motus-box" data-i="${i}" maxlength="2" placeholder="–" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="Lettre ${i + 1}"><div class="motus-wrong" id="mw-${i}"></div></div>`;
+        }
+        return `<div class="motus-cols" id="motus-cols">${cols}</div>
+                <div class="motus-legend"><span><i style="background:var(--moss)"></i>bien placée</span><span><i style="background:#cc6a0c"></i>dans le mot, ailleurs</span><span><i style="background:#b3243b"></i>absente du mot</span></div>`;
+    }
+
+    function motusInit() {
+        motusState = motusLoad();
+        motusBoxes().forEach((b, i) => {
+            b.addEventListener("input", () => {
+                b.value = motusClean(b.value).slice(-1);
+                if (b.value) { const nx = motusNeighbour(i, 1); if (nx) nx.focus(); }
+            });
+            b.addEventListener("keydown", e => {
+                if (e.key === "Enter") { e.preventDefault(); motusSubmit(); }
+                else if (e.key === "Backspace" && !b.value) { const pv = motusNeighbour(i, -1); if (pv) { e.preventDefault(); pv.value = ""; pv.focus(); } }
+                else if (e.key === "ArrowLeft") { const pv = motusNeighbour(i, -1); if (pv) { e.preventDefault(); pv.focus(); } }
+                else if (e.key === "ArrowRight") { const nx = motusNeighbour(i, 1); if (nx) { e.preventDefault(); nx.focus(); } }
+            });
+            b.addEventListener("beforeinput", e => {
+                if (e.inputType === "deleteContentBackward" && !b.value) { const pv = motusNeighbour(i, -1); if (pv) { e.preventDefault(); pv.value = ""; pv.focus(); } }
+            });
+            b.addEventListener("paste", e => {
+                e.preventDefault();
+                const txt = motusClean((e.clipboardData || window.clipboardData).getData("text"));
+                const boxes = motusBoxes(); let k = 0;
+                for (let j = i; j < 9 && k < txt.length; j++) { if (!boxes[j].readOnly) boxes[j].value = txt[k++]; }
+            });
+            b.addEventListener("focus", () => { if (!b.readOnly) b.select(); });
+        });
+        motusRender(true);
+    }
+
+    function motusRender(clearOthers) {
+        motusBoxes().forEach((b, i) => {
+            const g = motusState.greens[i];
+            if (g) { b.value = g; b.readOnly = true; b.classList.add("locked"); b.setAttribute("inputmode", "none"); }
+            else { b.readOnly = false; b.classList.remove("locked"); b.setAttribute("inputmode", "text"); if (clearOthers) b.value = ""; }
+            const w = document.getElementById("mw-" + i);
+            if (w) w.innerHTML = motusState.wrong[i].map(c => `<span class="motus-chip ${c.s}">${c.l}</span>`).join("");
+        });
+    }
+
+    // Règle classique (doublons gérés) : g = bien placée, o = dans le mot mais ailleurs, r = absente
+    function motusEvaluate(guess) {
+        const secret = MOTUS_WORD.split(""), g = guess.split(""), res = Array(9).fill("r"), left = {};
+        secret.forEach((ch, i) => { if (g[i] === ch) res[i] = "g"; else left[ch] = (left[ch] || 0) + 1; });
+        g.forEach((ch, i) => { if (res[i] !== "g" && left[ch] > 0) { res[i] = "o"; left[ch]--; } });
+        return res;
+    }
+
+    function motusSubmit() {
+        if (activeBarIdForRiddle !== 4 || !motusState) return;
+        const msg = document.getElementById("riddle-msg"), boxes = motusBoxes();
+        const letters = boxes.map(b => motusClean(b.value).slice(-1));
+        const empty = [];
+        letters.forEach((l, i) => { if (!l) empty.push(i); });
+        if (empty.length) {
+            msg.textContent = `Complète ${empty.length > 1 ? "les " + empty.length + " tirets restants" : "le tiret restant"}.`;
+            msg.className = "feedback feedback-bad";
+            boxes[empty[0]].focus();
+            empty.forEach(i => { boxes[i].classList.remove("shake"); void boxes[i].offsetWidth; boxes[i].classList.add("shake"); });
+            if (navigator.vibrate) navigator.vibrate(100);
+            return;
+        }
+        const guess = letters.join(""), res = motusEvaluate(guess);
+        res.forEach((s, i) => {
+            if (s === "g") { motusState.greens[i] = guess[i]; return; }
+            const list = motusState.wrong[i];
+            if (!list.some(c => c.l === guess[i] && c.s === s)) { list.push({ l: guess[i], s }); if (list.length > 6) list.shift(); }
+        });
+        motusSave();
+        const nGreen = res.filter(s => s === "g").length;
+        if (nGreen === 9) {
+            motusRender(false);
+            msg.textContent = "Mot trouvé — déblocage en cours…"; msg.className = "feedback feedback-good";
+            motusClear();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            unlockGlobalStep();
+            return;
+        }
+        motusRender(true);
+        msg.textContent = nGreen === 0 ? "Aucune lettre bien placée. Les orange sont dans le mot, ailleurs." : `${nGreen} lettre${nGreen > 1 ? "s" : ""} bien placée${nGreen > 1 ? "s" : ""} sur 9. Continue !`;
+        msg.className = "feedback feedback-warn";
+        const first = motusBoxes().find(b => !b.readOnly);
+        if (first) first.focus();
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
     }
 
     function buildMazeSVG() {
@@ -1392,6 +1496,10 @@
         }, 8000);
     }
 
+    // ---------- Estimation de position : filtre de Kalman « position + vitesse » ----------
+    // Repère local en mètres centré sur la cache (x = est, y = nord).
+    // Chaque point GPS est pondéré par sa précision, la vitesse Doppler du GPS (speed/heading) corrige
+    // le mouvement, et la position est prolongée jusqu'à l'instant présent (retard du GPS compensé).
     const M_PER_DEG = 111195;
     function toLocalXY(lat, lng) {
         return { x: (lng - TARGET_COORDS.lng) * M_PER_DEG * Math.cos(TARGET_COORDS.lat * Math.PI / 180), y: (lat - TARGET_COORDS.lat) * M_PER_DEG };
@@ -1421,8 +1529,9 @@
         if (!st) return { t: tms, X: { p: p.x, v: 0, P00: R0, P01: 0, P11: 4 }, Y: { p: p.y, v: 0, P00: R0, P01: 0, P11: 4 }, doppler: false };
         const dt = Math.max(0.05, Math.min(5, (tms - st.t) / 1000));
         st.t = tms;
-        const sa = st.doppler ? 0.5 : 0.3;
+        const sa = st.doppler ? 0.5 : 0.3;                          // sans vitesse Doppler : filtre plus prudent
         kf1Predict(st.X, dt, sa); kf1Predict(st.Y, dt, sa);
+        // un point très éloigné de la prédiction est probablement un rebond de signal : on lui fait moins confiance
         const nis = Math.pow(p.x - st.X.p, 2) / (st.X.P00 + R0) + Math.pow(p.y - st.Y.p, 2) / (st.Y.P00 + R0);
         const R = nis > 9 ? R0 * Math.min(16, nis / 3) : R0;
         kf1Update(st.X, p.x, R); kf1Update(st.Y, p.y, R);
@@ -1439,7 +1548,7 @@
         const dt = Math.max(0, Math.min(3, (nowMs - st.t) / 1000));
         let vx = st.X.v, vy = st.Y.v;
         if (Math.hypot(vx, vy) < 0.35) { vx = 0; vy = 0; }
-        const k = st.doppler ? 1.2 * (1 - Math.exp(-dt / 1.2)) : 0;
+        const k = st.doppler ? 1.2 * (1 - Math.exp(-dt / 1.2)) : 0;   // prolongement seulement si la vitesse est mesurée
         return { x: st.X.p + vx * k, y: st.Y.p + vy * k, vx: st.X.v, vy: st.Y.v, sigma: Math.sqrt((st.X.P00 + st.Y.P00) / 2) };
     }
 
@@ -1465,12 +1574,14 @@
         return (prev + alpha * diff + 360) % 360;
     }
 
+    // Cap compensé de l'inclinaison (alpha/beta/gamma) : à plat on suit le haut du téléphone,
+    // en position debout on suit son dos (là où pointe la caméra), avec fondu entre les deux.
     function headingFromEuler(alpha, beta, gamma) {
         const r = Math.PI / 180, a = alpha * r, b = (beta || 0) * r, g = (gamma || 0) * r;
         const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
-        const yE = -sA * cB, yN = cA * cB;
-        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG);
-        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));
+        const yE = -sA * cB, yN = cA * cB;                                   // haut du téléphone
+        const zE = -(cA * sG + sA * sB * cG), zN = -(sA * sG - cA * sB * cG); // dos du téléphone
+        const w = Math.max(0, Math.min(1, (Math.abs(cB) - 0.4) / 0.4));  // 1 = à plat, 0 = debout (selon le tangage)
         const ly = Math.hypot(yE, yN), lz = Math.hypot(zE, zN);
         let e = 0, n = 0;
         if (ly > 1e-3) { e += w * yE / ly; n += w * yN / ly; }
@@ -1479,6 +1590,7 @@
         return (Math.atan2(e, n) / r + 360) % 360;
     }
 
+    // Les capteurs ne font que mémoriser le cap : l'affichage est calculé à chaque image (voir compassFrame).
     function handleCompassOrientation(event) {
         let heading = null;
         if (typeof event.webkitCompassHeading === 'number' && event.webkitCompassHeading >= 0) {
@@ -1490,6 +1602,7 @@
         }
         if (heading == null) return;
         if (lastHeading == null) { lastHeading = heading; return; }
+        // lissage adaptatif : petit écart = fort lissage (anti-tremblement), grand écart = suivi immédiat
         const d = Math.abs(((heading - lastHeading + 540) % 360) - 180);
         lastHeading = smoothAngle(lastHeading, heading, Math.min(0.85, 0.14 + d / 30));
     }
@@ -1511,11 +1624,12 @@
             const d = ((tgt - cur + 540) % 360) - 180;
             const boost = Math.abs(d) > 35 ? 1.8 : 1;
             let step = d * Math.min(1, ease(speed * boost));
-            const cap = 900 * dt;
+            const cap = 900 * dt;                                  // vitesse max 900°/s : même un grand virage reste fluide
             step = Math.max(-cap, Math.min(cap, step));
             return (cur + step + 360) % 360;
         };
 
+        // position estimée à l'instant présent : distance, direction et tendance partent de la même source
         if (kf) {
             const pp = kalmanPos(kf, Date.now());
             const d = Math.hypot(pp.x, pp.y);
@@ -1527,6 +1641,7 @@
 
         const rose = document.getElementById("compass-rose"), needle = document.getElementById("compass-needle");
         if (lastHeading != null) dispRose = turn(dispRose, (360 - lastHeading) % 360, 14);
+        // dans l'incertitude du GPS la direction n'est plus fiable : l'aiguille se calme au lieu de s'affoler
         const near = targetDist != null && targetDist < Math.max(3, sigmaDisp);
         if (bearingTarget != null) dispNeedle = turn(dispNeedle, bearingTarget, near ? 2.5 : 9);
         if (rose && dispRose != null) rose.style.transform = `rotate(${dispRose.toFixed(2)}deg)`;
@@ -1555,6 +1670,7 @@
         compassRaf = requestAnimationFrame(compassFrame);
     }
 
+    // Paliers de chaleur avec hystérésis : plus de clignotement quand on reste à la frontière d'un palier.
     function nextHeat(dist) {
         const up = [30, 15, 5], down = [34, 18, 7];
         let h = heatState;
@@ -1563,6 +1679,7 @@
         return h;
     }
 
+    // Partie « lente » de l'affichage (paliers, jauge, messages, cône d'incertitude) : ~5 fois par seconde.
     function refreshCompassUI() {
         if (activeBarIdForRiddle !== 2 || !compassActive) return;
         const inst = document.getElementById("compass-instrument");
@@ -1580,6 +1697,7 @@
         const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
         document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
 
+        // cône d'incertitude : plus on approche, plus la direction GPS est floue (honnête plutôt que trompeur)
         const half = Math.atan2(sigmaDisp, Math.max(dist, 0.3)) * 180 / Math.PI;
         const cone = document.getElementById("compass-cone");
         if (cone) cone.setAttribute("d", conePath(Math.max(3, half)));
@@ -1595,6 +1713,7 @@
         else { msg = "Suis l'aiguille, la cache t'attend quelque part…"; kind = "info"; }
         setCompassStatus(msg, kind);
 
+        // tendance : plus fiable que la distance brute quand le GPS hésite de quelques mètres
         const tr = document.getElementById("ro-trend");
         if (tr) {
             const sp = Math.hypot(kf.X.v, kf.Y.v);
@@ -1611,19 +1730,40 @@
         if (heat >= 2 && navigator.vibrate && nowT - lastVibe > 4000) { lastVibe = nowT; navigator.vibrate([100, 50, 100]); }
     }
 
-    async function unlockGlobalStep() {
+    async function unlockGlobalStep(opts) {
+        const race = !!(opts && opts.race);
         const p = document.getElementById("global-participant").value;
         const payload = { action: "resolve_riddle", step: activeBarIdForRiddle, participant: p };
+        const rearm = () => {
+            const b = document.getElementById("btn-toast");
+            if (b) { b.disabled = false; b.classList.remove("pressed"); const sp = b.querySelector("span"); if (sp) sp.textContent = "Trinquer !"; }
+        };
         try {
             const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
             const data = await res.json();
-            if (data.status === "success" || data.status === "already_unlocked") {
-                showToast(`${p} a validé l'étape ! (+20 pts)`, "good");
+            if (data.status === "success") {
+                // le serveur répond « success » au tout premier : c'est lui qui désigne le gagnant
+                showToast(race ? `${p} a trinqué en premier ! (+20 pts)` : `${p} a validé l'étape ! (+20 pts)`, "good");
+                if (race) lancerConfettis();
                 fermerModales(); fetchGameState();
+            } else if (data.status === "already_unlocked") {
+                showToast(race ? "Trop tard ! Un autre corsaire a trinqué avant toi." : "Un autre corsaire t'a devancé : l'étape est débloquée pour tout le monde.", "info");
+                fermerModales(); fetchGameState();
+            } else {
+                const m = document.getElementById("riddle-msg");
+                if (m) { m.textContent = "Validation impossible pour le moment, réessaie dans un instant."; m.className = "feedback feedback-bad"; }
+                showToast("Le carnet n'a pas pu valider l'étape, réessaie.", "bad");
+                rearm();
             }
         } catch (error) {
+            if (race) {
+                // course au bouton : sans réseau on ne peut pas savoir qui est le premier, donc on ne débloque rien
+                showToast("Pas de réseau : impossible de savoir si tu es le premier. Réessaie !", "bad");
+                rearm();
+                return;
+            }
             stockerHorsLigne(payload);
-            currentGlobalStep = Math.min(BARS_DATA.length, activeBarIdForRiddle + 1);
+            currentGlobalStep = Math.max(currentGlobalStep, Math.min(BARS_DATA.length, activeBarIdForRiddle));
             showToast("Hors-ligne : étape validée sur le carnet !", "info");
             fermerModales(); renderBars(); renderCarte();
         }
@@ -1638,6 +1778,7 @@
         showModal("modal-drink");
     }
 
+    // Compression d'image automatique via Canvas
     document.getElementById('drink-photo').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
