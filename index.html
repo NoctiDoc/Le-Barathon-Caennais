@@ -658,8 +658,8 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    // COORDONNÉES DE TEST (position à remplacer par celle de la vraie cache avant la soirée)
-    const TARGET_COORDS = { lat: 49.156022, lng: -0.475112 };
+    // Coordonnées de la cache de l'étape 2
+    const TARGET_COORDS = { lat: 49.181329, lng: -0.364048 };
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
     function seededRandom(seed) {
@@ -1051,7 +1051,7 @@
                              🦜 <strong>Le Chant des Profondeurs</strong><br>
                              Écoute attentivement le cri mystère. Quel oiseau légendaire oblige au cul-sec ?
                            </div>
-                           <audio controls style="width:100%; margin-bottom:10px;" onerror="fallbackAudio(this)"><source src="son3.mp3" type="audio/mpeg"></audio>
+                           <audio controls style="width:100%; margin-bottom:10px;"><source src="son3.mp3" type="audio/mpeg" onerror="fallbackAudio(this.parentNode)"></audio>
                            <div id="audio-fallback-msg" style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;"></div>
                            <input type="text" id="ans" placeholder="Nom de l'oiseau…">
                            <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Valider</button>`;
@@ -1371,20 +1371,6 @@
         mazeAnimId = requestAnimationFrame(loop);
     }
 
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371000; const toRad = d => d * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function bearingTo(lat1, lon1, lat2, lon2) {
-        const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
-        const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
-        const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
-        return (toDeg(Math.atan2(y, x)) + 360) % 360;
-    }
-
     function buildCompassSVG() {
         const cx = 130, cy = 130, F = "'IM Fell English SC', Georgia, serif";
         const pt = (r, deg) => { const a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
@@ -1526,13 +1512,18 @@
     }
     function kalmanFix(st, lat, lng, acc, tms, speed, course) {
         const p = toLocalXY(lat, lng), R0 = Math.pow(Math.max(acc || 15, 3), 2);
-        if (!st) return { t: tms, X: { p: p.x, v: 0, P00: R0, P01: 0, P11: 4 }, Y: { p: p.y, v: 0, P00: R0, P01: 0, P11: 4 }, doppler: false };
+        const fresh = (doppler) => ({ t: tms, X: { p: p.x, v: 0, P00: R0, P01: 0, P11: 4 }, Y: { p: p.y, v: 0, P00: R0, P01: 0, P11: 4 }, doppler: doppler, out: 0 });
+        if (!st) return fresh(false);
+        if (tms - st.t > 10000) return fresh(st.doppler);          // long silence du GPS : on repart de la nouvelle position
         const dt = Math.max(0.05, Math.min(5, (tms - st.t) / 1000));
         st.t = tms;
         const sa = st.doppler ? 0.5 : 0.3;                          // sans vitesse Doppler : filtre plus prudent
         kf1Predict(st.X, dt, sa); kf1Predict(st.Y, dt, sa);
         // un point très éloigné de la prédiction est probablement un rebond de signal : on lui fait moins confiance
         const nis = Math.pow(p.x - st.X.p, 2) / (st.X.P00 + R0) + Math.pow(p.y - st.Y.p, 2) / (st.Y.P00 + R0);
+        // un écart qui dure n'est pas un rebond mais un vrai déplacement : après 3 points d'affilée on repart d'ici
+        st.out = nis > 9 ? (st.out || 0) + 1 : 0;
+        if (st.out >= 3) return fresh(st.doppler);
         const R = nis > 9 ? R0 * Math.min(16, nis / 3) : R0;
         kf1Update(st.X, p.x, R); kf1Update(st.Y, p.y, R);
         if (typeof speed === 'number' && isFinite(speed) && speed >= 0) {
@@ -1853,7 +1844,7 @@
             localStorage.removeItem('barathon_offline_queue');
             showToast("Données hors-ligne synchronisées avec succès !", "good");
         } catch (e) {
-            console.log("Toujours hors-ligne, synchro reportée.");
+            // toujours hors ligne : la file d'attente sera renvoyée plus tard
         }
     }
 
