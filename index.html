@@ -256,17 +256,80 @@
   /* CONFETTIS DE VICTOIRE */
   .confetti-piece { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 400; pointer-events: none; animation: confetti-fall linear forwards; border-radius: 2px; }
 
+  /* ÉCRAN DE DÉCOMPTE (avant l'ouverture) */
+  body.gate-locked .container, body.gate-locked #net-banner { display: none !important; }
+  .countdown-screen { min-height: calc(100vh - 36px); display: flex; align-items: center; justify-content: center; }
+  .countdown-screen[hidden] { display: none; }
+  .countdown-screen.leaving { animation: cd-out .6s var(--ease) forwards; }
+  @keyframes cd-out { to { opacity: 0; transform: scale(.96); } }
+  .cd-card { position: relative; width: 100%; max-width: 440px; background: var(--paper-card); border: 1px solid rgba(43,29,14,.35); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg), inset 0 0 40px rgba(169,130,45,.06); padding: 26px 18px 22px; text-align: center; animation: fade-in-up .5s var(--ease); }
+  .cd-seal { width: 74px; height: 74px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--wine); background: radial-gradient(circle at 35% 30%, #fff8e4, #ecd9a6); border: 2px solid var(--brass); box-shadow: var(--shadow-md); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .12s var(--ease); }
+  .cd-seal:active { transform: scale(.94); }
+  .cd-seal svg { animation: needle-idle 4s ease-in-out infinite; }
+  .cd-lead { font-size: 15px; color: var(--ink-soft); margin: 14px 0 12px; }
+  .cd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 14px; }
+  .cd-cell { background: linear-gradient(180deg, #2f2113 0%, #1f160c 100%); border: 1.5px solid var(--brass); border-radius: var(--radius-md); padding: 10px 2px 8px; box-shadow: inset 0 2px 8px rgba(0,0,0,.6), var(--shadow-sm); }
+  .cd-cell span { display: block; font-family: 'IM Fell English SC', serif; font-size: 34px; line-height: 1; color: var(--brass-light); text-shadow: 0 0 12px rgba(212,171,92,.5); font-variant-numeric: tabular-nums; }
+  .cd-cell small { display: block; margin-top: 5px; font-size: 11px; letter-spacing: 1px; color: #b79b62; text-transform: uppercase; }
+  .cd-date { font-family: 'IM Fell English SC', serif; font-size: 17px; color: var(--wine); margin: 4px 0 2px; }
+  .cd-hint { font-size: 12.5px; color: var(--ink-soft); font-style: italic; margin: 6px 0 0; }
+  .cd-admin { margin-top: 16px; padding-top: 12px; border-top: 1px dashed rgba(43,29,14,.3); }
+  .cd-admin[hidden] { display: none; }
+  .cd-admin input { text-align: center; font-size: 15px; }
+  #admin-badge { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -6px -4px 12px; padding: 6px 10px; border-radius: var(--radius-sm); background: repeating-linear-gradient(135deg, rgba(169,130,45,.18) 0 8px, rgba(169,130,45,.08) 8px 16px); border: 1px dashed var(--brass); font-size: 12px; color: var(--ink); }
+  #admin-badge[hidden] { display: none; }
+  #admin-badge button { font-family: inherit; font-size: 12px; background: var(--ink); color: var(--paper-card); border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+
+  /* CROIX DIRECTIONNELLE DU LABYRINTHE */
+  .maze-pad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 48px); gap: 6px; justify-content: center; margin: 8px 0 4px; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .maze-pad button { font-size: 20px; border-radius: var(--radius-md); border: 1px solid rgba(43,29,14,.4); background: #fffdf6; color: var(--ink); box-shadow: var(--shadow-sm); cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none; }
+  .maze-pad button.held, .maze-pad button:active { background: var(--wine); color: #fdf6e8; transform: scale(.96); }
+  .maze-pad .pad-up { grid-column: 2; grid-row: 1; }
+  .maze-pad .pad-left { grid-column: 1; grid-row: 2; }
+  .maze-pad .pad-center { grid-column: 2; grid-row: 2; font-size: 13px; background: transparent; box-shadow: none; border-style: dashed; color: var(--ink-soft); }
+  .maze-pad .pad-right { grid-column: 3; grid-row: 2; }
+  .maze-pad .pad-down { grid-column: 2; grid-row: 3; }
+
   /* CANVAS CACHÉ POUR LA COMPRESSION */
   #resize-canvas { display: none; }
 </style>
 </head>
-<body>
+<body class="gate-locked">
+
+<!-- ÉCRAN DE DÉCOMPTE : visible jusqu'au lancement (ou accès organisateur) -->
+<div id="countdown-screen" class="countdown-screen" hidden>
+  <div class="cd-card">
+    <div class="cd-seal" id="cd-seal" onclick="gererClicAdminDecompte()" aria-hidden="true">
+      <svg viewBox="0 0 40 40" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="20" cy="20" r="17"></circle>
+        <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
+        <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.35"></path>
+      </svg>
+    </div>
+    <h1>Le Barathon Caennais</h1>
+    <p class="cd-lead">Les tavernes ouvriront leurs portes dans…</p>
+    <div class="cd-grid" role="timer" aria-live="off">
+      <div class="cd-cell"><span id="cd-d">0</span><small>jours</small></div>
+      <div class="cd-cell"><span id="cd-h">00</span><small>heures</small></div>
+      <div class="cd-cell"><span id="cd-m">00</span><small>min</small></div>
+      <div class="cd-cell"><span id="cd-s">00</span><small>sec</small></div>
+    </div>
+    <p class="cd-date" id="cd-date">Rendez-vous le samedi 31 octobre à 15 h</p>
+    <p class="cd-hint">Affûte ton gosier, corsaire. Le carnet s'ouvrira tout seul à l'heure dite.</p>
+    <form id="cd-admin" class="cd-admin" hidden onsubmit="return tenterAccesAdmin(event)">
+      <input type="password" id="cd-admin-code" placeholder="Code organisateur" autocomplete="off" autocapitalize="off">
+      <button class="btn btn-primary" type="submit">Accès anticipé (test)</button>
+      <div id="cd-admin-msg" class="feedback"></div>
+    </form>
+  </div>
+</div>
 
 <div id="net-banner">Connexion au serveur...</div>
 <canvas id="resize-canvas"></canvas>
 <div id="toast-container"></div>
 
 <div class="container">
+  <div id="admin-badge" hidden><span>🔧 Mode test — accès anticipé</span><button type="button" onclick="reverrouillerApp()">Reverrouiller</button></div>
   <div class="brand-row" onclick="gererClicAdmin()">
     <svg viewBox="0 0 40 40" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
       <circle cx="20" cy="20" r="17"></circle>
@@ -710,7 +773,7 @@
     let selectedBarForDrink = null;
     let base64Photo = null, mimeType = null, fileName = null;
 
-    let mazeAnimId = null, mazeGamma = 0, mazeBeta = 0;
+    let mazeAnimId = null, mazeGamma = 0, mazeBeta = 0, mazeBase = null;
     let px = 15, py = 15;
     const mazeKeys = {};
 
@@ -719,12 +782,124 @@
     let compassRaf = null, compassLastT = 0, dispRose = null, dispNeedle = null, dispDist = null, targetDist = null, bearingTarget = null, lastAccuracy = null;
     let adminClicks = 0, adminTimer = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('barathon_participant');
-        if (savedName) document.getElementById('global-participant').value = savedName;
+    // ---------- Ouverture du jeu : décompte + accès organisateur ----------
+    // Heure de Paris (CET, UTC+1 : on est repassé à l'heure d'hiver le 25 octobre).
+    const LAUNCH_DATE = new Date("2026-10-31T15:00:00+01:00");
+    const ADMIN_CODE = "corsaire2026";          // à changer si besoin
+    const ADMIN_KEY = "barathon_admin";
+    let appStarted = false, countdownTimer = null, cdAdminClicks = 0, cdAdminTimer = null;
+
+    function estLance() { return Date.now() >= LAUNCH_DATE.getTime(); }
+    function estAdmin() { try { return localStorage.getItem(ADMIN_KEY) === "1"; } catch (e) { return false; } }
+    function codeAdminValide(code) { return (code || "").trim().toLowerCase() === ADMIN_CODE.toLowerCase(); }
+
+    function initPorte() {
+        // raccourci de test : index.html?admin=corsaire2026
+        const params = new URLSearchParams(location.search);
+        if (params.has("admin")) {
+            if (codeAdminValide(params.get("admin"))) localStorage.setItem(ADMIN_KEY, "1");
+            params.delete("admin");
+            history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash);
+        }
+        if (estLance() || estAdmin()) demarrerApp(false);
+        else afficherDecompte();
+    }
+
+    function afficherDecompte() {
+        document.body.classList.add("gate-locked");
+        document.getElementById("countdown-screen").hidden = false;
+        majDecompte();
+        clearInterval(countdownTimer);
+        countdownTimer = setInterval(majDecompte, 1000);
+    }
+
+    function majDecompte() {
+        const reste = LAUNCH_DATE.getTime() - Date.now();
+        if (reste <= 0) {
+            clearInterval(countdownTimer);
+            demarrerApp(true);
+            return;
+        }
+        const s = Math.floor(reste / 1000);
+        const pad = n => String(n).padStart(2, "0");
+        const set = (id, v) => { const el = document.getElementById(id); if (el.textContent !== v) el.textContent = v; };
+        set("cd-d", String(Math.floor(s / 86400)));
+        set("cd-h", pad(Math.floor(s / 3600) % 24));
+        set("cd-m", pad(Math.floor(s / 60) % 60));
+        set("cd-s", pad(s % 60));
+    }
+
+    function demarrerApp(avecFanfare) {
+        clearInterval(countdownTimer);
+        const screen = document.getElementById("countdown-screen");
+        const reveler = () => {
+            screen.hidden = true; screen.classList.remove("leaving");
+            document.body.classList.remove("gate-locked");
+            document.getElementById("admin-badge").hidden = !(estAdmin() && !estLance());
+        };
+        if (avecFanfare && !screen.hidden) {
+            screen.classList.add("leaving");
+            setTimeout(() => { reveler(); lancerConfettis(); showToast("Les tavernes sont ouvertes : à l'abordage !", "good"); }, 600);
+        } else reveler();
+
+        if (appStarted) return;
+        appStarted = true;
         verifierFileAttenteHorsLigne();
         verifierConnexionReseau();
         setInterval(verifierConnexionReseau, 10000);
+        programmerSync(0);
+        // quand le décompte est passé pendant le mode test, on retire le badge
+        if (!estLance()) setTimeout(function surveillerLancement() {
+            if (estLance()) document.getElementById("admin-badge").hidden = true;
+            else setTimeout(surveillerLancement, 30000);
+        }, 30000);
+    }
+
+    // 5 taps rapides sur le sceau du décompte -> champ « code organisateur »
+    function gererClicAdminDecompte() {
+        cdAdminClicks++;
+        clearTimeout(cdAdminTimer);
+        cdAdminTimer = setTimeout(() => { cdAdminClicks = 0; }, 2000);
+        if (cdAdminClicks >= 5) {
+            cdAdminClicks = 0;
+            const f = document.getElementById("cd-admin");
+            f.hidden = false;
+            document.getElementById("cd-admin-code").focus();
+        }
+    }
+
+    function tenterAccesAdmin(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById("cd-admin-code"), msg = document.getElementById("cd-admin-msg");
+        if (codeAdminValide(input.value)) {
+            localStorage.setItem(ADMIN_KEY, "1");
+            input.value = "";
+            document.getElementById("cd-admin").hidden = true;
+            msg.textContent = "";
+            demarrerApp(false);
+            showToast("Mode test activé : accès anticipé.", "good");
+        } else {
+            msg.textContent = "Code incorrect.";
+            msg.className = "feedback feedback-bad";
+            input.select();
+            if (navigator.vibrate) navigator.vibrate(150);
+        }
+        return false;
+    }
+
+    function reverrouillerApp() {
+        if (!confirm("Retirer l'accès anticipé et revenir au décompte ?")) return;
+        try {
+            localStorage.removeItem(ADMIN_KEY);
+            localStorage.removeItem("barathon_victoire");
+        } catch (e) {}
+        location.reload();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('barathon_participant');
+        if (savedName) document.getElementById('global-participant').value = savedName;
+        initPorte();
     });
 
     function sauvegarderParticipant() {
@@ -790,33 +965,58 @@
         }
     }
 
+    // 5 taps rapides sur le titre : forcer une étape (organisateur uniquement, local à ce téléphone)
+    let adminStepOverride = false;
     function gererClicAdmin() {
         adminClicks++;
         clearTimeout(adminTimer);
         adminTimer = setTimeout(() => { adminClicks = 0; }, 2000);
         if (adminClicks >= 5) {
             adminClicks = 0;
-            const codeSecours = prompt("🔐 Code Administrateur secret : À quelle étape faut-il forcer le passage ? (1 à 8)");
-            let stepNum = parseInt(codeSecours);
-            if (stepNum >= 1 && stepNum <= 8) {
+            if (!estAdmin()) {
+                const code = prompt("🔐 Code organisateur :");
+                if (code === null) return;
+                if (!codeAdminValide(code)) { showToast("Code incorrect.", "bad"); return; }
+                localStorage.setItem(ADMIN_KEY, "1");
+            }
+            const saisie = prompt("🔧 À quelle étape faut-il forcer le passage ? (1 à 8)\n(Uniquement sur ce téléphone, jusqu'au rechargement de la page.)");
+            const stepNum = parseInt(saisie, 10);
+            if (stepNum >= 1 && stepNum <= BARS_DATA.length) {
                 currentGlobalStep = stepNum;
+                adminStepOverride = true;   // le serveur ne ré-impose plus son étape tant que la page n'est pas rechargée
                 renderBars();
                 renderCarte();
-                showToast(`Passage forcé à l'étape ${stepNum}`, 'good');
+                showToast(`Passage forcé à l'étape ${stepNum} (local)`, 'good');
             }
         }
     }
 
-    setInterval(fetchGameState, 4000);
-    fetchGameState();
+    // ---------- Synchronisation : toutes les 4 s, en pause si l'appli est en arrière-plan ----------
+    let syncTimer = null, syncEchecs = 0, syncEnCours = false;
+    function programmerSync(ms) {
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(boucleSync, ms);
+    }
+    async function boucleSync() {
+        if (document.hidden) return;                          // reprend sur « visibilitychange »
+        await fetchGameState();
+        const delai = syncEchecs ? Math.min(30000, 4000 * Math.pow(2, syncEchecs)) : 4000;
+        programmerSync(delai);
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && appStarted) programmerSync(0);
+    });
 
     async function fetchGameState() {
+        if (syncEnCours) return;
+        syncEnCours = true;
         try {
             const res = await fetch(WEB_APP_URL + "?action=get_state");
             const data = await res.json();
+            syncEchecs = 0;
             const firstSync = !stateSynced;
             stateSynced = true;
-            if (data.currentStep && data.currentStep > currentGlobalStep) {
+            if (!adminStepOverride && data.currentStep && data.currentStep > currentGlobalStep) {
                 currentGlobalStep = data.currentStep;
                 renderBars();
                 renderCarte();
@@ -832,8 +1032,11 @@
                 renderCarte();
             }
         } catch (e) {
+            syncEchecs = Math.min(syncEchecs + 1, 3);
             const list = document.getElementById("bars-list");
             if (!list.innerHTML.includes("waypoint")) renderBars();
+        } finally {
+            syncEnCours = false;
         }
     }
 
@@ -1067,14 +1270,22 @@
             motusInit();
         }
         else if (barId === 5) {
-            px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
+            px = 15; py = 15; mazeGamma = 0; mazeBeta = 0; mazeBase = null;
             c.innerHTML = `<div class="riddle-parchment" style="margin-bottom:6px;">
                              🗺️️ <strong>Le Vrai Labyrinthe</strong><br>
                              Incline ton mobile pour guider ton pirate à travers les coursives vers le magot.
                            </div>
                            <div class="maze-svg-wrap">${buildMazeSVG()}</div>
-                           <div id="maze-hint" class="feedback feedback-info" style="margin:6px 0;">Glisse doucement dans les couloirs.</div>
-                           <button class="btn btn-primary" id="btn-maze" onclick="demarrerLabyrinthe()">Activer le gyroscope</button>`;
+                           <div id="maze-hint" class="feedback feedback-info" style="margin:6px 0;">Active le gyroscope, ou utilise les flèches.</div>
+                           <button class="btn btn-primary" id="btn-maze" onclick="demarrerLabyrinthe()">Activer le gyroscope</button>
+                           <div class="maze-pad" id="maze-pad">
+                             <button type="button" class="pad-up" data-k="ArrowUp" aria-label="Haut">▲</button>
+                             <button type="button" class="pad-left" data-k="ArrowLeft" aria-label="Gauche">◀</button>
+                             <button type="button" class="pad-center" onclick="recalibrerLabyrinthe()" aria-label="Recalibrer le gyroscope">zéro</button>
+                             <button type="button" class="pad-right" data-k="ArrowRight" aria-label="Droite">▶</button>
+                             <button type="button" class="pad-down" data-k="ArrowDown" aria-label="Bas">▼</button>
+                           </div>`;
+            lierCroixLabyrinthe();
             startSmoothMazeLoop();
             window.addEventListener('keydown', handleMazeKeydown);
             window.addEventListener('keyup', handleMazeKeyup);
@@ -1097,6 +1308,8 @@
                            <button class="btn btn-primary" onclick="verifierReponse()" style="margin-top:8px;">Terminer le jeu !</button>`;
         }
         showModal("modal-riddle");
+        const champ = document.getElementById("ans");
+        if (champ) champ.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); verifierReponse(); } });
     }
 
     function fallbackAudio(audioEl) {
@@ -1104,13 +1317,18 @@
         document.getElementById('audio-fallback-msg').textContent = "Le son n'a pas pu être chargé. Réessaie dans un instant ou demande à l'organisateur.";
     }
 
+    // minuscules, sans accents ni ponctuation, espaces réduits : « La Tour-Solidor ! » -> « la tour solidor »
+    function normaliser(str) {
+        return (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
     function verifierReponse() {
-        let ans = document.getElementById("ans") ? document.getElementById("ans").value.toLowerCase().trim() : "";
+        const ans = normaliser(document.getElementById("ans") ? document.getElementById("ans").value : "");
         let msg = document.getElementById("riddle-msg");
         let ok = false;
 
-        if (activeBarIdForRiddle === 2 && ans === "tour solidor") ok = true;
-        if (activeBarIdForRiddle === 3 && (ans.includes("pelican") || ans.includes("pélican"))) ok = true;
+        if (activeBarIdForRiddle === 2 && ans.includes("solidor")) ok = true;
+        if (activeBarIdForRiddle === 3 && ans.includes("pelican")) ok = true;
         if (activeBarIdForRiddle === 8 && ans.includes("embuscade")) ok = true;
 
         if (ok) {
@@ -1284,19 +1502,48 @@
     }
 
     function demarrerLabyrinthe() {
+        const btn = document.getElementById("btn-maze"), hint = document.getElementById("maze-hint");
+        const accepter = () => {
+            mazeBase = null;   // la position au premier relevé devient le « zéro »
+            window.removeEventListener('deviceorientation', handleMazeOrientation);
+            window.addEventListener('deviceorientation', handleMazeOrientation);
+            if (btn) btn.style.display = "none";
+            if (hint) { hint.textContent = "Garde ton téléphone comme ça : c'est la position neutre. Incline pour bouger."; hint.className = "feedback feedback-info"; }
+        };
+        const refuser = () => {
+            if (hint) { hint.textContent = "Gyroscope refusé : utilise les flèches ci-dessous."; hint.className = "feedback feedback-warn"; }
+        };
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission().then(res => {
-                if (res === 'granted') window.addEventListener('deviceorientation', handleMazeOrientation);
-            }).catch(() => {});
-        } else { window.addEventListener('deviceorientation', handleMazeOrientation); }
-        const btn = document.getElementById("btn-maze");
-        if (btn) btn.style.display = "none";
+            DeviceOrientationEvent.requestPermission().then(res => { if (res === 'granted') accepter(); else refuser(); }).catch(refuser);
+        } else if (typeof DeviceOrientationEvent !== 'undefined') { accepter(); }
+        else refuser();
+    }
+
+    function recalibrerLabyrinthe() {
+        mazeBase = null; mazeGamma = 0; mazeBeta = 0;
+        const hint = document.getElementById("maze-hint");
+        if (hint) { hint.textContent = "Position neutre recalée."; hint.className = "feedback feedback-info"; }
     }
 
     function handleMazeOrientation(event) {
-        if (activeBarIdForRiddle !== 5) return;
-        mazeGamma = event.gamma || 0;
-        mazeBeta = event.beta || 0;
+        if (activeBarIdForRiddle !== 5 || event.beta == null || event.gamma == null) return;
+        if (!mazeBase) mazeBase = { b: event.beta, g: event.gamma };
+        mazeGamma = event.gamma - mazeBase.g;
+        mazeBeta = event.beta - mazeBase.b;
+    }
+
+    // croix tactile : maintenir un bouton = maintenir la flèche correspondante
+    function lierCroixLabyrinthe() {
+        document.querySelectorAll("#maze-pad button[data-k]").forEach(b => {
+            const k = b.dataset.k;
+            const on = e => { e.preventDefault(); mazeKeys[k] = true; b.classList.add("held"); try { b.setPointerCapture(e.pointerId); } catch (_) {} };
+            const off = () => { mazeKeys[k] = false; b.classList.remove("held"); };
+            b.addEventListener("pointerdown", on);
+            b.addEventListener("pointerup", off);
+            b.addEventListener("pointercancel", off);
+            b.addEventListener("lostpointercapture", off);
+            b.addEventListener("contextmenu", e => e.preventDefault());
+        });
     }
 
     function handleMazeKeydown(event) {
@@ -1316,17 +1563,22 @@
 
     function startSmoothMazeLoop() {
         if (mazeAnimId) cancelAnimationFrame(mazeAnimId);
-        function loop() {
+        let lastT = performance.now();
+        function loop(now) {
             if (activeBarIdForRiddle !== 5) return;
-            const cs = 30, radius = 7, speed = 1.8;
+            // vitesse indépendante du nombre d'images/s (60, 90, 120 Hz…)
+            const dt = Math.min(0.05, Math.max(0, (now - lastT) / 1000));
+            lastT = now;
+            const cs = 30, radius = 7, speed = 1.8 * dt * 60;
+            const clamp = v => Math.max(-1.5, Math.min(1.5, v));
             let vx = 0, vy = 0;
             const THRESH = 4;
-            if (Math.abs(mazeGamma) > THRESH) vx = (mazeGamma / 30) * speed;
-            if (Math.abs(mazeBeta) > THRESH) vy = (mazeBeta / 30) * speed;
-            if (mazeKeys['ArrowLeft']) vx = speed;
-            if (mazeKeys['ArrowRight']) vx = -speed;
-            if (mazeKeys['ArrowUp']) vy = speed;
-            if (mazeKeys['ArrowDown']) vy = -speed;
+            if (Math.abs(mazeGamma) > THRESH) vx = clamp(mazeGamma / 30) * speed;
+            if (Math.abs(mazeBeta) > THRESH) vy = clamp(mazeBeta / 30) * speed;
+            if (mazeKeys['ArrowLeft']) vx = -speed;
+            if (mazeKeys['ArrowRight']) vx = speed;
+            if (mazeKeys['ArrowUp']) vy = -speed;
+            if (mazeKeys['ArrowDown']) vy = speed;
 
             if (vx !== 0 || vy !== 0) {
                 let nextPx = px + vx;
@@ -1721,31 +1973,33 @@
         if (heat >= 2 && navigator.vibrate && nowT - lastVibe > 4000) { lastVibe = nowT; navigator.vibrate([100, 50, 100]); }
     }
 
+    // Envoi au serveur : lève une erreur si le réseau ou le serveur échoue, renvoie la réponse JSON (ou null)
+    async function envoyerAuServeur(payload) {
+        const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        try { return await res.json(); } catch (e) { return null; }
+    }
+
+    // l'étape validée s'affiche tout de suite, sans attendre la prochaine synchro
+    function avancerEtapeLocale(step) {
+        if (!step || step <= currentGlobalStep) return;
+        currentGlobalStep = Math.min(BARS_DATA.length, step);
+        renderBars(); renderCarte();
+        if (currentGlobalStep >= BARS_DATA.length) declencherVictoire();
+    }
+
     async function unlockGlobalStep(opts) {
         const race = !!(opts && opts.race);
+        const step = activeBarIdForRiddle;
         const p = document.getElementById("global-participant").value;
-        const payload = { action: "resolve_riddle", step: activeBarIdForRiddle, participant: p };
+        const payload = { action: "resolve_riddle", step: step, participant: p, uid: nouvelUid() };
         const rearm = () => {
             const b = document.getElementById("btn-toast");
             if (b) { b.disabled = false; b.classList.remove("pressed"); const sp = b.querySelector("span"); if (sp) sp.textContent = "Trinquer !"; }
         };
+        let data;
         try {
-            const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
-            const data = await res.json();
-            if (data.status === "success") {
-                // le serveur répond « success » au tout premier : c'est lui qui désigne le gagnant
-                showToast(race ? `${p} a trinqué en premier ! (+20 pts)` : `${p} a validé l'étape ! (+20 pts)`, "good");
-                if (race) lancerConfettis();
-                fermerModales(); fetchGameState();
-            } else if (data.status === "already_unlocked") {
-                showToast(race ? "Trop tard ! Un autre corsaire a trinqué avant toi." : "Un autre corsaire t'a devancé : l'étape est débloquée pour tout le monde.", "info");
-                fermerModales(); fetchGameState();
-            } else {
-                const m = document.getElementById("riddle-msg");
-                if (m) { m.textContent = "Validation impossible pour le moment, réessaie dans un instant."; m.className = "feedback feedback-bad"; }
-                showToast("Le carnet n'a pas pu valider l'étape, réessaie.", "bad");
-                rearm();
-            }
+            data = await envoyerAuServeur(payload);
         } catch (error) {
             if (race) {
                 // course au bouton : sans réseau on ne peut pas savoir qui est le premier, donc on ne débloque rien
@@ -1754,9 +2008,23 @@
                 return;
             }
             stockerHorsLigne(payload);
-            currentGlobalStep = Math.max(currentGlobalStep, Math.min(BARS_DATA.length, activeBarIdForRiddle));
             showToast("Hors-ligne : étape validée sur le carnet !", "info");
-            fermerModales(); renderBars(); renderCarte();
+            fermerModales(); avancerEtapeLocale(step);
+            return;
+        }
+        if (data && data.status === "success") {
+            // le serveur répond « success » au tout premier : c'est lui qui désigne le gagnant
+            showToast(race ? `${p} a trinqué en premier ! (+20 pts)` : `${p} a validé l'étape ! (+20 pts)`, "good");
+            if (race) lancerConfettis();
+            fermerModales(); avancerEtapeLocale(step); fetchGameState();
+        } else if (data && data.status === "already_unlocked") {
+            showToast(race ? "Trop tard ! Un autre corsaire a trinqué avant toi." : "Un autre corsaire t'a devancé : l'étape est débloquée pour tout le monde.", "info");
+            fermerModales(); avancerEtapeLocale(step); fetchGameState();
+        } else {
+            const m = document.getElementById("riddle-msg");
+            if (m) { m.textContent = "Validation impossible pour le moment, réessaie dans un instant."; m.className = "feedback feedback-bad"; }
+            showToast("Le carnet n'a pas pu valider l'étape, réessaie.", "bad");
+            rearm();
         }
     }
 
@@ -1813,44 +2081,70 @@
         let points = 10;
         if (verre === selectedBarForDrink.spec) points += 5;
 
-        const payload = { action: "validate_drink", participant: p, bar: selectedBarForDrink.name, verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName };
+        const payload = { action: "validate_drink", participant: p, bar: selectedBarForDrink.name, verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName, uid: nouvelUid() };
 
         btn.disabled = true; btn.textContent = "Envoi…";
         try {
-            await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
-            showToast("Conso enregistrée avec succès !", "good");
+            const data = await envoyerAuServeur(payload);
+            if (data && data.status === "error") {
+                // le serveur a répondu mais refuse : on le dit, on ne prétend pas que c'est enregistré
+                showToast("Conso refusée par le carnet" + (data.message ? " : " + data.message : ", réessaie."), "bad");
+                btn.disabled = false; btn.textContent = "Envoyer la preuve (+10 pts)";
+                return;
+            }
+            showToast(`Conso enregistrée ! (+${points} pts)`, "good");
             fermerModales(); switchTab('scores');
         } catch (error) {
             stockerHorsLigne(payload);
-            showToast("Réseau indisponible : conso stockée localement.", "info");
+            showToast("Réseau indisponible : conso gardée sur le téléphone, envoi automatique plus tard.", "info");
             fermerModales(); switchTab('scores');
         }
         btn.disabled = false; btn.textContent = "Envoyer la preuve (+10 pts)";
     }
 
+    function nouvelUid() { return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8); }
+
+    const QUEUE_KEY = 'barathon_offline_queue';
+    function lireFile() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch (e) { return []; } }
+
     function stockerHorsLigne(payload) {
-        let queue = JSON.parse(localStorage.getItem('barathon_offline_queue') || '[]');
+        if (!payload.uid) payload.uid = nouvelUid();
+        const queue = lireFile();
         queue.push(payload);
-        localStorage.setItem('barathon_offline_queue', JSON.stringify(queue));
+        try { localStorage.setItem(QUEUE_KEY, JSON.stringify(queue)); }
+        catch (e) { showToast("Mémoire du téléphone pleine : la donnée n'a pas pu être gardée.", "bad"); }
     }
 
+    // Envoie la file un élément à la fois et le retire dès qu'il est passé :
+    // une coupure au milieu ne provoque plus de doublons de points.
+    let fileEnCours = false;
     async function verifierFileAttenteHorsLigne() {
-        let queue = JSON.parse(localStorage.getItem('barathon_offline_queue') || '[]');
+        if (fileEnCours) return;
+        let queue = lireFile();
         if (queue.length === 0) return;
+        fileEnCours = true;
+        let envoyes = 0;
         try {
-            for (let payload of queue) {
-                await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+            while (queue.length) {
+                await envoyerAuServeur(queue[0]);
+                queue.shift();
+                localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+                envoyes++;
             }
-            localStorage.removeItem('barathon_offline_queue');
-            showToast("Données hors-ligne synchronisées avec succès !", "good");
         } catch (e) {
-            // toujours hors ligne : la file d'attente sera renvoyée plus tard
+            // toujours hors ligne : le reste de la file sera renvoyé plus tard
+        } finally {
+            fileEnCours = false;
         }
+        if (envoyes) showToast(queue.length ? `${envoyes} donnée(s) hors-ligne synchronisée(s), ${queue.length} en attente.` : "Données hors-ligne synchronisées avec succès !", "good");
     }
 
     function declencherVictoire() {
-        if (!window.victoireAffichee) {
+        let dejaVue = false;
+        try { dejaVue = localStorage.getItem("barathon_victoire") === "1"; } catch (e) {}
+        if (!window.victoireAffichee && !dejaVue) {
             window.victoireAffichee = true;
+            try { localStorage.setItem("barathon_victoire", "1"); } catch (e) {}
             const c = document.getElementById("riddle-content");
             document.getElementById("riddle-title").textContent = "🏆 Le Pacte des Corsaires";
             c.innerHTML = `<div class="riddle-parchment" style="text-align:center;">
@@ -1870,8 +2164,8 @@
         window.removeEventListener('deviceorientation', handleMazeOrientation);
         window.removeEventListener('keydown', handleMazeKeydown);
         window.removeEventListener('keyup', handleMazeKeyup);
-        px = 15; py = 15; mazeGamma = 0; mazeBeta = 0;
-
+        px = 15; py = 15; mazeGamma = 0; mazeBeta = 0; mazeBase = null;
+        Object.keys(mazeKeys).forEach(k => { mazeKeys[k] = false; });
         if (geoWatchId != null) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
         window.removeEventListener('deviceorientation', handleCompassOrientation, true);
