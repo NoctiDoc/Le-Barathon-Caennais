@@ -31,7 +31,7 @@
   @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(540deg); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } }
   body {
-    margin: 0; min-height: 100vh; padding: 12px 10px 24px;
+    margin: 0; min-height: 100vh; padding: 12px 10px calc(76px + env(safe-area-inset-bottom, 0px));
     color: var(--ink);
     font-family: 'Special Elite', 'Courier New', monospace;
     background-color: var(--paper);
@@ -70,9 +70,11 @@
     border-style: solid; border-width: 0 28px 28px 0;
     border-color: transparent rgba(43,29,14,.2) transparent transparent;
   }
-  .brand-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px; cursor: pointer; user-select: none; }
+  .brand-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px; user-select: none; }
+  .brand-title-wrap { display: flex; align-items: center; gap: 8px; cursor: pointer; min-width: 0; }
+  .tabs { display: none !important; }
   .brand-row svg { color: var(--wine); flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
-  h1 { font-family: 'IM Fell English SC', serif; font-size: 26px; margin: 0; text-align: center; letter-spacing: .5px; text-shadow: 1px 1px 0 rgba(169,130,45,.2); }
+  h1 { font-family: 'IM Fell English SC', serif; font-size: clamp(19px, 5.2vw, 25px); margin: 0; text-align: left; letter-spacing: .5px; text-shadow: 1px 1px 0 rgba(169,130,45,.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tagline { text-align: center; font-style: italic; color: var(--ink-soft); font-size: 12.5px; margin: 6px 0 16px; line-height: 1.4; }
 
   .ledger-line { background: rgba(255,253,246,.7); border: 1px solid rgba(43,29,14,.18); border-radius: var(--radius-md); padding: 11px 14px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
@@ -290,6 +292,348 @@
   .maze-pad .pad-right { grid-column: 3; grid-row: 2; }
   .maze-pad .pad-down { grid-column: 2; grid-row: 3; }
 
+  /* CARTE TAVERNE ACTUELLE (HERO CARD) */
+  .current-bar-hero {
+    background: linear-gradient(135deg, #fffdf8 0%, #f7eed7 100%);
+    border: 2px solid var(--wine);
+    border-radius: var(--radius-md);
+    padding: 13px 14px;
+    margin-bottom: 11px;
+    box-shadow: 0 6px 18px rgba(122,35,51,.16), inset 0 0 20px rgba(169,130,45,.08);
+    animation: fade-in-up .35s var(--ease) forwards;
+  }
+  .cb-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .cb-pill {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--wine);
+    background: rgba(122,35,51,.1);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: .3px;
+  }
+  .cb-status-pill {
+    font-size: 10.5px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .cb-status-pill.done {
+    background: rgba(62,91,68,.16);
+    color: var(--moss);
+  }
+  .cb-status-pill.pending {
+    background: rgba(169,130,45,.18);
+    color: #8c6819;
+  }
+  .cb-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .cb-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .cb-name {
+    display: block;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 19px;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .cb-spec {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .cb-spec span {
+    color: var(--wine);
+    font-weight: bold;
+  }
+  .cb-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cb-actions .btn {
+    margin-top: 0;
+    padding: 11px 8px;
+    font-size: 12.5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .btn-map {
+    background: linear-gradient(180deg, #3e5b44 0%, #2f4734 100%);
+    color: #fff !important;
+    border-color: #243828;
+    box-shadow: var(--shadow-sm);
+  }
+  .waypoint.visited {
+    border-left-color: var(--brass);
+    opacity: .9;
+  }
+  .seal-visited {
+    background: radial-gradient(circle at 35% 30%, #f6e8c3, var(--brass));
+    color: #2b1d0e;
+    font-weight: bold;
+  }
+  .status-pending {
+    color: var(--brass);
+    font-size: 10.5px;
+    font-weight: bold;
+  }
+  .my-rank {
+    background: rgba(169,130,45,.22) !important;
+    font-weight: bold;
+  }
+
+  /* BARRE DE NAVIGATION INFÉRIEURE FIXE (MOBILE-FIRST) */
+  body.gate-locked .bottom-nav { display: none !important; }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-width: 440px; margin: 0 auto;
+    background: var(--paper-card);
+    border-top: 2px solid var(--brass);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 18px rgba(20,14,7,.32);
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    z-index: 95;
+    backdrop-filter: blur(8px);
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    padding: 6px 4px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .18s var(--ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn.active {
+    color: var(--wine);
+    font-weight: bold;
+    background: rgba(122,35,51,.12);
+  }
+  .nav-btn .nav-ico {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* THÈME SOMBRE (MODE NUIT TAVERNE) */
+  body.dark-mode {
+    --ink: #f2e7cd;
+    --ink-soft: #c4b595;
+    --paper: #161009;
+    --paper-card: #20160d;
+    --slate: #665b4c;
+    background-color: #120c07;
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(122,35,51,.25), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(169,130,45,.12), transparent 55%);
+  }
+  body.dark-mode .container,
+  body.dark-mode .cd-card,
+  body.dark-mode .modal-content,
+  body.dark-mode .bottom-nav {
+    background: #20160d;
+    border-color: rgba(169,130,45,.4);
+    box-shadow: 0 16px 40px rgba(0,0,0,.6);
+  }
+  body.dark-mode .waypoint,
+  body.dark-mode .current-bar-hero,
+  body.dark-mode .ledger-line,
+  body.dark-mode .carte-info,
+  body.dark-mode .riddle-parchment,
+  body.dark-mode .maze-svg-wrap {
+    background: #281c11;
+    border-color: rgba(169,130,45,.3);
+    color: var(--ink);
+  }
+  body.dark-mode select,
+  body.dark-mode input[type="text"],
+  body.dark-mode input[type="password"] {
+    background: #19110a;
+    color: var(--ink);
+    border-color: rgba(169,130,45,.5);
+  }
+  body.dark-mode .ledger-table th {
+    background: #140b04;
+    color: #e8d9b5;
+  }
+  body.dark-mode .ledger-table td {
+    border-bottom-color: rgba(169,130,45,.15);
+  }
+  body.dark-mode .ledger-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,.03);
+  }
+  body.dark-mode .theme-btn {
+    background: rgba(255,255,255,.1);
+    color: #ffd880;
+    border-color: rgba(255,255,255,.2);
+  }
+  body.dark-mode .nav-btn.active {
+    color: var(--brass-light);
+    background: rgba(212,171,92,.15);
+  }
+
+  .theme-btn {
+    background: rgba(43,29,14,.08);
+    border: 1px solid rgba(43,29,14,.25);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .theme-btn:active {
+    transform: scale(.92);
+  }
+  .drink-bonus-chip {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    margin: 8px 0;
+    text-align: center;
+    transition: all .2s;
+  }
+  .drink-bonus-chip.match {
+    background: rgba(62,91,68,.14);
+    color: var(--moss);
+    border: 1px solid var(--moss);
+    font-weight: bold;
+  }
+  .drink-bonus-chip.normal {
+    background: rgba(43,29,14,.06);
+    color: var(--ink-soft);
+    border: 1px dashed rgba(43,29,14,.3);
+  }
+
+  /* BONUS DÉGUISEMENT (ONE-SHOT AU DÉPART) */
+  .costume-ribbon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(90deg, rgba(122,35,51,.12), rgba(169,130,45,.18), rgba(122,35,51,.12));
+    border: 1px dashed var(--brass);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    margin: -6px 0 14px;
+    font-size: 11.5px;
+    font-weight: bold;
+    color: var(--wine);
+    text-align: center;
+  }
+  .costume-claim-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(169,130,45,.18) 0%, rgba(212,171,92,.10) 100%);
+    border: 1.5px solid var(--brass);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin: -6px 0 14px;
+    box-shadow: var(--shadow-sm);
+    animation: fade-in-up .3s var(--ease);
+  }
+  .ccc-icon {
+    font-size: 26px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .ccc-info {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+  }
+  .ccc-info strong {
+    display: block;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 14.5px;
+    color: var(--wine);
+    line-height: 1.2;
+  }
+  .ccc-info small {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.25;
+    margin-top: 1px;
+  }
+  .btn-costume-claim {
+    flex-shrink: 0;
+    margin-top: 0;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    font-weight: bold;
+    background: linear-gradient(180deg, var(--wine-light) 0%, var(--wine) 100%);
+    color: #fdf6e8;
+    border-color: #5a1824;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 6px rgba(122,35,51,.35);
+    cursor: pointer;
+    font-family: 'Special Elite', monospace;
+  }
+  .btn-costume-claim:active {
+    transform: scale(.95);
+  }
+  .costume-claimed-badge {
+    background: rgba(62,91,68,.12);
+    border: 1px solid var(--moss);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    margin: -6px 0 14px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--moss);
+    text-align: center;
+    animation: fade-in-up .3s var(--ease);
+  }
+  body.dark-mode .costume-ribbon {
+    background: linear-gradient(90deg, rgba(122,35,51,.25), rgba(169,130,45,.2), rgba(122,35,51,.25));
+    color: var(--brass-light);
+  }
+  body.dark-mode .costume-claim-card {
+    background: linear-gradient(135deg, rgba(169,130,45,.2) 0%, rgba(32,22,13,.8) 100%);
+    border-color: rgba(212,171,92,.4);
+  }
+  body.dark-mode .ccc-info strong {
+    color: var(--brass-light);
+  }
+  body.dark-mode .costume-claimed-badge {
+    background: rgba(62,91,68,.25);
+    color: #a8dba9;
+  }
+
   /* CANVAS CACHÉ POUR LA COMPRESSION */
   #resize-canvas { display: none; }
 </style>
@@ -330,13 +674,16 @@
 
 <div class="container">
   <div id="admin-badge" hidden><span>🔧 Mode test — accès anticipé</span><button type="button" onclick="reverrouillerApp()">Reverrouiller</button></div>
-  <div class="brand-row" onclick="gererClicAdmin()">
-    <svg viewBox="0 0 40 40" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
-      <circle cx="20" cy="20" r="17"></circle>
-      <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
-      <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.35"></path>
-    </svg>
-    <h1>Le Barathon Caennais</h1>
+  <div class="brand-row">
+    <div class="brand-title-wrap" onclick="gererClicAdmin()">
+      <svg viewBox="0 0 40 40" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="20" cy="20" r="17"></circle>
+        <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="currentColor" stroke="none"></path>
+        <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="currentColor" stroke="none" opacity="0.35"></path>
+      </svg>
+      <h1>Le Barathon Caennais</h1>
+    </div>
+    <button type="button" class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Basculer Mode Nuit" aria-label="Mode Nuit">🌙</button>
   </div>
   <p class="tagline">Huit tavernes. Une seule règle : personne n'avance seul.</p>
 
@@ -363,6 +710,7 @@
       <option value="David M">David M</option>
     </select>
   </div>
+  <div id="costume-claim-area"></div>
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('accueil')">Parcours</button>
@@ -687,7 +1035,7 @@
   <div class="modal-content">
     <h3 id="drink-bar-title">Enregistrer ma consommation</h3>
     <label for="drink-select">Qu'as-tu bu ?</label>
-    <select id="drink-select">
+    <select id="drink-select" onchange="majIndicateurBoisson()">
       <option value="Ricard / Pastis">Ricard / Pastis</option>
       <option value="Pinte de bière blonde">Pinte de bière blonde</option>
       <option value="Pinte de bière IPA / Spéciale">Pinte de bière IPA / Spéciale</option>
@@ -699,10 +1047,38 @@
       <option value="Soft / Sans alcool">Soft / Sans alcool</option>
     </select>
 
+    <div id="drink-bonus-chip" class="drink-bonus-chip normal">🍺 Boisson classique : +10 points</div>
+
     <label class="file-label" for="drink-photo">Preuve en image</label>
     <input type="file" id="drink-photo" accept="image/*" capture="environment">
+    <div id="photo-preview-wrap" style="display:none; margin:10px auto; max-width:240px; text-align:center;">
+      <img id="drink-photo-preview" src="" alt="Aperçu de la preuve" style="width:100%; max-height:160px; object-fit:cover; border-radius:6px; border:1.5px solid var(--brass); box-shadow:var(--shadow-sm);">
+      <div style="font-size:11.5px; color:var(--moss); font-weight:bold; margin-top:3px;">✓ Photo prête à être envoyée</div>
+    </div>
 
     <button class="btn btn-primary" id="btn-submit-drink" onclick="envoyerBoisson()">Envoyer la preuve (+10 pts)</button>
+    <button class="btn btn-ghost" onclick="fermerModales()">Annuler</button>
+  </div>
+</div>
+
+<!-- MODALE PHOTO DÉGUISEMENT (PREUVE GOOGLE DRIVE +10 PTS) -->
+<div id="modal-costume" class="modal">
+  <div class="modal-content">
+    <h3 id="costume-modal-title">🎭 Preuve du Déguisement</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 12px; line-height:1.4;">
+      Prends-toi en photo pour prouver ton costume ! La photo sera sauvegardée dans le dossier Google Drive et t'accordera <strong>+10 points</strong> au classement.
+    </p>
+
+    <label class="file-label" for="costume-photo">Ta photo en costume (selfie ou en pied)</label>
+    <input type="file" id="costume-photo" accept="image/*">
+    <div id="costume-preview-wrap" style="display:none; margin:10px auto; max-width:240px; text-align:center;">
+      <img id="costume-photo-preview" src="" alt="Aperçu du déguisement" style="width:100%; max-height:190px; object-fit:cover; border-radius:6px; border:1.5px solid var(--brass); box-shadow:var(--shadow-sm);">
+      <div style="font-size:11.5px; color:var(--moss); font-weight:bold; margin-top:3px;">✓ Photo prête à être envoyée sur le Drive</div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-submit-costume" onclick="envoyerPhotoCostume()">
+      📸 Envoyer sur le Drive & valider (+10 pts)
+    </button>
     <button class="btn btn-ghost" onclick="fermerModales()">Annuler</button>
   </div>
 </div>
@@ -721,8 +1097,8 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    // Coordonnées de la cache de l'étape 2
-    const TARGET_COORDS = { lat: 49.181329, lng: -0.364048 };
+    // Coordonnées de la cache de l'étape 2 (radar/boussole)
+    const TARGET_COORDS = { lat: 49.155952, lng: -0.473863 };
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
     function seededRandom(seed) {
@@ -899,12 +1275,16 @@
     window.addEventListener('DOMContentLoaded', () => {
         const savedName = localStorage.getItem('barathon_participant');
         if (savedName) document.getElementById('global-participant').value = savedName;
+        majAffichageCostume();
         initPorte();
     });
 
     function sauvegarderParticipant() {
         const name = document.getElementById('global-participant').value;
         if (name) localStorage.setItem('barathon_participant', name);
+        majAffichageCostume();
+        renderBars();
+        if (document.getElementById('tab-scores') && document.getElementById('tab-scores').classList.contains('active')) chargerClassement();
     }
 
     function showToast(text, type = 'info') {
@@ -922,11 +1302,15 @@
         setTimeout(() => { toast.remove(); }, 3500);
     }
 
+    let modalHistoryPushed = false;
     function showModal(id) {
         const m = document.getElementById(id);
         if (!m) return;
         m.style.display = 'flex';
         requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('is-open')));
+        if (!modalHistoryPushed) {
+            try { history.pushState({ modalOpen: id }, ""); modalHistoryPushed = true; } catch (_) {}
+        }
     }
 
     function hideModal(id) {
@@ -1052,35 +1436,93 @@
         if (lp) lp.textContent = `${pct} %`;
     }
 
+    function getValidatedDrinksFor(p) {
+        if (!p) return [];
+        try { return JSON.parse(localStorage.getItem('barathon_drinks_' + p) || '[]'); } catch (_) { return []; }
+    }
+    function markDrinkValidated(p, barId) {
+        if (!p || !barId) return;
+        const list = getValidatedDrinksFor(p);
+        if (!list.includes(barId)) {
+            list.push(barId);
+            try { localStorage.setItem('barathon_drinks_' + p, JSON.stringify(list)); } catch (_) {}
+        }
+    }
+
     function renderBars() {
         const container = document.getElementById("bars-list");
+        if (!container) return;
         container.innerHTML = "";
+        const p = document.getElementById("global-participant").value;
+        const mesBoissons = getValidatedDrinksFor(p);
+        let html = "";
         let delay = 0;
+
         BARS_DATA.forEach(bar => {
-            if (bar.id <= currentGlobalStep) {
-                container.innerHTML += `<div class="waypoint open" style="animation-delay:${delay}ms" onclick="ouvrirValidationBoisson(${bar.id})">
-                    <div class="seal">${bar.id}</div>
-                    <div class="waypoint-info"><strong>${bar.name}</strong><small>Spécialité : ${bar.spec}</small></div>
-                    <div class="status status-open">Ouvert</div>
+            const isCurrent = bar.id === currentGlobalStep;
+            const isPast = bar.id < currentGlobalStep;
+            const boissonFaite = mesBoissons.includes(bar.id);
+
+            if (isCurrent) {
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(bar.name + " Caen")}`;
+                html += `
+                <div class="current-bar-hero" style="animation-delay:${delay}ms">
+                    <div class="cb-badge-row">
+                        <span class="cb-pill">📍 Taverne Actuelle · Étape ${bar.id}/8</span>
+                        ${boissonFaite ? '<span class="cb-status-pill done">✓ Conso notée</span>' : '<span class="cb-status-pill pending">Conso à noter</span>'}
+                    </div>
+                    <div class="cb-main">
+                        <div class="seal">${bar.id}</div>
+                        <div class="cb-info">
+                            <strong class="cb-name">${bar.name}</strong>
+                            <div class="cb-spec">⭐ Spécialité : <span>${bar.spec}</span> (+5 pts)</div>
+                        </div>
+                    </div>
+                    <div class="cb-actions">
+                        <a href="${mapsUrl}" target="_blank" rel="noopener" class="btn btn-map">
+                            🗺️ Y aller (GPS)
+                        </a>
+                        <button type="button" class="btn ${boissonFaite ? 'btn-ghost' : 'btn-primary'}" onclick="ouvrirValidationBoisson(${bar.id})">
+                            ${boissonFaite ? '✓ Conso notée (+)' : '📸 Valider conso'}
+                        </button>
+                    </div>
                 </div>`;
                 delay += 55;
-                if (bar.id === currentGlobalStep && currentGlobalStep < BARS_DATA.length) {
+
+                if (currentGlobalStep < BARS_DATA.length) {
                     let prochainId = currentGlobalStep + 1;
-                    container.innerHTML += `<div class="unlock-call" style="animation-delay:${delay}ms" onclick="ouvrirEnigme(${prochainId})">
+                    html += `<div class="unlock-call" style="animation-delay:${delay}ms" onclick="ouvrirEnigme(${prochainId})">
                         <div class="unlock-icon">⚔</div>
-                        <div class="unlock-text"><strong>Débloquer l'étape ${prochainId}</strong><small>Une épreuve t'attend — résous-la pour tout le monde.</small></div>
+                        <div class="unlock-text">
+                            <strong>Débloquer l'étape ${prochainId}</strong>
+                            <small>Une épreuve t'attend — résous-la pour faire avancer l'équipage !</small>
+                        </div>
                         <div class="unlock-chevron">&#8250;</div>
                     </div>`;
                     delay += 55;
                 }
+            } else if (isPast) {
+                html += `<div class="waypoint open visited" style="animation-delay:${delay}ms" onclick="ouvrirValidationBoisson(${bar.id})">
+                    <div class="seal seal-visited">${bar.id}</div>
+                    <div class="waypoint-info">
+                        <strong>${bar.name}</strong>
+                        <small>Spécialité : ${bar.spec}</small>
+                    </div>
+                    <div class="status ${boissonFaite ? 'status-open' : 'status-pending'}">
+                        ${boissonFaite ? '✓ Conso OK' : '+ Noter conso'}
+                    </div>
+                </div>`;
+                delay += 40;
             } else {
-                container.innerHTML += `<div class="waypoint locked">
+                html += `<div class="waypoint locked">
                     <div class="seal seal-locked">${bar.id}</div>
                     <div class="waypoint-info"><strong>Étape scellée</strong><small>Spécialité : à découvrir</small></div>
                     <div class="status status-locked">Verrouillé</div>
                 </div>`;
             }
         });
+
+        container.innerHTML = html;
         updateProgress();
     }
 
@@ -2028,12 +2470,179 @@
         }
     }
 
+    // ---------- GESTION DU BONUS DÉGUISEMENT (PREUVE PHOTO SUR GOOGLE DRIVE, +10 PTS) ----------
+    let base64CostumePhoto = null, costumeMimeType = null, costumeFileName = null;
+
+    function majAffichageCostume() {
+        const area = document.getElementById("costume-claim-area");
+        if (!area) return;
+        const p = document.getElementById("global-participant").value;
+        if (!p) {
+            area.innerHTML = `<div class="costume-ribbon">🎭 Spécial 31 Octobre : prends ta photo en costume pour prouver ton déguisement (+10 pts) !</div>`;
+            return;
+        }
+        const claimed = localStorage.getItem("barathon_costume_claimed_" + p) === "1";
+        if (claimed) {
+            area.innerHTML = `<div class="costume-claimed-badge"><span>✓ 🎭 Photo de déguisement enregistrée sur le Drive (+10 pts pour ${p})</span></div>`;
+        } else {
+            area.innerHTML = `
+            <div class="costume-claim-card">
+                <div class="ccc-icon">🎭</div>
+                <div class="ccc-info">
+                    <strong>Preuve Déguisement (+10 pts)</strong>
+                    <small>Prends-toi en photo pour enregistrer la preuve de ton costume sur le Google Drive !</small>
+                </div>
+                <button type="button" class="btn btn-costume-claim" onclick="ouvrirModaleCostume()">
+                    📸 Photo (+10)
+                </button>
+            </div>`;
+        }
+    }
+
+    function ouvrirModaleCostume() {
+        const p = document.getElementById("global-participant").value;
+        if (!p) {
+            showToast("Choisis d'abord ton nom dans la liste !", "bad");
+            return;
+        }
+        const claimed = localStorage.getItem("barathon_costume_claimed_" + p) === "1";
+        if (claimed) {
+            showToast("Tu as déjà enregistré ta photo de déguisement !", "info");
+            return;
+        }
+        document.getElementById("costume-modal-title").textContent = `🎭 Déguisement de ${p}`;
+        document.getElementById("costume-photo").value = "";
+        base64CostumePhoto = null;
+        const pWrap = document.getElementById('costume-preview-wrap');
+        const pImg = document.getElementById('costume-photo-preview');
+        if (pWrap) pWrap.style.display = 'none';
+        if (pImg) pImg.src = '';
+        const btn = document.getElementById('btn-submit-costume');
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "📸 Envoyer sur le Drive & valider (+10 pts)";
+        }
+        showModal("modal-costume");
+    }
+
+    document.getElementById('costume-photo').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        costumeMimeType = file.type || "image/jpeg";
+        costumeFileName = file.name || "costume.jpg";
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.getElementById('resize-canvas');
+                const ctx = canvas.getContext('2d');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 900;
+                const MAX_HEIGHT = 900;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                base64CostumePhoto = dataUrl.split(',')[1];
+                const pImg = document.getElementById('costume-photo-preview');
+                const pWrap = document.getElementById('costume-preview-wrap');
+                if (pImg) pImg.src = dataUrl;
+                if (pWrap) pWrap.style.display = 'block';
+                showToast("Photo prête pour l'envoi au Drive !", "good");
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    async function envoyerPhotoCostume() {
+        if (!base64CostumePhoto) {
+            showToast("Prends d'abord une photo pour prouver ton déguisement !", "bad");
+            return;
+        }
+        const p = document.getElementById("global-participant").value;
+        const btn = document.getElementById("btn-submit-costume");
+
+        const payload = {
+            action: "validate_drink",
+            participant: p,
+            bar: "Accueil - Déguisement",
+            verre: "Photo Déguisement",
+            points: 10,
+            deguise: true,
+            photoBase64: base64CostumePhoto,
+            mimeType: costumeMimeType || "image/jpeg",
+            fileName: `${p}_deguisement.jpg`,
+            uid: nouvelUid()
+        };
+
+        btn.disabled = true;
+        btn.textContent = "Envoi sur Google Drive…";
+        try {
+            const data = await envoyerAuServeur(payload);
+            if (data && data.status === "error") {
+                showToast("Erreur lors de l'envoi : " + (data.message || "réessaie"), "bad");
+                btn.disabled = false;
+                btn.textContent = "📸 Envoyer sur le Drive & valider (+10 pts)";
+                return;
+            }
+            localStorage.setItem("barathon_costume_claimed_" + p, "1");
+            showToast(`🎭 Photo enregistrée sur le Drive ! +10 pts accordés à ${p} !`, "good");
+            lancerConfettis();
+            fermerModales();
+            majAffichageCostume();
+            chargerClassement();
+        } catch (error) {
+            stockerHorsLigne(payload);
+            localStorage.setItem("barathon_costume_claimed_" + p, "1");
+            showToast("Réseau indisponible : photo gardée sur le téléphone, synchronisée dès que possible (+10 pts) !", "info");
+            fermerModales();
+            majAffichageCostume();
+        }
+        btn.disabled = false;
+        btn.textContent = "📸 Envoyer sur le Drive & valider (+10 pts)";
+    }
+
+    function majIndicateurBoisson() {
+        const s = document.getElementById("drink-select");
+        const chip = document.getElementById("drink-bonus-chip");
+        const btn = document.getElementById("btn-submit-drink");
+        if (!s || !chip || !selectedBarForDrink) return;
+
+        const isSpec = s.value === selectedBarForDrink.spec;
+        const pts = isSpec ? 15 : 10;
+
+        if (isSpec) {
+            chip.className = "drink-bonus-chip match";
+            chip.innerHTML = "⭐ <strong>Spécialité du bar !</strong> +15 points (+5 pts bonus)";
+        } else {
+            chip.className = "drink-bonus-chip normal";
+            chip.innerHTML = "🍺 Boisson classique : +10 points (prends la spécialité pour +15 pts !)";
+        }
+        if (btn) btn.textContent = `Envoyer la preuve (+${pts} pts)`;
+    }
+
     function ouvrirValidationBoisson(barId) {
         const p = document.getElementById("global-participant").value;
         if (!p) { showToast("Choisis d'abord ton nom, en haut du carnet !", "bad"); return; }
         selectedBarForDrink = BARS_DATA.find(b => b.id === barId);
         document.getElementById("drink-bar-title").textContent = `Consommation : ${selectedBarForDrink.name}`;
-        document.getElementById("drink-photo").value = ""; base64Photo = null;
+        document.getElementById("drink-photo").value = "";
+        base64Photo = null;
+        const pWrap = document.getElementById('photo-preview-wrap');
+        const pImg = document.getElementById('drink-photo-preview');
+        if (pWrap) pWrap.style.display = 'none';
+        if (pImg) pImg.src = '';
+
+        majIndicateurBoisson();
         showModal("modal-drink");
     }
 
@@ -2065,7 +2674,11 @@
                 ctx.drawImage(img, 0, 0, width, height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
                 base64Photo = dataUrl.split(',')[1];
-                showToast("Preuve photo compressée avec succès.", "good");
+                const pImg = document.getElementById('drink-photo-preview');
+                const pWrap = document.getElementById('photo-preview-wrap');
+                if (pImg) pImg.src = dataUrl;
+                if (pWrap) pWrap.style.display = 'block';
+                showToast("Preuve photo prête.", "good");
             };
             img.src = event.target.result;
         };
@@ -2081,25 +2694,38 @@
         let points = 10;
         if (verre === selectedBarForDrink.spec) points += 5;
 
-        const payload = { action: "validate_drink", participant: p, bar: selectedBarForDrink.name, verre: verre, points: points, photoBase64: base64Photo, mimeType: mimeType, fileName: fileName, uid: nouvelUid() };
+        const payload = {
+            action: "validate_drink",
+            participant: p,
+            bar: selectedBarForDrink.name,
+            verre: verre,
+            points: points,
+            photoBase64: base64Photo,
+            mimeType: mimeType,
+            fileName: fileName,
+            uid: nouvelUid()
+        };
 
         btn.disabled = true; btn.textContent = "Envoi…";
         try {
             const data = await envoyerAuServeur(payload);
             if (data && data.status === "error") {
-                // le serveur a répondu mais refuse : on le dit, on ne prétend pas que c'est enregistré
                 showToast("Conso refusée par le carnet" + (data.message ? " : " + data.message : ", réessaie."), "bad");
-                btn.disabled = false; btn.textContent = "Envoyer la preuve (+10 pts)";
+                btn.disabled = false; btn.textContent = `Envoyer la preuve (+${points} pts)`;
                 return;
             }
+            markDrinkValidated(p, selectedBarForDrink.id);
+            renderBars();
             showToast(`Conso enregistrée ! (+${points} pts)`, "good");
             fermerModales(); switchTab('scores');
         } catch (error) {
             stockerHorsLigne(payload);
+            markDrinkValidated(p, selectedBarForDrink.id);
+            renderBars();
             showToast("Réseau indisponible : conso gardée sur le téléphone, envoi automatique plus tard.", "info");
             fermerModales(); switchTab('scores');
         }
-        btn.disabled = false; btn.textContent = "Envoyer la preuve (+10 pts)";
+        btn.disabled = false; btn.textContent = `Envoyer la preuve (+${points} pts)`;
     }
 
     function nouvelUid() { return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8); }
@@ -2156,9 +2782,17 @@
         }
     }
 
-    function fermerModales() {
+    function fermerModales(fromPopstate) {
         hideModal("modal-riddle");
         hideModal("modal-drink");
+        hideModal("modal-costume");
+
+        if (modalHistoryPushed && !fromPopstate) {
+            modalHistoryPushed = false;
+            try { history.back(); } catch (_) {}
+        } else {
+            modalHistoryPushed = false;
+        }
 
         if (mazeAnimId) { cancelAnimationFrame(mazeAnimId); mazeAnimId = null; }
         window.removeEventListener('deviceorientation', handleMazeOrientation);
@@ -2174,30 +2808,88 @@
     }
 
     function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        const idx = tab === 'accueil' ? 0 : tab === 'scores' ? 1 : 2;
-        document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            const isMatch = (tab === 'accueil' && b.textContent.includes('Parcours')) ||
+                            (tab === 'scores' && b.textContent.includes('Classement')) ||
+                            (tab === 'carte' && b.textContent.includes('Carte'));
+            b.classList.toggle('active', isMatch);
+        });
+        const target = document.getElementById('tab-' + tab);
+        if (target) target.classList.add('active');
         if (tab === 'scores') chargerClassement();
         if (tab === 'carte') renderCarte();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function chargerClassement() {
         const tbody = document.getElementById('ranking-body'); 
         tbody.innerHTML = `<tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr>`;
+        const monNom = (document.getElementById('global-participant').value || "").trim().toLowerCase();
         try {
             const res = await fetch(WEB_APP_URL + "?action=classement"); 
             const data = await res.json(); 
             tbody.innerHTML = "";
             data.forEach((row, i) => {
                 let rang = i === 0 ? '<span class="medal medal-gold">I</span>' : i === 1 ? '<span class="medal medal-silver">II</span>' : i === 2 ? '<span class="medal medal-bronze">III</span>' : `#${i + 1}`;
-                tbody.innerHTML += `<tr><td>${rang}</td><td><b>${row.participant}</b></td><td>${row.points} pts</td></tr>`;
+                const isMe = monNom && row.participant.trim().toLowerCase() === monNom;
+                tbody.innerHTML += `<tr class="${isMe ? 'my-rank' : ''}"><td>${rang}</td><td><b>${row.participant}${isMe ? ' (toi)' : ''}</b></td><td>${row.points} pts</td></tr>`;
             });
         } catch (e) { 
             tbody.innerHTML = `<tr><td colspan="3">Mode hors-ligne actif<br><button class="btn btn-ghost" onclick="chargerClassement()">Réessayer</button></td></tr>`; 
         }
     }
+
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        try { localStorage.setItem('barathon_dark_mode', isDark ? '1' : '0'); } catch (_) {}
+        const b = document.getElementById('theme-btn');
+        if (b) b.textContent = isDark ? '☀️' : '🌙';
+    }
+    function initTheme() {
+        let isDark = false;
+        try { isDark = localStorage.getItem('barathon_dark_mode') === '1'; } catch (_) {}
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            const b = document.getElementById('theme-btn');
+            if (b) b.textContent = '☀️';
+        }
+    }
+
+    // Gestion ergonomique des fenêtres modales :
+    // - Fermeture en cliquant en dehors de la boîte
+    // - Touche Échap
+    // - Bouton Retour du téléphone Android (popstate)
+    window.addEventListener('popstate', () => {
+        if (document.querySelector('.modal.is-open')) fermerModales(true);
+    });
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.querySelector('.modal.is-open')) fermerModales(false);
+    });
+    document.querySelectorAll('.modal').forEach(m => {
+        m.addEventListener('click', (e) => {
+            if (e.target === m) fermerModales(false);
+        });
+    });
+
+    initTheme();
 </script>
+
+<nav class="bottom-nav" id="bottom-nav" aria-label="Navigation principale">
+  <button type="button" class="nav-btn active" data-tab="accueil" onclick="switchTab('accueil')">
+    <span class="nav-ico">🧭</span>
+    <span>Parcours</span>
+  </button>
+  <button type="button" class="nav-btn" data-tab="carte" onclick="switchTab('carte')">
+    <span class="nav-ico">🗺️</span>
+    <span>Carte</span>
+  </button>
+  <button type="button" class="nav-btn" data-tab="scores" onclick="switchTab('scores')">
+    <span class="nav-ico">🏆</span>
+    <span>Scores</span>
+  </button>
+</nav>
+
 </body>
 </html>
