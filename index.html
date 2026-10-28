@@ -1607,15 +1607,19 @@
     let appStarted = false, countdownTimer = null, cdAdminClicks = 0, cdAdminTimer = null;
 
     function isParticipantAdmin(name) {
-        if (!name) name = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || localStorage.getItem("barathon_participant") || "";
+        if (!name) {
+            const sel = document.getElementById("global-participant");
+            name = (sel ? sel.value : "") || localStorage.getItem("barathon_participant") || "";
+        }
         if (!name) return false;
         const n = name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return n.includes("alexandre") || n.includes("jeremy") || n.includes("straub") || n.includes("faby");
+        const isAlex = n.includes("alexandre") && (n.includes("faby") || n === "alexandre");
+        const isJeremy = (n.includes("jeremy") || n.includes("jérémy")) && (n.includes("straub") || n.includes("jeremy s") || n === "jeremy");
+        return isAlex || isJeremy;
     }
     function estLance() { return Date.now() >= LAUNCH_DATE.getTime(); }
     function estAdmin() {
         try {
-            if (localStorage.getItem(ADMIN_KEY) === "1") return true;
             return isParticipantAdmin();
         } catch (e) {
             return false;
@@ -1636,7 +1640,8 @@
         }
         const forceLocked = localStorage.getItem("barathon_lock_override") === "1";
         const savedName = localStorage.getItem('barathon_participant');
-        if (!forceLocked && (estLance() || estAdmin() || isParticipantAdmin(savedName))) {
+        const codeBypass = localStorage.getItem(ADMIN_KEY) === "1";
+        if (!forceLocked && (estLance() || isParticipantAdmin(savedName) || codeBypass)) {
             demarrerApp(false);
         } else {
             afficherDecompte();
@@ -1699,36 +1704,40 @@
         const badgeBtns = document.getElementById('admin-badge-btns');
         if (!badge) return;
 
+        // Géocache / Étape / Reverrouiller disponible TOUT LE TEMPS pour Alexandre Faby et Jérémy Straub
         if (isParticipantAdmin(p)) {
             badge.hidden = false;
             if (badgeText) badgeText.innerHTML = `👑 <b>Capitaine Admin (${p})</b>`;
             if (badgeBtns) {
                 badgeBtns.innerHTML = `
-                  <button type="button" onclick="ouvrirModalAdminGeocache()" title="Changer l'emplacement de la cache">📍 Géocache</button>
-                  <button type="button" onclick="ouvrirMenuAdminEtapes()" title="Changer d'étape">Étape</button>
-                  ${!estLance() ? '<button type="button" onclick="reverrouillerApp()">Reverrouiller</button>' : ''}
-                `;
-            }
-        } else if (estAdmin() && !estLance()) {
-            badge.hidden = false;
-            if (badgeText) badgeText.innerHTML = `🔧 Mode test — accès anticipé`;
-            if (badgeBtns) {
-                badgeBtns.innerHTML = `
-                  <button type="button" onclick="ouvrirModalAdminGeocache()">📍 Géocache</button>
-                  <button type="button" onclick="reverrouillerApp()">Reverrouiller</button>
+                  <button type="button" onclick="ouvrirModalAdminGeocache()" title="Changer l'emplacement ou l'indice de la géocache">📍 Géocache</button>
+                  <button type="button" onclick="ouvrirMenuAdminEtapes()" title="Changer d'étape pour tout l'équipage">Étape</button>
+                  <button type="button" onclick="reverrouillerApp()" title="Reverrouiller le carnet">Reverrouiller</button>
                 `;
             }
         } else {
+            // Pour tous les autres participants : JAMAIS disponible
             badge.hidden = true;
+            if (badgeBtns) badgeBtns.innerHTML = '';
         }
     }
 
     // ---------- Gestion Admin de la Géocache (Étape 2) ----------
     function ouvrirMenuAdminEtapes() {
+        const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
+        if (!isParticipantAdmin(p)) {
+            showToast("Accès réservé aux Capitaines Organisateurs (Alexandre Faby & Jérémy Straub).", "bad");
+            return;
+        }
         gererClicAdmin(true);
     }
 
     function ouvrirModalAdminGeocache() {
+        const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
+        if (!isParticipantAdmin(p)) {
+            showToast("Accès réservé aux Capitaines Organisateurs (Alexandre Faby & Jérémy Straub).", "bad");
+            return;
+        }
         const latInput = document.getElementById("admin-geo-lat");
         const lngInput = document.getElementById("admin-geo-lng");
         const indiceInput = document.getElementById("admin-geo-indice");
@@ -1940,7 +1949,9 @@
     }
 
     function reverrouillerApp() {
-        if (!confirm("Retirer l'accès anticipé et revenir au décompte ?")) return;
+        const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
+        if (!isParticipantAdmin(p)) return;
+        if (!confirm("Reverrouiller le carnet et revenir au décompte ?")) return;
         try {
             localStorage.removeItem(ADMIN_KEY);
             localStorage.removeItem("barathon_victoire");
@@ -2075,19 +2086,17 @@
     }
 
     async function gererClicAdmin(force = false) {
+        const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
+        if (!isParticipantAdmin(p)) {
+            showToast("Accès réservé aux Capitaines Organisateurs (Alexandre Faby & Jérémy Straub).", "bad");
+            return;
+        }
         if (!force) {
             adminClicks++;
             clearTimeout(adminTimer);
             adminTimer = setTimeout(() => { adminClicks = 0; }, 2000);
             if (adminClicks < 5) return;
             adminClicks = 0;
-        }
-        if (!estAdmin()) {
-            const code = prompt("🔐 Code organisateur :");
-            if (code === null) return;
-            if (!codeAdminValide(code)) { showToast("Code incorrect.", "bad"); return; }
-            localStorage.setItem(ADMIN_KEY, "1");
-            localStorage.removeItem("barathon_lock_override");
         }
         const saisie = prompt(`👑 Capitaine Admin - Changer d'étape\n\nÀ quelle étape faut-il passer ? (1 à 8)\n\n⚠️ Cela changera l'étape sur le Google Sheet pour TOUT L'ÉQUIPAGE !`, currentGlobalStep);
         if (saisie === null) return;
