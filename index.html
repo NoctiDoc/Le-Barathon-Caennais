@@ -229,6 +229,175 @@
   .heat-scale { display: flex; justify-content: space-between; max-width: 250px; margin: 3px auto 0; font-size: 9.5px; color: var(--ink-soft); letter-spacing: .6px; }
   .gps-tip { font-size: 11px; color: var(--ink-soft); background: rgba(212,171,92,.14); border-left: 3px solid var(--brass); padding: 7px 10px; border-radius: 3px; margin: 10px 0 0; text-align: left; line-height: 1.35; }
 
+  /* BALISE RADAR DE PROXIMITÉ (< 7m) */
+  .compass-proximity-halo {
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.3s ease;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.65) 0%, rgba(255, 120, 0, 0.35) 45%, rgba(178, 34, 34, 0) 72%);
+  }
+  .compass-instrument.proximity-beacon {
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  }
+  .compass-instrument.proximity-beacon:active {
+    transform: scale(0.96) !important;
+  }
+  .compass-instrument.proximity-beacon .compass-proximity-halo {
+    opacity: 1;
+    animation: beacon-radiate 1.1s ease-in-out infinite alternate;
+  }
+  @keyframes beacon-radiate {
+    0% { transform: scale(0.95); opacity: 0.6; }
+    100% { transform: scale(1.12); opacity: 1; }
+  }
+  .compass-beacon-badge {
+    display: none;
+    margin: 8px auto 2px;
+    padding: 6px 14px;
+    max-width: 250px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #d48b1b, #7a2333);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(212, 139, 27, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    animation: beacon-pulse-badge 1s infinite alternate ease-in-out;
+  }
+  .compass-instrument.proximity-beacon ~ .compass-beacon-badge {
+    display: block;
+  }
+  @keyframes beacon-pulse-badge {
+    0% { transform: scale(0.98); box-shadow: 0 2px 8px rgba(212, 139, 27, 0.4); }
+    100% { transform: scale(1.03); box-shadow: 0 5px 18px rgba(255, 170, 0, 0.8); }
+  }
+
+  /* CARTE INDICE SECRET GÉOCACHE */
+  .geocache-hint-card {
+    margin: 12px auto 6px;
+    max-width: 280px;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: left;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .geocache-hint-card.locked {
+    background: rgba(43, 29, 14, 0.08);
+    border: 1.5px dashed rgba(169, 130, 45, 0.45);
+    color: var(--ink-soft);
+  }
+  .geocache-hint-card.locked .gh-lock-state {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .geocache-hint-card.locked .gh-unlocked-state {
+    display: none;
+  }
+  .geocache-hint-card.locked .gh-icon {
+    font-size: 22px;
+    opacity: 0.7;
+  }
+  .geocache-hint-card.locked .gh-text strong {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+  }
+  .geocache-hint-card.locked .gh-text small {
+    display: block;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+    line-height: 1.35;
+  }
+
+  .geocache-hint-card.unlocked {
+    background: linear-gradient(135deg, #fffcf2 0%, #faecd0 100%);
+    border: 2px solid var(--brass);
+    color: var(--ink);
+    box-shadow: 0 6px 20px rgba(184, 134, 11, 0.35), inset 0 1px 2px #fff;
+    animation: hint-unlock-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .geocache-hint-card.unlocked .gh-lock-state {
+    display: none;
+  }
+  .geocache-hint-card.unlocked .gh-unlocked-state {
+    display: block;
+  }
+  @keyframes hint-unlock-pop {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .gh-unlocked-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--wine);
+    border-bottom: 1px dashed rgba(122, 35, 51, 0.3);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .gh-unlocked-header .gh-pulse-icon {
+    font-size: 16px;
+    animation: icon-wobble 1.5s infinite;
+  }
+  @keyframes icon-wobble {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(8deg); }
+  }
+  .gh-clue-content {
+    font-family: 'Special Elite', Georgia, serif;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #2b1d0e;
+    background: rgba(255, 255, 255, 0.65);
+    border-left: 3px solid var(--wine);
+    padding: 8px 10px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  .gh-sub-tip {
+    font-size: 10px;
+    color: var(--ink-soft);
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  body.dark-mode .geocache-hint-card.locked {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(212,171,92,0.3);
+    color: #c4b595;
+  }
+  body.dark-mode .geocache-hint-card.locked .gh-text strong {
+    color: #f2e7cd;
+  }
+  body.dark-mode .geocache-hint-card.unlocked {
+    background: linear-gradient(135deg, #2a1c10 0%, #1c130b 100%);
+    border-color: var(--brass);
+    color: #f2e7cd;
+    box-shadow: 0 6px 24px rgba(212,171,92,0.25), inset 0 1px 1px rgba(255,255,255,0.1);
+  }
+  body.dark-mode .gh-unlocked-header {
+    color: var(--brass-light);
+    border-bottom-color: rgba(212,171,92,0.3);
+  }
+  body.dark-mode .gh-clue-content {
+    background: rgba(0,0,0,0.35);
+    color: #fceecb;
+    border-left-color: var(--brass-light);
+  }
+
   .riddle-parchment { background: #fcf8ee; border: 1px dashed rgba(43,29,14,.35); padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 13px; text-align: left; line-height: 1.4; }
   
   .maze-svg-wrap { margin: 10px 0; text-align: center; border: 2px solid var(--brass); border-radius: 4px; background: #f5ecc7; padding: 4px; box-shadow: inset 0 0 10px rgba(43,29,14,.1); }
@@ -1300,6 +1469,24 @@
       </div>
     </div>
 
+    <!-- Indice secret (dévoilé à < 7m) -->
+    <div style="border-top:1px dashed rgba(43,29,14,.25); padding-top:10px; margin-top:8px;">
+      <label style="display:block; font-size:11.5px; font-weight:bold; color:var(--wine); margin-bottom:3px;">
+        🗝️ Indice secret (dévoilé aux corsaires à &lt; 7m)
+      </label>
+      <textarea id="admin-geo-indice" rows="2" placeholder="Ex: Cherche au creux de la vieille pierre sous l'arcade…" style="width:100%; font-size:12px; padding:7px; border:1.5px solid var(--brass); border-radius:var(--radius-sm); box-sizing:border-box; background:var(--parchment-light); color:var(--ink); font-family:inherit;"></textarea>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+        <span style="font-size:10.5px; color:var(--ink-soft);">Rayon de révélation :</span>
+        <div style="display:inline-flex; align-items:center; gap:4px;">
+          <input type="number" id="admin-geo-rayon" value="7" min="1" max="50" style="width:55px; margin:0; font-size:12px; padding:4px 6px; text-align:center;">
+          <span style="font-size:11px; font-weight:bold; color:var(--ink);">mètres</span>
+        </div>
+      </div>
+      <div style="font-size:10px; color:var(--ink-soft); margin-top:3px; line-height:1.3;">
+        Visible sur tous les téléphones uniquement dès qu'un joueur franchit ce rayon !
+      </div>
+    </div>
+
     <div style="display:flex; flex-direction:column; gap:6px; margin-top:12px;">
       <button type="button" class="btn btn-primary" onclick="validerSaisieManuelleGeocache()" style="margin:0;">
         💾 Enregistrer & Synchroniser
@@ -1315,7 +1502,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw93vfV2-3SW1bYJHEP_3NpXX8_O1MUJYF_YHzBnsj82FBmjJghvenZjUll1dQDgfLjIw/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbymVKEAs4CGY3GQ9CsId_xck8VwBfjS5RkT0AkLzFE8x_kg7uBur4zWQqwu7IO1kB4KDw/exec";
 
     const BARS_DATA = [
         { id: 1, name: "Café du Théâtre", spec: "Cocktail maison" },
@@ -1328,11 +1515,15 @@
         { id: 8, name: "Les Mauvais Gamins", spec: "Embuscade / Cocktail" }
     ];
 
-    // Coordonnées de la cache de l'étape 2 (radar/boussole)
+    // Coordonnées et indice de la cache de l'étape 2 (radar/boussole)
     const DEFAULT_TARGET_COORDS = { lat: 49.155952, lng: -0.473863 };
+    const DEFAULT_TARGET_CLUE = "Fouille minutieusement les pierres et recoins : la cache du corsaire s'y dissimule !";
+    const DEFAULT_TARGET_RADIUS = 7; // Rayon d'activation en mètres
     let targetCoords = Object.assign({}, DEFAULT_TARGET_COORDS);
+    let targetClue = DEFAULT_TARGET_CLUE;
+    let targetRadius = DEFAULT_TARGET_RADIUS;
 
-    // Charger d'éventuelles coordonnées sauvegardées localement
+    // Charger d'éventuelles coordonnées et indice sauvegardés localement
     try {
         const savedTarget = localStorage.getItem("barathon_geocache_target");
         if (savedTarget) {
@@ -1342,6 +1533,10 @@
                 targetCoords.lng = parsed.lng;
             }
         }
+        const savedClue = localStorage.getItem("barathon_geocache_clue");
+        if (savedClue && savedClue.trim() !== "") targetClue = savedClue.trim();
+        const savedRadius = localStorage.getItem("barathon_geocache_radius");
+        if (savedRadius && !isNaN(Number(savedRadius))) targetRadius = Number(savedRadius);
     } catch (e) {}
 
     const TARGET_COORDS = targetCoords; // rétro-compatibilité
@@ -1432,13 +1627,20 @@
         // raccourci de test : index.html?admin=corsaire2026
         const params = new URLSearchParams(location.search);
         if (params.has("admin")) {
-            if (codeAdminValide(params.get("admin"))) localStorage.setItem(ADMIN_KEY, "1");
+            if (codeAdminValide(params.get("admin"))) {
+                localStorage.setItem(ADMIN_KEY, "1");
+                localStorage.removeItem("barathon_lock_override");
+            }
             params.delete("admin");
             history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash);
         }
+        const forceLocked = localStorage.getItem("barathon_lock_override") === "1";
         const savedName = localStorage.getItem('barathon_participant');
-        if (estLance() || estAdmin() || isParticipantAdmin(savedName)) demarrerApp(false);
-        else afficherDecompte();
+        if (!forceLocked && (estLance() || estAdmin() || isParticipantAdmin(savedName))) {
+            demarrerApp(false);
+        } else {
+            afficherDecompte();
+        }
     }
 
     function afficherDecompte() {
@@ -1529,10 +1731,14 @@
     function ouvrirModalAdminGeocache() {
         const latInput = document.getElementById("admin-geo-lat");
         const lngInput = document.getElementById("admin-geo-lng");
+        const indiceInput = document.getElementById("admin-geo-indice");
+        const rayonInput = document.getElementById("admin-geo-rayon");
         const pasteInput = document.getElementById("admin-geo-paste");
         const mapsLink = document.getElementById("admin-geo-maps-link");
         if (latInput) latInput.value = targetCoords.lat;
         if (lngInput) lngInput.value = targetCoords.lng;
+        if (indiceInput) indiceInput.value = targetClue;
+        if (rayonInput) rayonInput.value = targetRadius;
         if (pasteInput) pasteInput.value = "";
         if (mapsLink) mapsLink.href = `https://www.google.com/maps?q=${targetCoords.lat},${targetCoords.lng}`;
         showModal("modal-admin-geocache");
@@ -1584,7 +1790,7 @@
                             `Définir cet endroit comme NOUVELLE GÉOCACHE pour tout l'équipage ?`;
 
                 if (confirm(msg)) {
-                    await appliquerEtSynchroniserGeocache(lat, lng);
+                    await appliquerEtSynchroniserGeocache(lat, lng, targetClue, targetRadius);
                 }
             },
             (err) => {
@@ -1604,12 +1810,20 @@
         );
     }
 
-    function appliquerGeocacheLocale(lat, lng, persisterLocal = true) {
+    function appliquerGeocacheLocale(lat, lng, indice, rayon, persisterLocal = true) {
         targetCoords.lat = Number(lat);
         targetCoords.lng = Number(lng);
+        if (indice != null && typeof indice === "string" && indice.trim() !== "") {
+            targetClue = indice.trim();
+        }
+        if (rayon != null && !isNaN(Number(rayon)) && Number(rayon) > 0) {
+            targetRadius = Number(rayon);
+        }
         if (persisterLocal) {
             try {
                 localStorage.setItem("barathon_geocache_target", JSON.stringify(targetCoords));
+                localStorage.setItem("barathon_geocache_clue", targetClue);
+                localStorage.setItem("barathon_geocache_radius", String(targetRadius));
             } catch (e) {}
         }
         kf = null;
@@ -1623,13 +1837,22 @@
         if (inputLat) inputLat.value = targetCoords.lat;
         const inputLng = document.getElementById("admin-geo-lng");
         if (inputLng) inputLng.value = targetCoords.lng;
+        const inputIndice = document.getElementById("admin-geo-indice");
+        if (inputIndice) inputIndice.value = targetClue;
+        const inputRayon = document.getElementById("admin-geo-rayon");
+        if (inputRayon) inputRayon.value = targetRadius;
         const gmapsLink = document.getElementById("admin-geo-maps-link");
         if (gmapsLink) gmapsLink.href = `https://www.google.com/maps?q=${targetCoords.lat},${targetCoords.lng}`;
+        const clueDisp = document.getElementById("geocache-clue-display");
+        if (clueDisp) clueDisp.textContent = targetClue;
     }
 
-    async function appliquerEtSynchroniserGeocache(lat, lng) {
+    async function appliquerEtSynchroniserGeocache(lat, lng, indice, rayon) {
         const joueur = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || "Admin";
-        appliquerGeocacheLocale(lat, lng, true);
+        const clue = (indice != null && typeof indice === "string" && indice.trim() !== "") ? indice.trim() : targetClue;
+        const rad = (rayon != null && !isNaN(Number(rayon)) && Number(rayon) > 0) ? Number(rayon) : targetRadius;
+        
+        appliquerGeocacheLocale(lat, lng, clue, rad, true);
         showToast(`📍 Cache mise à jour : ${lat}, ${lng}`, "good");
         lancerConfettis();
 
@@ -1637,6 +1860,8 @@
             action: "set_geocache",
             lat: lat,
             lng: lng,
+            indice: clue,
+            rayon: rad,
             participant: joueur,
             uid: nouvelUid()
         };
@@ -1658,20 +1883,26 @@
     async function validerSaisieManuelleGeocache() {
         const latInput = document.getElementById("admin-geo-lat");
         const lngInput = document.getElementById("admin-geo-lng");
+        const indiceInput = document.getElementById("admin-geo-indice");
+        const rayonInput = document.getElementById("admin-geo-rayon");
+
         const lat = parseFloat(latInput ? latInput.value : "");
         const lng = parseFloat(lngInput ? lngInput.value : "");
+        const indice = indiceInput ? indiceInput.value.trim() : targetClue;
+        const rayon = rayonInput ? parseFloat(rayonInput.value) || targetRadius : targetRadius;
+
         if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
             showToast("Coordonnées GPS invalides. Vérifie les valeurs.", "bad");
             return;
         }
-        if (confirm(`Enregistrer ces coordonnées pour la Géocache ?\nLatitude : ${lat}\nLongitude : ${lng}`)) {
-            await appliquerEtSynchroniserGeocache(lat, lng);
+        if (confirm(`Enregistrer ces paramètres pour la Géocache ?\n• Latitude : ${lat}\n• Longitude : ${lng}\n• Rayon : ${rayon} m\n• Indice : "${indice}"`)) {
+            await appliquerEtSynchroniserGeocache(lat, lng, indice, rayon);
         }
     }
 
     async function reinitialiserGeocacheDefaut() {
-        if (confirm("Réinitialiser la géocache aux coordonnées d'origine (49.155952, -0.473863) ?")) {
-            await appliquerEtSynchroniserGeocache(DEFAULT_TARGET_COORDS.lat, DEFAULT_TARGET_COORDS.lng);
+        if (confirm("Réinitialiser la géocache aux coordonnées et indice d'origine ?")) {
+            await appliquerEtSynchroniserGeocache(DEFAULT_TARGET_COORDS.lat, DEFAULT_TARGET_COORDS.lng, DEFAULT_TARGET_CLUE, DEFAULT_TARGET_RADIUS);
         }
     }
 
@@ -1693,6 +1924,7 @@
         const input = document.getElementById("cd-admin-code"), msg = document.getElementById("cd-admin-msg");
         if (codeAdminValide(input.value)) {
             localStorage.setItem(ADMIN_KEY, "1");
+            localStorage.removeItem("barathon_lock_override");
             input.value = "";
             document.getElementById("cd-admin").hidden = true;
             msg.textContent = "";
@@ -1712,6 +1944,7 @@
         try {
             localStorage.removeItem(ADMIN_KEY);
             localStorage.removeItem("barathon_victoire");
+            localStorage.setItem("barathon_lock_override", "1");
         } catch (e) {}
         location.reload();
     }
@@ -1807,7 +2040,41 @@
 
     // 5 taps rapides sur le titre : forcer une étape (organisateur uniquement, local à ce téléphone)
     let adminStepOverride = false;
-    function gererClicAdmin(force = false) {
+    async function changerEtapeAdmin(stepNum) {
+        stepNum = parseInt(stepNum, 10);
+        if (isNaN(stepNum) || stepNum < 1 || stepNum > BARS_DATA.length) {
+            showToast("Numéro d'étape invalide (doit être entre 1 et 8).", "bad");
+            return;
+        }
+
+        currentGlobalStep = stepNum;
+        adminStepOverride = false;
+        renderBars();
+        renderCarte();
+        showToast(`Étape ${stepNum} activée. Synchronisation sur le Google Sheet…`, "info");
+
+        const joueur = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || "Admin";
+        const payload = {
+            action: "set_step",
+            step: stepNum,
+            participant: joueur,
+            uid: nouvelUid()
+        };
+
+        try {
+            const res = await envoyerAuServeur(payload);
+            if (res && (res.status === "success" || res.status === "ok")) {
+                showToast(`✓ Étape ${stepNum} synchronisée sur le Sheet pour TOUT L'ÉQUIPAGE !`, "good");
+                lancerConfettis();
+            } else {
+                showToast(`Étape ${stepNum} mise à jour localement.`, "info");
+            }
+        } catch (e) {
+            showToast(`Étape ${stepNum} mise à jour localement (hors ligne).`, "info");
+        }
+    }
+
+    async function gererClicAdmin(force = false) {
         if (!force) {
             adminClicks++;
             clearTimeout(adminTimer);
@@ -1820,19 +2087,11 @@
             if (code === null) return;
             if (!codeAdminValide(code)) { showToast("Code incorrect.", "bad"); return; }
             localStorage.setItem(ADMIN_KEY, "1");
+            localStorage.removeItem("barathon_lock_override");
         }
-        const saisie = prompt("🔧 À quelle étape faut-il forcer le passage ? (1 à 8)\n(Uniquement sur ce téléphone, jusqu'au rechargement de la page.)");
+        const saisie = prompt(`👑 Capitaine Admin - Changer d'étape\n\nÀ quelle étape faut-il passer ? (1 à 8)\n\n⚠️ Cela changera l'étape sur le Google Sheet pour TOUT L'ÉQUIPAGE !`, currentGlobalStep);
         if (saisie === null) return;
-        const stepNum = parseInt(saisie, 10);
-        if (stepNum >= 1 && stepNum <= BARS_DATA.length) {
-            currentGlobalStep = stepNum;
-            adminStepOverride = true;   // le serveur ne ré-impose plus son étape tant que la page n'est pas rechargée
-            renderBars();
-            renderCarte();
-            showToast(`Passage forcé à l'étape ${stepNum} (local)`, 'good');
-        } else {
-            showToast("Numéro d'étape invalide.", "bad");
-        }
+        await changerEtapeAdmin(saisie);
     }
 
     // ---------- Synchronisation : toutes les 4 s, en pause si l'appli est en arrière-plan ----------
@@ -1861,26 +2120,41 @@
             const firstSync = !stateSynced;
             stateSynced = true;
 
-            // Synchronisation temps réel de la géocache si définie dans le Google Sheet
-            if (data.geocache && typeof data.geocache.lat === "number" && typeof data.geocache.lng === "number") {
-                if (Math.abs(data.geocache.lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache.lng - targetCoords.lng) > 0.000005) {
-                    appliquerGeocacheLocale(data.geocache.lat, data.geocache.lng, true);
+            // Synchronisation temps réel de la géocache et de l'indice si définis dans le Google Sheet
+            if (data.geocache) {
+                const gLat = typeof data.geocache.lat === "number" ? data.geocache.lat : parseFloat(data.geocache.lat);
+                const gLng = typeof data.geocache.lng === "number" ? data.geocache.lng : parseFloat(data.geocache.lng);
+                const gIndice = (data.geocache.indice !== undefined && data.geocache.indice !== null) ? String(data.geocache.indice).trim() : "";
+                const gRayon = data.geocache.rayon ? (parseFloat(data.geocache.rayon) || targetRadius) : targetRadius;
+
+                if (!isNaN(gLat) && !isNaN(gLng)) {
+                    const diffCoords = Math.abs(gLat - targetCoords.lat) > 0.000005 || Math.abs(gLng - targetCoords.lng) > 0.000005;
+                    const diffClue = gIndice && gIndice !== targetClue;
+                    const diffRayon = gRayon && gRayon !== targetRadius;
+                    if (diffCoords || diffClue || diffRayon) {
+                        appliquerGeocacheLocale(gLat, gLng, gIndice || targetClue, gRayon || targetRadius, true);
+                    }
                 }
             } else if (typeof data.geocache_lat === "number" && typeof data.geocache_lng === "number") {
                 if (Math.abs(data.geocache_lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache_lng - targetCoords.lng) > 0.000005) {
-                    appliquerGeocacheLocale(data.geocache_lat, data.geocache_lng, true);
+                    appliquerGeocacheLocale(data.geocache_lat, data.geocache_lng, targetClue, targetRadius, true);
                 }
             }
 
-            if (!adminStepOverride && data.currentStep && data.currentStep > currentGlobalStep) {
+            if (!adminStepOverride && data.currentStep && data.currentStep !== currentGlobalStep) {
+                const ancienStep = currentGlobalStep;
                 currentGlobalStep = data.currentStep;
                 renderBars();
                 renderCarte();
                 if (!firstSync) {
-                    // quelqu'un d'autre vient de débloquer : on prévient, et on ferme l'épreuve devenue inutile
+                    // quelqu'un d'autre vient de débloquer ou admin a changé : on prévient, et on ferme l'épreuve devenue inutile
                     const riddle = document.getElementById("modal-riddle");
                     if (riddle && riddle.classList.contains("is-open") && activeBarIdForRiddle !== null && activeBarIdForRiddle <= currentGlobalStep) fermerModales();
-                    showToast(`Un corsaire a débloqué l'étape ${currentGlobalStep} !`, "good");
+                    if (data.currentStep > ancienStep) {
+                        showToast(`Un corsaire a débloqué l'étape ${currentGlobalStep} !`, "good");
+                    } else {
+                        showToast(`L'étape a été ajustée à l'étape ${currentGlobalStep}.`, "info");
+                    }
                 }
                 if (currentGlobalStep >= BARS_DATA.length) declencherVictoire();
             } else if (!document.getElementById("bars-list").innerHTML.includes("waypoint")) {
@@ -2152,7 +2426,7 @@
                     📍 Mettre ma position GPS actuelle
                   </button>
                   <button type="button" class="btn-agb btn-agb-edit" onclick="ouvrirModalAdminGeocache()">
-                    ✏️ Modifier
+                    ✏️ Coordonnées & Indice
                   </button>
                 </div>
               </div>` : '';
@@ -2161,9 +2435,14 @@
                              <strong>Le Radar du Corsaire</strong><br>
                              Suis l'aiguille jusqu'à la cache. Plus tu t'approches, plus l'instrument s'enflamme.
                            </div>
-                           <div class="compass-instrument standby" id="compass-instrument" data-heat="0">
+                           <div class="compass-instrument standby" id="compass-instrument" data-heat="0" onclick="cliquerBaliseGeocache()">
                              <div class="compass-glow"></div><div class="compass-ping"></div><div class="compass-ping p2"></div>
+                             <div class="compass-proximity-halo"></div>
                              ${buildCompassSVG()}
+                           </div>
+                           <div class="compass-beacon-badge" id="compass-beacon-badge">
+                             🔥 BALISE DU CORSAIRE ACTIVE 🔥
+                             <small style="display:block; font-size:9.5px; opacity:0.9;">Touche la boussole pour focaliser l'indice</small>
                            </div>
                            <div class="compass-readout">
                              <div class="ro-label" id="ro-label">Radar en veille</div>
@@ -2172,6 +2451,28 @@
                            </div>
                            <div class="heat-meter" id="heat-meter">${buildHeatSegments()}</div>
                            <div class="heat-scale"><span>Froid</span><span>Brûlant</span></div>
+
+                           <!-- CARTE INDICE SECRET DÉVOILÉ À < 7M -->
+                           <div id="geocache-hint-box" class="geocache-hint-card locked">
+                             <div class="gh-lock-state">
+                               <span class="gh-icon">🔒</span>
+                               <div class="gh-text">
+                                 <strong>INDICE DE LA CACHE VERROUILLÉ</strong>
+                                 <small id="geocache-hint-remain">Rapproche-toi à moins de ${targetRadius}m pour capter le signal et dévoiler l'indice…</small>
+                               </div>
+                             </div>
+                             <div class="gh-unlocked-state">
+                               <div class="gh-unlocked-header">
+                                 <span class="gh-pulse-icon">🗝️</span>
+                                 <span>BALISE ACTIVE (&lt; ${targetRadius}m) — INDICE DÉVOILÉ :</span>
+                               </div>
+                               <div class="gh-clue-content" id="geocache-clue-display">
+                                 ${targetClue || DEFAULT_TARGET_CLUE}
+                               </div>
+                               <div class="gh-sub-tip">💡 Fouille cet endroit, relève le code secret et valide-le ci-dessous !</div>
+                             </div>
+                           </div>
+
                            <div id="compass-msg" class="feedback feedback-info">Active le radar pour lancer la recherche.</div>
                            <div id="compass-calib"></div>
                            <button id="btn-compass" class="btn btn-primary" onclick="demarrerBoussole()">Activer le radar</button>
@@ -2631,6 +2932,15 @@
         compassActive = false; lastLat = null; lastLng = null; lastHeading = null; lastAccuracy = null;
         needleRotation = 0; roseRotation = 0; dispRose = null; dispNeedle = null; dispDist = null; targetDist = null; bearingTarget = null;
         kf = null; trendS = 0; uiT = 0; sigmaDisp = 8; heatState = 0; headingAccuracy = null; calibCheckT = 0;
+        const inst = document.getElementById("compass-instrument");
+        if (inst) {
+            inst.classList.remove("proximity-beacon");
+            inst.dataset.beacon = "0";
+            inst.style.transform = "";
+            inst.style.filter = "";
+        }
+        const hintBox = document.getElementById("geocache-hint-box");
+        if (hintBox) hintBox.className = "geocache-hint-card locked";
     }
 
     function demarrerBoussole() {
@@ -2878,8 +3188,58 @@
         if (arrow) arrow.style.opacity = (half <= 30 ? 1 : half >= 70 ? 0.3 : 1 - (half - 30) / 40 * 0.7).toFixed(2);
 
         const inZone = dist <= Math.max(sigmaDisp * 1.4, 4);
+
+        // --- DÉTECTION PROXIMITÉ GÉOCACHE (< 7m) : BALISE LUMINEUSE + INDICE DÉVOILÉ ---
+        const isBeacon = dist <= targetRadius;
+        const proximityRatio = isBeacon ? Math.max(0, Math.min(1, (targetRadius - dist) / targetRadius)) : 0;
+
+        if (isBeacon) {
+            inst.classList.add("proximity-beacon");
+            inst.dataset.beacon = "1";
+            // Lueur dorée & feu croissante de 7m (ratio 0) jusqu'à 0m (ratio 1)
+            const glowPx = Math.round(15 + proximityRatio * 50); // 15px -> 65px
+            const spreadPx = Math.round(5 + proximityRatio * 25);
+            const aGold = (0.55 + proximityRatio * 0.45).toFixed(2);
+            const aFire = (0.4 + proximityRatio * 0.6).toFixed(2);
+            const scale = (1.02 + proximityRatio * 0.08).toFixed(3);
+            inst.style.transform = `scale(${scale})`;
+            inst.style.filter = `drop-shadow(0 0 ${glowPx}px rgba(255, 215, 0, ${aGold})) drop-shadow(0 0 ${glowPx + spreadPx}px rgba(255, 95, 0, ${aFire}))`;
+
+            // Révéler la carte indice
+            const hintBox = document.getElementById("geocache-hint-box");
+            if (hintBox) {
+                if (!hintBox.classList.contains("unlocked")) {
+                    hintBox.className = "geocache-hint-card unlocked";
+                    if (navigator.vibrate) navigator.vibrate([120, 60, 120, 60, 250]);
+                    showToast("🔥 BALISE ACTIVE : l'indice secret est dévoilé !", "good");
+                    lancerConfettis();
+                }
+                const clueEl = document.getElementById("geocache-clue-display");
+                if (clueEl) clueEl.textContent = targetClue || DEFAULT_TARGET_CLUE;
+            }
+        } else {
+            inst.classList.remove("proximity-beacon");
+            inst.dataset.beacon = "0";
+            inst.style.transform = "";
+            inst.style.filter = "";
+
+            const hintBox = document.getElementById("geocache-hint-box");
+            if (hintBox && hintBox.classList.contains("unlocked")) {
+                hintBox.className = "geocache-hint-card locked";
+            }
+            const distRemain = document.getElementById("geocache-hint-remain");
+            if (distRemain) {
+                const diff = Math.max(0, dist - targetRadius);
+                distRemain.textContent = `Rapproche-toi à moins de ${targetRadius}m pour capter le signal (encore ${Math.round(diff)} m)…`;
+            }
+        }
+
         let msg, kind;
-        if (heat >= 2 && inZone) { msg = "Tu es dans la zone de la cache : le GPS ne peut plus te guider, fouille autour de toi."; kind = "good"; }
+        if (isBeacon) {
+            msg = `🔥 BALISE ALLUMÉE (&lt; ${targetRadius}m) : consulte l'indice secret ci-dessus !`;
+            kind = "good";
+        }
+        else if (heat >= 2 && inZone) { msg = "Tu es dans la zone de la cache : le GPS ne peut plus te guider, fouille autour de toi."; kind = "good"; }
         else if (heat === 3) { msg = "Tu y es presque — ouvre l'œil !"; kind = "good"; }
         else if (heat === 2) { msg = "Ça brûle ! Fouille les environs."; kind = "warn"; }
         else if (heat === 1) { msg = "Tu t'approches de la zone critique…"; kind = "warn"; }
@@ -2900,7 +3260,22 @@
         }
 
         const nowT = Date.now();
-        if (heat >= 2 && navigator.vibrate && nowT - lastVibe > 4000) { lastVibe = nowT; navigator.vibrate([100, 50, 100]); }
+        if ((isBeacon || heat >= 2) && navigator.vibrate && nowT - lastVibe > 4000) { lastVibe = nowT; navigator.vibrate(isBeacon ? [150, 80, 150] : [100, 50, 100]); }
+    }
+
+    function cliquerBaliseGeocache() {
+        if (!compassActive) {
+            demarrerBoussole();
+            return;
+        }
+        if (dispDist != null && dispDist <= targetRadius) {
+            if (navigator.vibrate) navigator.vibrate([100, 70, 150]);
+            showToast("✨ La balise crépite d'or : fouille l'emplacement décrit dans l'indice !", "good");
+            const hintBox = document.getElementById("geocache-hint-box");
+            if (hintBox) hintBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+            showToast(`📡 Radar actif : avance vers la cache (< ${targetRadius}m pour allumer la balise).`, "info");
+        }
     }
 
     // Envoi au serveur : lève une erreur si le réseau ou le serveur échoue, renvoie la réponse JSON (ou null)
@@ -3372,6 +3747,8 @@
         hideModal("modal-riddle");
         hideModal("modal-drink");
         hideModal("modal-costume");
+        hideModal("modal-admin-geocache");
+        document.querySelectorAll(".modal.is-open").forEach(m => hideModal(m.id));
 
         if (modalHistoryPushed && !fromPopstate) {
             modalHistoryPushed = false;
