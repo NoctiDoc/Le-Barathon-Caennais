@@ -278,9 +278,73 @@
   .cd-admin { margin-top: 16px; padding-top: 12px; border-top: 1px dashed rgba(43,29,14,.3); }
   .cd-admin[hidden] { display: none; }
   .cd-admin input { text-align: center; font-size: 15px; }
-  #admin-badge { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -6px -4px 12px; padding: 6px 10px; border-radius: var(--radius-sm); background: repeating-linear-gradient(135deg, rgba(169,130,45,.18) 0 8px, rgba(169,130,45,.08) 8px 16px); border: 1px dashed var(--brass); font-size: 12px; color: var(--ink); }
-  #admin-badge[hidden] { display: none; }
-  #admin-badge button { font-family: inherit; font-size: 12px; background: var(--ink); color: var(--paper-card); border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+  #admin-badge { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: -6px -4px 12px; padding: 6px 10px; border-radius: var(--radius-sm); background: repeating-linear-gradient(135deg, rgba(169,130,45,.18) 0 8px, rgba(169,130,45,.08) 8px 16px); border: 1px dashed var(--brass); font-size: 12px; color: var(--ink); }
+  #admin-badge[hidden] { display: none !important; }
+  #admin-badge button { font-family: inherit; font-size: 11px; background: var(--ink); color: var(--paper-card); border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; transition: transform .1s; }
+  #admin-badge button:active { transform: scale(.95); }
+
+  /* BANNIÈRE RÉGLAGE GÉOCACHE DIRECT DANS L'ÉPREUVE */
+  .admin-geocache-banner {
+    background: linear-gradient(135deg, rgba(169,130,45,.2) 0%, rgba(122,35,51,.15) 100%);
+    border: 1.5px solid var(--brass);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    margin-bottom: 12px;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .agb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11.5px;
+    color: var(--wine);
+    margin-bottom: 3px;
+  }
+  .agb-coords {
+    font-family: monospace;
+    font-size: 11px;
+    background: rgba(255,255,255,.65);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--ink);
+    border: 1px solid rgba(43,29,14,.2);
+  }
+  .agb-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .btn-agb {
+    flex: 1;
+    font-family: 'Special Elite', monospace;
+    font-size: 11.5px;
+    padding: 7px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid var(--ink);
+    transition: transform .1s;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-agb:active { transform: scale(.97); }
+  .btn-agb-gps {
+    background: linear-gradient(180deg, var(--wine-light), var(--wine));
+    color: #fdf6e8;
+    border-color: #5a1824;
+    font-weight: bold;
+  }
+  .btn-agb-edit {
+    background: #fffdf6;
+    color: var(--ink);
+    border-color: var(--brass);
+  }
+  body.dark-mode .admin-geocache-banner {
+    background: linear-gradient(135deg, rgba(169,130,45,.25) 0%, rgba(32,22,13,.9) 100%);
+    border-color: rgba(212,171,92,.5);
+  }
+  body.dark-mode .agb-header { color: var(--brass-light); }
+  body.dark-mode .agb-coords { background: rgba(0,0,0,.5); color: #f5ecc7; border-color: rgba(212,171,92,.3); }
+  body.dark-mode .btn-agb-edit { background: #241709; color: #f5ecc7; border-color: var(--brass); }
 
   /* CROIX DIRECTIONNELLE DU LABYRINTHE */
   .maze-pad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 48px); gap: 6px; justify-content: center; margin: 8px 0 4px; touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -769,7 +833,14 @@
 <div id="toast-container"></div>
 
 <div class="container">
-  <div id="admin-badge" hidden><span>🔧 Mode test — accès anticipé</span><button type="button" onclick="reverrouillerApp()">Reverrouiller</button></div>
+  <div id="admin-badge" hidden>
+    <span id="admin-badge-text">👑 Capitaine Admin</span>
+    <div id="admin-badge-btns" style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button type="button" onclick="ouvrirModalAdminGeocache()">📍 Géocache</button>
+      <button type="button" onclick="ouvrirMenuAdminEtapes()">Étape</button>
+      <button type="button" onclick="reverrouillerApp()">Reverrouiller</button>
+    </div>
+  </div>
   <div class="brand-row">
     <div class="brand-title-wrap" onclick="gererClicAdmin()">
       <svg viewBox="0 0 40 40" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
@@ -793,8 +864,8 @@
     <select id="global-participant" onchange="sauvegarderParticipant()">
       <option value="">-- Choisis ton nom --</option>
       <option value="Majid">Majid</option>
-      <option value="Alexandre">Alexandre</option>
-      <option value="Jeremy S">Jeremy S</option>
+      <option value="Alexandre Faby">Alexandre Faby 👑</option>
+      <option value="Jérémy Straub">Jérémy Straub 👑</option>
       <option value="Romain R">Romain R</option>
       <option value="Théo M">Théo M</option>
       <option value="Pepette">Pepette</option>
@@ -1182,6 +1253,67 @@
   </div>
 </div>
 
+<!-- MODALE ADMIN GÉOCACHE -->
+<div id="modal-admin-geocache" class="modal">
+  <div class="modal-content" style="max-width:380px;">
+    <h3 style="font-family:'Pirata One', cursive; font-size:24px; color:var(--wine); margin-bottom:6px;">
+      📍 Réglage Géocache (Étape 2)
+    </h3>
+    <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px; line-height:1.35;">
+      Définit les coordonnées cibles traquées en temps réel par la boussole et le radar pour tout l'équipage.
+    </p>
+
+    <!-- Bouton GPS 1-clic direct -->
+    <div style="background:rgba(212,171,92,.18); border:1.5px solid var(--brass); border-radius:var(--radius-sm); padding:10px; margin-bottom:12px; text-align:center;">
+      <div style="font-size:11px; font-weight:bold; color:var(--wine); margin-bottom:6px;">
+        🎯 TU ES SUR PLACE ?
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-agb-gps-modal" onclick="capturerPositionActuelleGeocache()" style="margin:0; font-size:13px; padding:10px 12px;">
+        📍 Définir sur ma position GPS actuelle
+      </button>
+      <div style="font-size:10px; color:var(--ink-soft); margin-top:5px;">
+        Capte le signal GPS précis de ton smartphone et met à jour la cache instantanément.
+      </div>
+    </div>
+
+    <!-- Saisie manuelle ou collage rapide -->
+    <div style="border-top:1px dashed rgba(43,29,14,.25); padding-top:10px; margin-top:8px;">
+      <label style="display:block; font-size:11.5px; font-weight:bold; margin-bottom:3px; color:var(--ink);">
+        Coller des coordonnées (ex: 49.155952, -0.473863)
+      </label>
+      <input type="text" id="admin-geo-paste" placeholder="Coller ici depuis Google Maps…" oninput="analyserCoordonneesCollees(this.value)" style="margin-bottom:8px; font-size:12px; padding:7px;">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div>
+          <label style="display:block; font-size:10.5px; color:var(--ink-soft); margin-bottom:2px;">Latitude</label>
+          <input type="number" step="0.000001" id="admin-geo-lat" style="margin:0; font-size:12.5px; padding:6px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:10.5px; color:var(--ink-soft); margin-bottom:2px;">Longitude</label>
+          <input type="number" step="0.000001" id="admin-geo-lng" style="margin:0; font-size:12.5px; padding:6px;">
+        </div>
+      </div>
+      <div style="text-align:right; margin-top:4px;">
+        <a id="admin-geo-maps-link" href="#" target="_blank" rel="noopener noreferrer" style="font-size:11px; color:var(--wine); text-decoration:underline;">
+          🗺️ Vérifier sur Google Maps
+        </a>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:6px; margin-top:12px;">
+      <button type="button" class="btn btn-primary" onclick="validerSaisieManuelleGeocache()" style="margin:0;">
+        💾 Enregistrer & Synchroniser
+      </button>
+      <button type="button" class="btn btn-ghost" onclick="reinitialiserGeocacheDefaut()" style="margin:0; font-size:11px; color:#8a6a1e;">
+        ↺ Réinitialiser coordonnées par défaut
+      </button>
+      <button type="button" class="btn btn-ghost" onclick="fermerModales()" style="margin:0; font-size:12px;">
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw93vfV2-3SW1bYJHEP_3NpXX8_O1MUJYF_YHzBnsj82FBmjJghvenZjUll1dQDgfLjIw/exec";
 
@@ -1197,7 +1329,22 @@
     ];
 
     // Coordonnées de la cache de l'étape 2 (radar/boussole)
-    const TARGET_COORDS = { lat: 49.155952, lng: -0.473863 };
+    const DEFAULT_TARGET_COORDS = { lat: 49.155952, lng: -0.473863 };
+    let targetCoords = Object.assign({}, DEFAULT_TARGET_COORDS);
+
+    // Charger d'éventuelles coordonnées sauvegardées localement
+    try {
+        const savedTarget = localStorage.getItem("barathon_geocache_target");
+        if (savedTarget) {
+            const parsed = JSON.parse(savedTarget);
+            if (parsed && typeof parsed.lat === "number" && typeof parsed.lng === "number") {
+                targetCoords.lat = parsed.lat;
+                targetCoords.lng = parsed.lng;
+            }
+        }
+    } catch (e) {}
+
+    const TARGET_COORDS = targetCoords; // rétro-compatibilité
 
     const MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_SEED = 20260916;
     function seededRandom(seed) {
@@ -1264,8 +1411,21 @@
     const ADMIN_KEY = "barathon_admin";
     let appStarted = false, countdownTimer = null, cdAdminClicks = 0, cdAdminTimer = null;
 
+    function isParticipantAdmin(name) {
+        if (!name) name = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || localStorage.getItem("barathon_participant") || "";
+        if (!name) return false;
+        const n = name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return n.includes("alexandre") || n.includes("jeremy") || n.includes("straub") || n.includes("faby");
+    }
     function estLance() { return Date.now() >= LAUNCH_DATE.getTime(); }
-    function estAdmin() { try { return localStorage.getItem(ADMIN_KEY) === "1"; } catch (e) { return false; } }
+    function estAdmin() {
+        try {
+            if (localStorage.getItem(ADMIN_KEY) === "1") return true;
+            return isParticipantAdmin();
+        } catch (e) {
+            return false;
+        }
+    }
     function codeAdminValide(code) { return (code || "").trim().toLowerCase() === ADMIN_CODE.toLowerCase(); }
 
     function initPorte() {
@@ -1276,7 +1436,8 @@
             params.delete("admin");
             history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash);
         }
-        if (estLance() || estAdmin()) demarrerApp(false);
+        const savedName = localStorage.getItem('barathon_participant');
+        if (estLance() || estAdmin() || isParticipantAdmin(savedName)) demarrerApp(false);
         else afficherDecompte();
     }
 
@@ -1310,7 +1471,7 @@
         const reveler = () => {
             screen.hidden = true; screen.classList.remove("leaving");
             document.body.classList.remove("gate-locked");
-            document.getElementById("admin-badge").hidden = !(estAdmin() && !estLance());
+            majAdminUI();
         };
         if (avecFanfare && !screen.hidden) {
             screen.classList.add("leaving");
@@ -1323,11 +1484,195 @@
         verifierConnexionReseau();
         setInterval(verifierConnexionReseau, 10000);
         programmerSync(0);
-        // quand le décompte est passé pendant le mode test, on retire le badge
         if (!estLance()) setTimeout(function surveillerLancement() {
-            if (estLance()) document.getElementById("admin-badge").hidden = true;
+            if (estLance()) majAdminUI();
             else setTimeout(surveillerLancement, 30000);
         }, 30000);
+    }
+
+    function majAdminUI() {
+        const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
+        const badge = document.getElementById('admin-badge');
+        const badgeText = document.getElementById('admin-badge-text');
+        const badgeBtns = document.getElementById('admin-badge-btns');
+        if (!badge) return;
+
+        if (isParticipantAdmin(p)) {
+            badge.hidden = false;
+            if (badgeText) badgeText.innerHTML = `👑 <b>Capitaine Admin (${p})</b>`;
+            if (badgeBtns) {
+                badgeBtns.innerHTML = `
+                  <button type="button" onclick="ouvrirModalAdminGeocache()" title="Changer l'emplacement de la cache">📍 Géocache</button>
+                  <button type="button" onclick="ouvrirMenuAdminEtapes()" title="Changer d'étape">Étape</button>
+                  ${!estLance() ? '<button type="button" onclick="reverrouillerApp()">Reverrouiller</button>' : ''}
+                `;
+            }
+        } else if (estAdmin() && !estLance()) {
+            badge.hidden = false;
+            if (badgeText) badgeText.innerHTML = `🔧 Mode test — accès anticipé`;
+            if (badgeBtns) {
+                badgeBtns.innerHTML = `
+                  <button type="button" onclick="ouvrirModalAdminGeocache()">📍 Géocache</button>
+                  <button type="button" onclick="reverrouillerApp()">Reverrouiller</button>
+                `;
+            }
+        } else {
+            badge.hidden = true;
+        }
+    }
+
+    // ---------- Gestion Admin de la Géocache (Étape 2) ----------
+    function ouvrirMenuAdminEtapes() {
+        gererClicAdmin(true);
+    }
+
+    function ouvrirModalAdminGeocache() {
+        const latInput = document.getElementById("admin-geo-lat");
+        const lngInput = document.getElementById("admin-geo-lng");
+        const pasteInput = document.getElementById("admin-geo-paste");
+        const mapsLink = document.getElementById("admin-geo-maps-link");
+        if (latInput) latInput.value = targetCoords.lat;
+        if (lngInput) lngInput.value = targetCoords.lng;
+        if (pasteInput) pasteInput.value = "";
+        if (mapsLink) mapsLink.href = `https://www.google.com/maps?q=${targetCoords.lat},${targetCoords.lng}`;
+        showModal("modal-admin-geocache");
+    }
+
+    function analyserCoordonneesCollees(val) {
+        if (!val) return;
+        const parts = val.trim().split(/[\s,;]+/);
+        if (parts.length >= 2) {
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                document.getElementById("admin-geo-lat").value = lat;
+                document.getElementById("admin-geo-lng").value = lng;
+                const mapsLink = document.getElementById("admin-geo-maps-link");
+                if (mapsLink) mapsLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+                showToast("Coordonnées détectées !", "good");
+            }
+        }
+    }
+
+    function capturerPositionActuelleGeocache() {
+        if (!navigator.geolocation) {
+            showToast("La géolocalisation n'est pas supportée par ton navigateur.", "bad");
+            return;
+        }
+        showToast("Acquisition de la position GPS en cours…", "info");
+        const btnGps = document.getElementById("btn-agb-gps-modal");
+        const oldText = btnGps ? btnGps.innerHTML : "";
+        if (btnGps) {
+            btnGps.disabled = true;
+            btnGps.innerHTML = "📡 Recherche du signal GPS précis…";
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                if (btnGps) {
+                    btnGps.disabled = false;
+                    btnGps.innerHTML = oldText;
+                }
+                const lat = Number(pos.coords.latitude.toFixed(6));
+                const lng = Number(pos.coords.longitude.toFixed(6));
+                const acc = Math.round(pos.coords.accuracy || 0);
+
+                const msg = `📍 Position GPS captée avec succès !\n\n` +
+                            `• Latitude : ${lat}\n` +
+                            `• Longitude : ${lng}\n` +
+                            `• Précision : ±${acc} m\n\n` +
+                            `Définir cet endroit comme NOUVELLE GÉOCACHE pour tout l'équipage ?`;
+
+                if (confirm(msg)) {
+                    await appliquerEtSynchroniserGeocache(lat, lng);
+                }
+            },
+            (err) => {
+                if (btnGps) {
+                    btnGps.disabled = false;
+                    btnGps.innerHTML = oldText;
+                }
+                let errTxt = "Erreur GPS : ";
+                if (err.code === 1) errTxt += "permission refusée. Autorise la localisation.";
+                else if (err.code === 2) errTxt += "position introuvable. Mets-toi à découvert.";
+                else if (err.code === 3) errTxt += "délai dépassé. Réessaie.";
+                else errTxt += err.message || "inconnue";
+                showToast(errTxt, "bad");
+                alert(errTxt);
+            },
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+        );
+    }
+
+    function appliquerGeocacheLocale(lat, lng, persisterLocal = true) {
+        targetCoords.lat = Number(lat);
+        targetCoords.lng = Number(lng);
+        if (persisterLocal) {
+            try {
+                localStorage.setItem("barathon_geocache_target", JSON.stringify(targetCoords));
+            } catch (e) {}
+        }
+        kf = null;
+        targetDist = null;
+        dispDist = null;
+        bearingTarget = null;
+        
+        const agbText = document.getElementById("agb-target-text");
+        if (agbText) agbText.textContent = `${targetCoords.lat.toFixed(6)}, ${targetCoords.lng.toFixed(6)}`;
+        const inputLat = document.getElementById("admin-geo-lat");
+        if (inputLat) inputLat.value = targetCoords.lat;
+        const inputLng = document.getElementById("admin-geo-lng");
+        if (inputLng) inputLng.value = targetCoords.lng;
+        const gmapsLink = document.getElementById("admin-geo-maps-link");
+        if (gmapsLink) gmapsLink.href = `https://www.google.com/maps?q=${targetCoords.lat},${targetCoords.lng}`;
+    }
+
+    async function appliquerEtSynchroniserGeocache(lat, lng) {
+        const joueur = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || "Admin";
+        appliquerGeocacheLocale(lat, lng, true);
+        showToast(`📍 Cache mise à jour : ${lat}, ${lng}`, "good");
+        lancerConfettis();
+
+        const payload = {
+            action: "set_geocache",
+            lat: lat,
+            lng: lng,
+            participant: joueur,
+            uid: nouvelUid()
+        };
+
+        try {
+            const res = await envoyerAuServeur(payload);
+            if (res && res.status === "ok") {
+                showToast("✓ Synchronisé sur le Google Sheet !", "good");
+            } else {
+                showToast("Enregistré localement (Google Apps Script en attente)", "info");
+            }
+        } catch (e) {
+            showToast("Enregistré sur ce téléphone (hors ligne)", "info");
+        }
+
+        fermerModales();
+    }
+
+    async function validerSaisieManuelleGeocache() {
+        const latInput = document.getElementById("admin-geo-lat");
+        const lngInput = document.getElementById("admin-geo-lng");
+        const lat = parseFloat(latInput ? latInput.value : "");
+        const lng = parseFloat(lngInput ? lngInput.value : "");
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            showToast("Coordonnées GPS invalides. Vérifie les valeurs.", "bad");
+            return;
+        }
+        if (confirm(`Enregistrer ces coordonnées pour la Géocache ?\nLatitude : ${lat}\nLongitude : ${lng}`)) {
+            await appliquerEtSynchroniserGeocache(lat, lng);
+        }
+    }
+
+    async function reinitialiserGeocacheDefaut() {
+        if (confirm("Réinitialiser la géocache aux coordonnées d'origine (49.155952, -0.473863) ?")) {
+            await appliquerEtSynchroniserGeocache(DEFAULT_TARGET_COORDS.lat, DEFAULT_TARGET_COORDS.lng);
+        }
     }
 
     // 5 taps rapides sur le sceau du décompte -> champ « code organisateur »
@@ -1372,15 +1717,27 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('barathon_participant');
-        if (savedName) document.getElementById('global-participant').value = savedName;
+        let savedName = localStorage.getItem('barathon_participant');
+        if (savedName) {
+            const sel = document.getElementById('global-participant');
+            if (savedName === "Alexandre" || savedName === "Alexandre Faby") {
+                savedName = "Alexandre Faby";
+                localStorage.setItem('barathon_participant', "Alexandre Faby");
+            } else if (savedName === "Jeremy S" || savedName === "Jérémy Straub" || savedName === "Jeremy Straub") {
+                savedName = "Jérémy Straub";
+                localStorage.setItem('barathon_participant', "Jérémy Straub");
+            }
+            if (sel) sel.value = savedName;
+        }
         majAffichageCostume();
         initPorte();
+        majAdminUI();
     });
 
     function sauvegarderParticipant() {
         const name = document.getElementById('global-participant').value;
         if (name) localStorage.setItem('barathon_participant', name);
+        majAdminUI();
         majAffichageCostume();
         renderBars();
         if (document.getElementById('tab-scores') && document.getElementById('tab-scores').classList.contains('active')) chargerClassement();
@@ -1450,27 +1807,31 @@
 
     // 5 taps rapides sur le titre : forcer une étape (organisateur uniquement, local à ce téléphone)
     let adminStepOverride = false;
-    function gererClicAdmin() {
-        adminClicks++;
-        clearTimeout(adminTimer);
-        adminTimer = setTimeout(() => { adminClicks = 0; }, 2000);
-        if (adminClicks >= 5) {
+    function gererClicAdmin(force = false) {
+        if (!force) {
+            adminClicks++;
+            clearTimeout(adminTimer);
+            adminTimer = setTimeout(() => { adminClicks = 0; }, 2000);
+            if (adminClicks < 5) return;
             adminClicks = 0;
-            if (!estAdmin()) {
-                const code = prompt("🔐 Code organisateur :");
-                if (code === null) return;
-                if (!codeAdminValide(code)) { showToast("Code incorrect.", "bad"); return; }
-                localStorage.setItem(ADMIN_KEY, "1");
-            }
-            const saisie = prompt("🔧 À quelle étape faut-il forcer le passage ? (1 à 8)\n(Uniquement sur ce téléphone, jusqu'au rechargement de la page.)");
-            const stepNum = parseInt(saisie, 10);
-            if (stepNum >= 1 && stepNum <= BARS_DATA.length) {
-                currentGlobalStep = stepNum;
-                adminStepOverride = true;   // le serveur ne ré-impose plus son étape tant que la page n'est pas rechargée
-                renderBars();
-                renderCarte();
-                showToast(`Passage forcé à l'étape ${stepNum} (local)`, 'good');
-            }
+        }
+        if (!estAdmin()) {
+            const code = prompt("🔐 Code organisateur :");
+            if (code === null) return;
+            if (!codeAdminValide(code)) { showToast("Code incorrect.", "bad"); return; }
+            localStorage.setItem(ADMIN_KEY, "1");
+        }
+        const saisie = prompt("🔧 À quelle étape faut-il forcer le passage ? (1 à 8)\n(Uniquement sur ce téléphone, jusqu'au rechargement de la page.)");
+        if (saisie === null) return;
+        const stepNum = parseInt(saisie, 10);
+        if (stepNum >= 1 && stepNum <= BARS_DATA.length) {
+            currentGlobalStep = stepNum;
+            adminStepOverride = true;   // le serveur ne ré-impose plus son étape tant que la page n'est pas rechargée
+            renderBars();
+            renderCarte();
+            showToast(`Passage forcé à l'étape ${stepNum} (local)`, 'good');
+        } else {
+            showToast("Numéro d'étape invalide.", "bad");
         }
     }
 
@@ -1499,6 +1860,18 @@
             syncEchecs = 0;
             const firstSync = !stateSynced;
             stateSynced = true;
+
+            // Synchronisation temps réel de la géocache si définie dans le Google Sheet
+            if (data.geocache && typeof data.geocache.lat === "number" && typeof data.geocache.lng === "number") {
+                if (Math.abs(data.geocache.lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache.lng - targetCoords.lng) > 0.000005) {
+                    appliquerGeocacheLocale(data.geocache.lat, data.geocache.lng, true);
+                }
+            } else if (typeof data.geocache_lat === "number" && typeof data.geocache_lng === "number") {
+                if (Math.abs(data.geocache_lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache_lng - targetCoords.lng) > 0.000005) {
+                    appliquerGeocacheLocale(data.geocache_lat, data.geocache_lng, true);
+                }
+            }
+
             if (!adminStepOverride && data.currentStep && data.currentStep > currentGlobalStep) {
                 currentGlobalStep = data.currentStep;
                 renderBars();
@@ -1768,7 +2141,23 @@
 
         if (barId === 2) {
             resetCompassState();
-            c.innerHTML = `<div class="riddle-parchment">
+            const adminWidget = isParticipantAdmin(joueur) ? `
+              <div class="admin-geocache-banner">
+                <div class="agb-header">
+                  <span>👑 <strong>Réglage Géocache</strong> (Admin)</span>
+                  <span class="agb-coords" id="agb-target-text">${targetCoords.lat.toFixed(6)}, ${targetCoords.lng.toFixed(6)}</span>
+                </div>
+                <div class="agb-actions">
+                  <button type="button" class="btn-agb btn-agb-gps" onclick="capturerPositionActuelleGeocache()">
+                    📍 Mettre ma position GPS actuelle
+                  </button>
+                  <button type="button" class="btn-agb btn-agb-edit" onclick="ouvrirModalAdminGeocache()">
+                    ✏️ Modifier
+                  </button>
+                </div>
+              </div>` : '';
+            c.innerHTML = `${adminWidget}
+                           <div class="riddle-parchment">
                              <strong>Le Radar du Corsaire</strong><br>
                              Suis l'aiguille jusqu'à la cache. Plus tu t'approches, plus l'instrument s'enflamme.
                            </div>
@@ -2281,7 +2670,7 @@
     // le mouvement, et la position est prolongée jusqu'à l'instant présent (retard du GPS compensé).
     const M_PER_DEG = 111195;
     function toLocalXY(lat, lng) {
-        return { x: (lng - TARGET_COORDS.lng) * M_PER_DEG * Math.cos(TARGET_COORDS.lat * Math.PI / 180), y: (lat - TARGET_COORDS.lat) * M_PER_DEG };
+        return { x: (lng - targetCoords.lng) * M_PER_DEG * Math.cos(targetCoords.lat * Math.PI / 180), y: (lat - targetCoords.lat) * M_PER_DEG };
     }
     function kf1Predict(s, dt, sa) {
         const q = sa * sa, dt2 = dt * dt, dt3 = dt2 * dt, dt4 = dt3 * dt;
