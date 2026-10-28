@@ -229,6 +229,50 @@
   .heat-scale { display: flex; justify-content: space-between; max-width: 250px; margin: 3px auto 0; font-size: 9.5px; color: var(--ink-soft); letter-spacing: .6px; }
   .gps-tip { font-size: 11px; color: var(--ink-soft); background: rgba(212,171,92,.14); border-left: 3px solid var(--brass); padding: 7px 10px; border-radius: 3px; margin: 10px 0 0; text-align: left; line-height: 1.35; }
 
+  /* HUD TÉLÉMÉTRIE TEMPS RÉEL GPS & CAP */
+  .compass-telemetry-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    max-width: 250px;
+    margin: 6px auto 0;
+    font-size: 10.5px;
+  }
+  .telemetry-item {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(43, 29, 14, 0.08);
+    border: 1px solid rgba(169, 130, 45, 0.35);
+    color: var(--ink);
+    font-size: 10.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-green { background: #2e8540; box-shadow: 0 0 6px #2e8540; }
+  .dot-yellow { background: #d4a017; box-shadow: 0 0 6px #d4a017; }
+  .dot-orange { background: #d45d17; box-shadow: 0 0 6px #d45d17; }
+  .dot-red { background: #b3243b; box-shadow: 0 0 6px #b3243b; }
+  .dot-gray { background: #888; }
+  body.dark-mode .telemetry-item {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 171, 92, 0.3);
+    color: #f2e7cd;
+  }
+
   /* BALISE RADAR DE PROXIMITÉ (< 7m) */
   .compass-proximity-halo {
     position: absolute;
@@ -1598,6 +1642,9 @@
     let kf = null, trendS = 0, uiT = 0, sigmaDisp = 8, heatState = 0, headingAccuracy = null, calibCheckT = 0;
     let compassRaf = null, compassLastT = 0, dispRose = null, dispNeedle = null, dispDist = null, targetDist = null, bearingTarget = null, lastAccuracy = null;
     let adminClicks = 0, adminTimer = null;
+    let stationaryActive = false, stationarySince = 0, anchorX = null, anchorY = null;
+    let lastStepT = 0, lastAccMag = 9.81, liveSpeedMs = 0, gyroRotZ = 0, lastGyroT = 0;
+    let geigerAudioCtx = null, geigerLastT = 0, recentFixes = [];
 
     // ---------- Ouverture du jeu : décompte + accès organisateur ----------
     // Heure de Paris (CET, UTC+1 : on est repassé à l'heure d'hiver le 25 octobre).
@@ -2458,6 +2505,16 @@
                              <div class="ro-value"><span id="ro-digits">---</span><span class="ro-unit" id="ro-unit">m</span></div>
                              <div class="ro-trend" id="ro-trend"></div>
                            </div>
+                           <div class="compass-telemetry-hud" id="compass-telemetry-hud">
+                             <div class="telemetry-item" title="Précision du signal GPS">
+                               <span class="tel-dot dot-gray" id="tel-accuracy-dot"></span>
+                               <span id="tel-accuracy-txt">GPS: acquisition…</span>
+                             </div>
+                             <div class="telemetry-item" title="Cap et direction vers la géocache">
+                               <span>🧭</span>
+                               <span id="tel-bearing-txt">Cap: ---</span>
+                             </div>
+                           </div>
                            <div class="heat-meter" id="heat-meter">${buildHeatSegments()}</div>
                            <div class="heat-scale"><span>Froid</span><span>Brûlant</span></div>
 
@@ -2936,11 +2993,85 @@
         if (m) { m.textContent = text; m.className = "feedback feedback-" + kind; }
     }
 
+    function initGeigerAudio() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!geigerAudioCtx && AudioCtx) geigerAudioCtx = new AudioCtx();
+            if (geigerAudioCtx && geigerAudioCtx.state === 'suspended') geigerAudioCtx.resume().catch(() => {});
+        } catch (_) {}
+    }
+
+    function playGeigerClick(volume = 0.3) {
+        if (!geigerAudioCtx) return;
+        try {
+            if (geigerAudioCtx.state === 'suspended') geigerAudioCtx.resume().catch(() => {});
+            const t = geigerAudioCtx.currentTime;
+            const osc = geigerAudioCtx.createOscillator();
+            const gain = geigerAudioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, t);
+            osc.frequency.exponentialRampToValueAtTime(260, t + 0.022);
+            gain.gain.setValueAtTime(Math.min(volume, 0.45), t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
+            osc.connect(gain);
+            gain.connect(geigerAudioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.025);
+        } catch (_) {}
+    }
+
+    function getCardinalDirection(deg) {
+        if (deg == null || isNaN(deg)) return "---";
+        const cardinals = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+        const idx = Math.round(((deg % 360) + 360) % 360 / 45) % 8;
+        return `${Math.round(deg)}° ${cardinals[idx]}`;
+    }
+
+    function onStepDetected() {
+        if (!kf) return;
+        if (stationaryActive) {
+            stationaryActive = false;
+            stationarySince = 0;
+            anchorX = null;
+            anchorY = null;
+        }
+        const stride = 0.72;
+        const heading = (lastHeading != null) ? lastHeading : 0;
+        const rad = heading * Math.PI / 180;
+        const dx = stride * Math.sin(rad);
+        const dy = stride * Math.cos(rad);
+        kf.X.p += dx;
+        kf.Y.p += dy;
+        kf.X.v = kf.X.v * 0.6 + (dx / 0.5) * 0.4;
+        kf.Y.v = kf.Y.v * 0.6 + (dy / 0.5) * 0.4;
+    }
+
+    function handleDeviceMotion(event) {
+        if (!compassActive) return;
+        const now = performance.now();
+        if (event.rotationRate) {
+            gyroRotZ = event.rotationRate.alpha || event.rotationRate.gamma || 0;
+            lastGyroT = now;
+        }
+        const acc = event.accelerationIncludingGravity || event.acceleration;
+        if (!acc || acc.x == null || acc.y == null || acc.z == null) return;
+        const mag = Math.hypot(acc.x, acc.y, acc.z);
+        const delta = mag - lastAccMag;
+        lastAccMag = mag;
+        if (delta > 1.8 && mag > 11.2 && (now - lastStepT > 280)) {
+            lastStepT = now;
+            onStepDetected();
+        }
+    }
+
     function resetCompassState() {
         if (compassRaf) { cancelAnimationFrame(compassRaf); compassRaf = null; }
         compassActive = false; lastLat = null; lastLng = null; lastHeading = null; lastAccuracy = null;
         needleRotation = 0; roseRotation = 0; dispRose = null; dispNeedle = null; dispDist = null; targetDist = null; bearingTarget = null;
         kf = null; trendS = 0; uiT = 0; sigmaDisp = 8; heatState = 0; headingAccuracy = null; calibCheckT = 0;
+        stationaryActive = false; stationarySince = 0; anchorX = null; anchorY = null; recentFixes = [];
+        lastStepT = 0; geigerLastT = 0; gyroRotZ = 0;
+        window.removeEventListener('devicemotion', handleDeviceMotion, true);
         const inst = document.getElementById("compass-instrument");
         if (inst) {
             inst.classList.remove("proximity-beacon");
@@ -2954,13 +3085,25 @@
 
     function demarrerBoussole() {
         if (!navigator.geolocation) { setCompassStatus("Géolocalisation indisponible sur cet appareil.", "warn"); return; }
+        initGeigerAudio();
         const attach = () => {
             window.addEventListener('deviceorientation', handleCompassOrientation, true);
             if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleCompassOrientation, true);
+            window.addEventListener('devicemotion', handleDeviceMotion, true);
         };
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission().then(res => { if (res === 'granted') attach(); }).catch(() => {});
-        } else { attach(); }
+            DeviceOrientationEvent.requestPermission().then(res => {
+                if (res === 'granted') {
+                    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                        DeviceMotionEvent.requestPermission().then(() => attach()).catch(() => attach());
+                    } else { attach(); }
+                }
+            }).catch(() => attach());
+        } else {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission().then(() => attach()).catch(() => attach());
+            } else { attach(); }
+        }
 
         geoWatchId = navigator.geolocation.watchPosition(updateCompassPosition, geoErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
         compassActive = true;
@@ -3014,8 +3157,45 @@
     function kalmanFix(st, lat, lng, acc, tms, speed, course) {
         const p = toLocalXY(lat, lng), R0 = Math.pow(Math.max(acc || 15, 3), 2);
         const fresh = (doppler) => ({ t: tms, X: { p: p.x, v: 0, P00: R0, P01: 0, P11: 4 }, Y: { p: p.y, v: 0, P00: R0, P01: 0, P11: 4 }, doppler: doppler, out: 0 });
-        if (!st) return fresh(false);
-        if (tms - st.t > 10000) return fresh(st.doppler);          // long silence du GPS : on repart de la nouvelle position
+        if (!st) { recentFixes = [{ x: p.x, y: p.y, t: tms }]; return fresh(false); }
+        if (tms - st.t > 10000) { recentFixes = [{ x: p.x, y: p.y, t: tms }]; return fresh(st.doppler); }
+
+        recentFixes.push({ x: p.x, y: p.y, t: tms });
+        if (recentFixes.length > 5) recentFixes.shift();
+
+        // Détection stationnaire avancée (ZUPT) : vitesse Doppler nulle ou dispersion spatiale < 3.2m
+        const isSpeedStop = typeof speed === 'number' && isFinite(speed) && speed >= 0 && speed < 0.38;
+        let isJitterTight = false;
+        if (recentFixes.length >= 3) {
+            let minX = recentFixes[0].x, maxX = recentFixes[0].x, minY = recentFixes[0].y, maxY = recentFixes[0].y;
+            for (let i = 1; i < recentFixes.length; i++) {
+                if (recentFixes[i].x < minX) minX = recentFixes[i].x;
+                if (recentFixes[i].x > maxX) maxX = recentFixes[i].x;
+                if (recentFixes[i].y < minY) minY = recentFixes[i].y;
+                if (recentFixes[i].y > maxY) maxY = recentFixes[i].y;
+            }
+            if (Math.hypot(maxX - minX, maxY - minY) < 3.2) isJitterTight = true;
+        }
+
+        if (isSpeedStop || isJitterTight) {
+            if (!stationarySince) stationarySince = tms;
+            if (tms - stationarySince >= 1200 || isSpeedStop) {
+                stationaryActive = true;
+                if (anchorX === null) { anchorX = st.X.p; anchorY = st.Y.p; }
+                anchorX += (p.x - anchorX) * 0.12;
+                anchorY += (p.y - anchorY) * 0.12;
+                st.X.p = anchorX; st.Y.p = anchorY;
+                st.X.v = 0; st.Y.v = 0;
+                st.t = tms;
+                return st;
+            }
+        } else if ((typeof speed === 'number' && speed > 0.55) || (anchorX !== null && Math.hypot(p.x - anchorX, p.y - anchorY) > 4.2)) {
+            stationaryActive = false;
+            stationarySince = 0;
+            anchorX = null;
+            anchorY = null;
+        }
+
         const dt = Math.max(0.05, Math.min(5, (tms - st.t) / 1000));
         st.t = tms;
         const sa = st.doppler ? 0.5 : 0.3;                          // sans vitesse Doppler : filtre plus prudent
@@ -3096,7 +3276,11 @@
         if (lastHeading == null) { lastHeading = heading; return; }
         // lissage adaptatif : petit écart = fort lissage (anti-tremblement), grand écart = suivi immédiat
         const d = Math.abs(((heading - lastHeading + 540) % 360) - 180);
-        lastHeading = smoothAngle(lastHeading, heading, Math.min(0.85, 0.14 + d / 30));
+        let alpha = Math.min(0.85, 0.14 + d / 30);
+        if (Math.abs(gyroRotZ) < 3.2 && d < 18) {
+            alpha *= 0.45; // stabilisation gyroscopique contre perturbations magnétiques urbaines
+        }
+        lastHeading = smoothAngle(lastHeading, heading, alpha);
     }
 
     function conePath(halfDeg) {
@@ -3146,6 +3330,17 @@
             const txt = km ? (dispDist / 1000).toFixed(1) : String(Math.round(dispDist));
             if (val && val.textContent !== txt) val.textContent = txt;
             if (unit) { const u = km ? "km" : "m"; if (unit.textContent !== u) unit.textContent = u; }
+
+            // Sonar / Compteur Geiger sensoriel sonore & haptique (< 7m)
+            if (dispDist <= targetRadius) {
+                const r = Math.max(0, Math.min(1, (targetRadius - dispDist) / Math.max(0.5, targetRadius - 0.5)));
+                const geigerInterval = Math.round(1100 - r * 1010); // 1100ms à 7m -> 90ms à 0.5m
+                if (now - geigerLastT >= geigerInterval) {
+                    geigerLastT = now;
+                    playGeigerClick(0.2 + r * 0.35);
+                    if (navigator.vibrate) navigator.vibrate(12 + Math.round(r * 18));
+                }
+            }
         }
 
         if (now - uiT > 180) { uiT = now; refreshCompassUI(); }
@@ -3185,6 +3380,40 @@
 
         const lab = document.getElementById("ro-label");
         if (lab) lab.textContent = "Distance de la cache" + (lastAccuracy != null ? ` (±${Math.round(lastAccuracy)} m)` : "");
+
+        // Mise à jour du HUD de télémétrie temps réel
+        const telDot = document.getElementById("tel-accuracy-dot");
+        const telTxt = document.getElementById("tel-accuracy-txt");
+        const telBear = document.getElementById("tel-bearing-txt");
+
+        if (telDot && telTxt) {
+            if (stationaryActive) {
+                telDot.className = "tel-dot dot-green";
+                telTxt.textContent = `GPS: ⚓ Ancré (±${Math.round(lastAccuracy || 3)}m)`;
+            } else if (lastAccuracy != null) {
+                const acc = Math.round(lastAccuracy);
+                if (acc <= 5) {
+                    telDot.className = "tel-dot dot-green";
+                    telTxt.textContent = `GPS: ±${acc}m (Optimal)`;
+                } else if (acc <= 10) {
+                    telDot.className = "tel-dot dot-yellow";
+                    telTxt.textContent = `GPS: ±${acc}m (Bon)`;
+                } else if (acc <= 20) {
+                    telDot.className = "tel-dot dot-orange";
+                    telTxt.textContent = `GPS: ±${acc}m (Moyen)`;
+                } else {
+                    telDot.className = "tel-dot dot-red";
+                    telTxt.textContent = `GPS: ±${acc}m (Faible)`;
+                }
+            } else {
+                telDot.className = "tel-dot dot-gray";
+                telTxt.textContent = "GPS: acquisition…";
+            }
+        }
+
+        if (telBear) {
+            telBear.textContent = "Cap: " + (bearingTarget != null ? getCardinalDirection(bearingTarget) : "---");
+        }
 
         const lit = Math.round(Math.max(0, Math.min(1, (120 - dist) / 115)) * 10);
         document.querySelectorAll("#heat-meter i").forEach((el, i) => el.classList.toggle("lit", i < lit));
@@ -3776,6 +4005,7 @@
         if (gpsFallbackTimer) clearTimeout(gpsFallbackTimer);
         window.removeEventListener('deviceorientation', handleCompassOrientation, true);
         window.removeEventListener('deviceorientationabsolute', handleCompassOrientation, true);
+        window.removeEventListener('devicemotion', handleDeviceMotion, true);
         resetCompassState();
     }
 
