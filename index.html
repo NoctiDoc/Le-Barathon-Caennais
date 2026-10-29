@@ -474,8 +474,8 @@
   /* ÉCRAN DE DÉCOMPTE (avant l'ouverture) */
   body.gate-locked .container, body.gate-locked #net-banner { display: none !important; }
   .countdown-screen { min-height: calc(100vh - 36px); display: flex; align-items: center; justify-content: center; }
-  .countdown-screen[hidden] { display: none; }
-  .countdown-screen.leaving { animation: cd-out .6s var(--ease) forwards; }
+  .countdown-screen[hidden] { display: none !important; }
+  .countdown-screen.leaving { animation: cd-out .6s var(--ease) forwards; pointer-events: none; }
   @keyframes cd-out { to { opacity: 0; transform: scale(.96); } }
   .cd-card { position: relative; width: 100%; max-width: 440px; background: var(--paper-card); border: 1px solid rgba(43,29,14,.35); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg), inset 0 0 40px rgba(169,130,45,.06); padding: 26px 18px 22px; text-align: center; animation: fade-in-up .5s var(--ease); }
   .cd-seal { width: 74px; height: 74px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--wine); background: radial-gradient(circle at 35% 30%, #fff8e4, #ecd9a6); border: 2px solid var(--brass); box-shadow: var(--shadow-md); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .12s var(--ease); }
@@ -1069,7 +1069,8 @@
     box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.6);
     text-align: left;
   }
-  .participant-validated-card[hidden] {
+  .participant-validated-card[hidden],
+  #participant-picker-box[hidden] {
     display: none !important;
   }
   .vp-main {
@@ -1373,18 +1374,62 @@
       <div class="participant-picker-row">
         <select id="global-participant" onchange="onSelectParticipantChange()">
           <option value="">-- Choisis ton prénom --</option>
-          <option value="Majid">Majid</option>
-          <option value="Alexandre Faby">Alexandre Faby 👑</option>
-          <option value="Jérémy Straub">Jérémy Straub 👑</option>
-          <option value="Romain R">Romain R</option>
-          <option value="Théo M">Théo M</option>
-          <option value="Pepette">Pepette</option>
-          <option value="Jules D">Jules D</option>
+          <option value="Adèle">Adèle</option>
+          <option value="Alyssa">Alyssa</option>
+          <option value="Bastien">Bastien</option>
+          <option value="Benoit">Benoit</option>
+          <option value="Cass">Cass</option>
+          <option value="Charlie">Charlie</option>
+          <option value="Chloé G">Chloé G</option>
           <option value="Daubeuf">Daubeuf</option>
-          <option value="Zaza">Zaza</option>
+          <option value="David">David</option>
+          <option value="Emilie">Emilie</option>
           <option value="Emy">Emy</option>
+          <option value="Ernest">Ernest</option>
+          <option value="Estelle dpt">Estelle dpt</option>
+          <option value="Faby">Faby</option>
+          <option value="Fanny">Fanny</option>
+          <option value="Flo">Flo</option>
+          <option value="Gaetan">Gaetan</option>
+          <option value="Halim">Halim</option>
+          <option value="Jérémy H">Jérémy H</option>
+          <option value="Jérémy S">Jérémy S</option>
+          <option value="Jules">Jules</option>
+          <option value="Julie">Julie</option>
+          <option value="Kevin">Kevin</option>
+          <option value="Kevin Breton">Kevin Breton</option>
+          <option value="Kyllian">Kyllian</option>
+          <option value="Louise">Louise</option>
+          <option value="Luc">Luc</option>
+          <option value="Lucille">Lucille</option>
+          <option value="Maiwen">Maiwen</option>
+          <option value="Majid">Majid</option>
           <option value="Mama">Mama</option>
-          <option value="David M">David M</option>
+          <option value="Marc">Marc</option>
+          <option value="Marie Lair">Marie Lair</option>
+          <option value="Maryse">Maryse</option>
+          <option value="Mathilde">Mathilde</option>
+          <option value="Max">Max</option>
+          <option value="Mélanie">Mélanie</option>
+          <option value="Melissande">Melissande</option>
+          <option value="Morgan">Morgan</option>
+          <option value="Ophélie">Ophélie</option>
+          <option value="Pauline">Pauline</option>
+          <option value="Pepette">Pepette</option>
+          <option value="Quentin">Quentin</option>
+          <option value="Romain">Romain</option>
+          <option value="Romain L">Romain L</option>
+          <option value="Steph">Steph</option>
+          <option value="Théo">Théo</option>
+          <option value="Thomas">Thomas</option>
+          <option value="Val">Val</option>
+          <option value="Victor">Victor</option>
+          <option value="Zaza">Zaza</option>
+          <option value="Invité 1">Invité 1</option>
+          <option value="Invité 2">Invité 2</option>
+          <option value="Invité 3">Invité 3</option>
+          <option value="Invité 4">Invité 4</option>
+          <option value="Invité 5">Invité 5</option>
         </select>
         <button type="button" class="btn-validate-profile" id="btn-validate-participant" onclick="validerParticipant()">✓ Valider</button>
         <button type="button" class="btn-cancel-profile" id="btn-cancel-change-participant" onclick="annulerChangementParticipant()" hidden>Annuler</button>
@@ -1394,15 +1439,15 @@
     <div id="participant-validated-box" class="participant-validated-card" hidden>
       <div class="vp-main">
         <div class="vp-identity">
-          <span class="vp-label">🏴‍☠️ Corsaire validé :</span>
+          <span class="vp-label">Corsaire validé :</span>
           <strong class="vp-name" id="vp-name">—</strong>
         </div>
         <div class="vp-team-wrap">
-          <span class="team-pill" id="vp-team">⚓ Équipage…</span>
+          <span class="team-pill" id="vp-team">Équipage…</span>
         </div>
       </div>
       <button type="button" class="btn-change-profile" onclick="ouvrirChangementParticipant()" title="Tu t'es trompé de prénom ? Clique ici pour en changer">
-        ✏️ Changer
+        Changer
       </button>
     </div>
   </div>
@@ -1874,7 +1919,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcvnhUWFMjQKYprR_NzBJKKfvsqej_bS4GC6DlFtKJCs5dJyT7NglxxJlVxGU44AMKdQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxjYOJOnOZ2kmdmwt5pEpe5Gw7T9CutvkK8E8qWC1yYZs19ZBMFDc39IjhFTmtWr-zrRg/exec";
 
     const BARS_DATA = [
         { id: 1, name: "Café du Théâtre", spec: "Cocktail maison" },
@@ -1987,9 +2032,9 @@
             name = (sel ? sel.value : "") || localStorage.getItem("barathon_participant") || "";
         }
         if (!name) return false;
-        const n = name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const isAlex = n.includes("alexandre") && (n.includes("faby") || n === "alexandre");
-        const isJeremy = (n.includes("jeremy") || n.includes("jérémy")) && (n.includes("straub") || n.includes("jeremy s") || n === "jeremy");
+        const n = normaliserNomParticipant(name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const isAlex = n === "faby" || n === "alexandre" || n === "alex" || n.includes("faby");
+        const isJeremy = n === "jeremy s" || n === "jeremy straub" || n === "jeremy" || (n.includes("jeremy") && (n.includes("straub") || n.endsWith(" s")));
         return isAlex || isJeremy;
     }
     function estLance() { return Date.now() >= LAUNCH_DATE.getTime(); }
@@ -2016,7 +2061,11 @@
         const forceLocked = localStorage.getItem("barathon_lock_override") === "1";
         const savedName = localStorage.getItem('barathon_participant');
         const codeBypass = localStorage.getItem(ADMIN_KEY) === "1";
-        if (!forceLocked && (estLance() || isParticipantAdmin(savedName) || codeBypass)) {
+        // Dès que l'heure officielle (LAUNCH_DATE) est atteinte, l'application s'ouvre toujours pour tout le monde !
+        if (estLance() || (!forceLocked && (isParticipantAdmin(savedName) || codeBypass))) {
+            if (estLance()) {
+                try { localStorage.removeItem("barathon_lock_override"); } catch (e) {}
+            }
             demarrerApp(false);
         } else {
             afficherDecompte();
@@ -2025,7 +2074,12 @@
 
     function afficherDecompte() {
         document.body.classList.add("gate-locked");
-        document.getElementById("countdown-screen").hidden = false;
+        const screen = document.getElementById("countdown-screen");
+        if (screen) {
+            screen.hidden = false;
+            screen.style.display = "flex";
+            screen.classList.remove("leaving");
+        }
         majDecompte();
         clearInterval(countdownTimer);
         countdownTimer = setInterval(majDecompte, 1000);
@@ -2033,14 +2087,20 @@
 
     function majDecompte() {
         const reste = LAUNCH_DATE.getTime() - Date.now();
+        const set = (id, v) => { const el = document.getElementById(id); if (el && el.textContent !== v) el.textContent = v; };
         if (reste <= 0) {
             clearInterval(countdownTimer);
+            countdownTimer = null;
+            set("cd-d", "0");
+            set("cd-h", "00");
+            set("cd-m", "00");
+            set("cd-s", "00");
+            try { localStorage.removeItem("barathon_lock_override"); } catch (e) {}
             demarrerApp(true);
             return;
         }
         const s = Math.floor(reste / 1000);
         const pad = n => String(n).padStart(2, "0");
-        const set = (id, v) => { const el = document.getElementById(id); if (el.textContent !== v) el.textContent = v; };
         set("cd-d", String(Math.floor(s / 86400)));
         set("cd-h", pad(Math.floor(s / 3600) % 24));
         set("cd-m", pad(Math.floor(s / 60) % 60));
@@ -2049,16 +2109,38 @@
 
     function demarrerApp(avecFanfare) {
         clearInterval(countdownTimer);
+        countdownTimer = null;
+        if (estLance()) {
+            try { localStorage.removeItem("barathon_lock_override"); } catch (e) {}
+        }
         const screen = document.getElementById("countdown-screen");
         const reveler = () => {
-            screen.hidden = true; screen.classList.remove("leaving");
+            if (screen) {
+                screen.hidden = true;
+                screen.style.display = "none";
+                screen.classList.remove("leaving");
+            }
             document.body.classList.remove("gate-locked");
+            majParticipantValidationUI();
             majAdminUI();
+            majAffichageCostume();
+            renderBars();
+            renderCarte();
         };
-        if (avecFanfare && !screen.hidden) {
+        if (avecFanfare && screen && !screen.hidden) {
             screen.classList.add("leaving");
-            setTimeout(() => { reveler(); lancerConfettis(); showToast("Les tavernes sont ouvertes : à l'abordage !", "good"); }, 600);
-        } else reveler();
+            // On retire gate-locked tout de suite pour que le contenu soit déjà prêt dessous pendant le fondu de 600ms
+            document.body.classList.remove("gate-locked");
+            renderBars();
+            renderCarte();
+            setTimeout(() => {
+                reveler();
+                lancerConfettis();
+                showToast("Les tavernes sont ouvertes : à l'abordage !", "good");
+            }, 600);
+        } else {
+            reveler();
+        }
 
         if (appStarted) return;
         appStarted = true;
@@ -2072,6 +2154,11 @@
         }, 30000);
     }
 
+    // Si le téléphone était en veille pendant la fin du décompte, on vérifie dès le réveil de l'écran
+    window.addEventListener("focus", () => { if (!appStarted) majDecompte(); });
+    window.addEventListener("pageshow", () => { if (!appStarted) majDecompte(); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && !appStarted) majDecompte(); });
+
     function majAdminUI() {
         const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
         const badge = document.getElementById('admin-badge');
@@ -2082,7 +2169,7 @@
         // Géocache / Étape / Reverrouiller disponible TOUT LE TEMPS pour Alexandre Faby et Jérémy Straub
         if (isParticipantAdmin(p)) {
             badge.hidden = false;
-            if (badgeText) badgeText.innerHTML = `👑 <b>Capitaine Admin (${p})</b>`;
+            if (badgeText) badgeText.innerHTML = `<b>Capitaine Admin (${p})</b>`;
             if (badgeBtns) {
                 badgeBtns.innerHTML = `
                   <button type="button" onclick="ouvrirModalAdminGeocache()" title="Changer l'emplacement ou l'indice de la géocache">📍 Géocache</button>
@@ -2355,15 +2442,28 @@
     }
 
     // ---------- GESTION DES PARTICIPANTS, VALIDATION EN CACHE & ÉQUIPAGES ÉQUILIBRÉS ----------
-    const TEAM_RICARD = "Pirate du Ricard";
-    const TEAM_LONG_ISLAND = "Pirate du Long Island";
+    const TEAM_RICARD = "Hollandais Volant";
+    const TEAM_LONG_ISLAND = "Black Pearl";
     const DEFAULT_PARTICIPANTS = [
-        "Majid", "Alexandre Faby", "Jérémy Straub", "Romain R",
-        "Théo M", "Pepette", "Jules D", "Daubeuf",
-        "Zaza", "Emy", "Mama", "David M"
+        "Adèle", "Alyssa", "Bastien", "Benoit", "Cass", "Charlie", "Chloé G", "Daubeuf",
+        "David", "Emilie", "Emy", "Ernest", "Estelle dpt", "Faby", "Fanny", "Flo",
+        "Gaetan", "Halim", "Jérémy H", "Jérémy S", "Jules", "Julie", "Kevin", "Kevin Breton",
+        "Kyllian", "Louise", "Luc", "Lucille", "Maiwen", "Majid", "Mama", "Marc",
+        "Marie Lair", "Maryse", "Mathilde", "Max", "Mélanie", "Melissande", "Morgan", "Ophélie",
+        "Pauline", "Pepette", "Quentin", "Romain", "Romain L", "Steph", "Théo", "Thomas",
+        "Val", "Victor", "Zaza", "Invité 1", "Invité 2", "Invité 3", "Invité 4", "Invité 5"
     ];
-    let knownParticipantsList = DEFAULT_PARTICIPANTS.slice();
+    let knownParticipantsList = [];
+    let hasSheetParticipants = false;
     let modeChangementParticipant = false;
+
+    function normaliserNomEquipe(team) {
+        if (!team || typeof team !== "string") return "";
+        const t = team.trim().toLowerCase();
+        if (t === "hollandais volant" || t.includes("hollandais") || t.includes("ricard")) return TEAM_RICARD;
+        if (t === "black pearl" || t.includes("black pearl") || t.includes("pearl") || t.includes("long island")) return TEAM_LONG_ISLAND;
+        return "";
+    }
 
     function getDeviceId() {
         try {
@@ -2380,7 +2480,13 @@
 
     function getLocalTeamsMap() {
         try {
-            return JSON.parse(localStorage.getItem("barathon_teams_map") || "{}");
+            const raw = JSON.parse(localStorage.getItem("barathon_teams_map") || "{}");
+            const cleaned = {};
+            Object.keys(raw).forEach(k => {
+                const nt = normaliserNomEquipe(raw[k]);
+                if (nt) cleaned[k] = nt;
+            });
+            return cleaned;
         } catch (_) {
             return {};
         }
@@ -2393,10 +2499,34 @@
     }
 
     function normaliserNomParticipant(savedName) {
-        if (!savedName) return "";
-        if (savedName === "Alexandre" || savedName === "Alexandre Faby") return "Alexandre Faby";
-        if (savedName === "Jeremy S" || savedName === "Jérémy Straub" || savedName === "Jeremy Straub") return "Jérémy Straub";
-        return savedName.trim();
+        if (!savedName || typeof savedName !== "string") return "";
+        // Supprimer tout éventuel émoji ou tag d'équipe résiduel au cas où
+        return savedName
+            .replace(/👑/g, "")
+            .replace(/\(🥃.*?\)/g, "")
+            .replace(/\(🍹.*?\)/g, "")
+            .trim();
+    }
+
+    function trouverCorrespondanceListe(nom, liste) {
+        if (!nom || !Array.isArray(liste) || liste.length === 0) return "";
+        const clean = normaliserNomParticipant(nom).toLowerCase();
+        if (!clean) return "";
+        // 1. Correspondance exacte (insensible à la casse)
+        for (const item of liste) {
+            if (item.toLowerCase() === clean) return item;
+        }
+        // 2. Correspondance Admin (ex: "Alexandre Faby" <-> "Faby", "Jérémy Straub" <-> "Jérémy S")
+        if (isParticipantAdmin(clean)) {
+            const nNorm = clean.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const isAlex = nNorm === "faby" || nNorm === "alexandre" || nNorm === "alex" || nNorm.includes("faby");
+            for (const item of liste) {
+                const il = item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (isAlex && (il === "faby" || il === "alexandre" || il.includes("faby"))) return item;
+                if (!isAlex && (il === "jeremy s" || il === "jeremy straub" || il.includes("straub") || il === "jeremy")) return item;
+            }
+        }
+        return "";
     }
 
     function choisirEquipeEquilibreeLocale(participant, previousParticipant) {
@@ -2404,22 +2534,24 @@
         if (previousParticipant && previousParticipant !== participant) {
             delete map[previousParticipant];
         }
-        if (map[participant] === TEAM_RICARD || map[participant] === TEAM_LONG_ISLAND) {
+        const existing = normaliserNomEquipe(map[participant]);
+        if (existing === TEAM_RICARD || existing === TEAM_LONG_ISLAND) {
+            map[participant] = existing;
             saveLocalTeamsMap(map);
-            return map[participant];
+            return existing;
         }
-        let countRicard = 0, countLongIsland = 0;
+        let countHollandais = 0, countBlackPearl = 0;
         Object.keys(map).forEach(k => {
-            if (k === participant) return;
-            if (map[k] === TEAM_RICARD) countRicard++;
-            else if (map[k] === TEAM_LONG_ISLAND) countLongIsland++;
+            if (k.toLowerCase() === participant.toLowerCase()) return;
+            const t = normaliserNomEquipe(map[k]);
+            if (t === TEAM_RICARD) countHollandais++;
+            else if (t === TEAM_LONG_ISLAND) countBlackPearl++;
         });
         let assigned = TEAM_RICARD;
-        if (countRicard < countLongIsland) assigned = TEAM_RICARD;
-        else if (countLongIsland < countRicard) assigned = TEAM_LONG_ISLAND;
+        if (countHollandais < countBlackPearl) assigned = TEAM_RICARD;
+        else if (countBlackPearl < countHollandais) assigned = TEAM_LONG_ISLAND;
         else {
-            // Égalité parfaite : alterner de manière déterministe
-            assigned = ((countRicard + countLongIsland) % 2 === 0) ? TEAM_RICARD : TEAM_LONG_ISLAND;
+            assigned = ((countHollandais + countBlackPearl) % 2 === 0) ? TEAM_RICARD : TEAM_LONG_ISLAND;
         }
         map[participant] = assigned;
         saveLocalTeamsMap(map);
@@ -2429,7 +2561,7 @@
     function syncParticipantsDropdown(serverParticipants) {
         const sel = document.getElementById("global-participant");
         if (!sel) return;
-        const currentVal = sel.value || localStorage.getItem("barathon_participant") || "";
+        let currentVal = normaliserNomParticipant(sel.value || localStorage.getItem("barathon_participant") || "");
 
         const namesSet = new Set();
         const orderedNames = [];
@@ -2445,7 +2577,7 @@
         };
 
         if (Array.isArray(serverParticipants) && serverParticipants.length > 0) {
-            const map = getLocalTeamsMap();
+            hasSheetParticipants = true;
             const serverValidatedMap = {};
             serverParticipants.forEach(item => {
                 if (typeof item === "string") {
@@ -2453,17 +2585,18 @@
                 } else if (item && item.name) {
                     const cleanName = normaliserNomParticipant(item.name);
                     addName(cleanName);
-                    if (item.team === TEAM_RICARD || item.team === TEAM_LONG_ISLAND) {
-                        serverValidatedMap[cleanName] = item.team;
+                    const normTeam = normaliserNomEquipe(item.team);
+                    if (normTeam) {
+                        serverValidatedMap[cleanName] = normTeam;
                     }
                 }
             });
-            // Mettre à jour la carte des équipes depuis le Google Sheet tout en gardant le joueur local s'il vient de valider
-            const myValidated = localStorage.getItem("barathon_validated_participant");
-            const myTeam = localStorage.getItem("barathon_participant_team");
+            const myValidated = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
+            const myTeam = normaliserNomEquipe(localStorage.getItem("barathon_participant_team") || "");
+            const matchedMyValidated = trouverCorrespondanceListe(myValidated, orderedNames);
             const mergedMap = Object.assign({}, serverValidatedMap);
-            if (myValidated && (myTeam === TEAM_RICARD || myTeam === TEAM_LONG_ISLAND) && !mergedMap[myValidated]) {
-                mergedMap[myValidated] = myTeam;
+            if (matchedMyValidated && myTeam && !mergedMap[matchedMyValidated]) {
+                mergedMap[matchedMyValidated] = myTeam;
             }
             saveLocalTeamsMap(mergedMap);
             try {
@@ -2472,24 +2605,64 @@
         } else {
             try {
                 const cachedList = JSON.parse(localStorage.getItem("barathon_participants_list") || "[]");
-                if (Array.isArray(cachedList) && cachedList.length > 0) cachedList.forEach(addName);
+                if (Array.isArray(cachedList) && cachedList.length > 0) {
+                    hasSheetParticipants = true;
+                    cachedList.forEach(addName);
+                }
             } catch (_) {}
         }
 
-        DEFAULT_PARTICIPANTS.forEach(addName);
-        if (currentVal) addName(currentVal);
+        // Uniquement si aucune liste n'a encore été reçue du Google Sheet (premier lancement hors-ligne)
+        if (orderedNames.length === 0) {
+            DEFAULT_PARTICIPANTS.forEach(addName);
+        }
+
         knownParticipantsList = orderedNames;
 
-        const mapTeams = getLocalTeamsMap();
+        // Vérifier que le nom sélectionné existe bien dans la liste actuelle du Google Sheet (sans jamais rajouter les anciens noms supprimés)
+        if (currentVal) {
+            const matched = trouverCorrespondanceListe(currentVal, orderedNames);
+            if (matched) {
+                if (matched !== currentVal) {
+                    currentVal = matched;
+                    try {
+                        localStorage.setItem("barathon_participant", matched);
+                        if (localStorage.getItem("barathon_validated_participant")) {
+                            localStorage.setItem("barathon_validated_participant", matched);
+                        }
+                    } catch (_) {}
+                }
+            } else if (hasSheetParticipants) {
+                // L'ancien nom en cache n'existe plus dans le Google Sheet : on le retire proprement
+                currentVal = "";
+                try {
+                    localStorage.removeItem("barathon_participant");
+                    localStorage.removeItem("barathon_validated_participant");
+                    localStorage.removeItem("barathon_participant_validated");
+                } catch (_) {}
+            }
+        }
+
+        // Nettoyer aussi la carte locale des équipes pour retirer tout ancien nom qui n'est plus dans le Google Sheet
+        if (hasSheetParticipants && orderedNames.length > 0) {
+            const map = getLocalTeamsMap();
+            let changed = false;
+            Object.keys(map).forEach(k => {
+                if (!trouverCorrespondanceListe(k, orderedNames)) {
+                    delete map[k];
+                    changed = true;
+                }
+            });
+            if (changed) saveLocalTeamsMap(map);
+        }
+
         let html = `<option value="">-- Choisis ton prénom --</option>`;
         orderedNames.forEach(name => {
-            const crown = isParticipantAdmin(name) ? " 👑" : "";
-            const teamTag = mapTeams[name] ? ` (${mapTeams[name] === TEAM_RICARD ? "🥃 Ricard" : "🍹 Long Island"})` : "";
             const selectedAttr = (name === currentVal) ? " selected" : "";
-            html += `<option value="${name.replace(/"/g, '&quot;')}"${selectedAttr}>${name}${crown}${teamTag}</option>`;
+            html += `<option value="${name.replace(/"/g, '&quot;')}"${selectedAttr}>${name}</option>`;
         });
         sel.innerHTML = html;
-        if (currentVal) sel.value = currentVal;
+        sel.value = currentVal || "";
     }
 
     function majParticipantValidationUI() {
@@ -2501,22 +2674,28 @@
         const vpTeam = document.getElementById("vp-team");
 
         const isValidated = localStorage.getItem("barathon_participant_validated") === "1";
-        const validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || localStorage.getItem("barathon_participant") || "");
+        let validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || localStorage.getItem("barathon_participant") || "");
+        if (hasSheetParticipants && knownParticipantsList.length > 0 && validatedName) {
+            validatedName = trouverCorrespondanceListe(validatedName, knownParticipantsList);
+        }
         const map = getLocalTeamsMap();
-        const team = map[validatedName] || localStorage.getItem("barathon_participant_team") || "";
+        const team = normaliserNomEquipe(map[validatedName] || localStorage.getItem("barathon_participant_team") || "");
+        if (team) {
+            try { localStorage.setItem("barathon_participant_team", team); } catch (_) {}
+        }
 
         if (isValidated && validatedName && !modeChangementParticipant) {
             if (sel && sel.value !== validatedName) sel.value = validatedName;
             if (pickerBox) pickerBox.hidden = true;
             if (validatedBox) validatedBox.hidden = false;
-            if (vpName) vpName.innerHTML = `${validatedName}${isParticipantAdmin(validatedName) ? " 👑" : ""}`;
+            if (vpName) vpName.textContent = validatedName;
             if (vpTeam) {
                 if (team === TEAM_LONG_ISLAND) {
                     vpTeam.className = "team-pill team-longisland";
-                    vpTeam.innerHTML = `🍹 ${TEAM_LONG_ISLAND}`;
+                    vpTeam.textContent = TEAM_LONG_ISLAND;
                 } else {
                     vpTeam.className = "team-pill team-ricard";
-                    vpTeam.innerHTML = `🥃 ${team || TEAM_RICARD}`;
+                    vpTeam.textContent = team || TEAM_RICARD;
                 }
             }
         } else {
@@ -2578,7 +2757,7 @@
         try {
             const res = await envoyerAuServeur(payload);
             if (res && (res.status === "success" || res.status === "ok")) {
-                const serverTeam = res.team || localTeam;
+                const serverTeam = normaliserNomEquipe(res.team) || localTeam;
                 try { localStorage.setItem("barathon_participant_team", serverTeam); } catch (_) {}
                 const map = getLocalTeamsMap();
                 if (previousParticipant && previousParticipant !== name) delete map[previousParticipant];
@@ -2590,13 +2769,13 @@
                     syncParticipantsDropdown();
                 }
                 majParticipantValidationUI();
-                showToast(`🏴‍☠️ ${name} validé(e) dans l'équipage « ${serverTeam} » !`, "good");
+                showToast(`${name} validé(e) dans l'équipage « ${serverTeam} » !`, "good");
             } else {
-                showToast(`🏴‍☠️ ${name} validé(e) dans l'équipage « ${localTeam} » !`, "good");
+                showToast(`${name} validé(e) dans l'équipage « ${localTeam} » !`, "good");
             }
         } catch (e) {
             stockerHorsLigne(payload);
-            showToast(`🏴‍☠️ ${name} validé(e) en cache (${localTeam}) !`, "good");
+            showToast(`${name} validé(e) en cache (${localTeam}) !`, "good");
         } finally {
             if (btn) {
                 btn.disabled = false;
@@ -4677,9 +4856,11 @@
 
         const localTeams = getLocalTeamsMap();
         const myValidated = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
-        const myTeam = localStorage.getItem("barathon_participant_team") || "";
+        const myTeam = normaliserNomEquipe(localStorage.getItem("barathon_participant_team") || "");
         if (myValidated && (myTeam === TEAM_RICARD || myTeam === TEAM_LONG_ISLAND) && !localTeams[myValidated]) {
-            localTeams[myValidated] = myTeam;
+            if (!hasSheetParticipants || !knownParticipantsList.length || trouverCorrespondanceListe(myValidated, knownParticipantsList)) {
+                localTeams[myValidated] = myTeam;
+            }
         }
 
         // Construire la table complète des joueurs (ceux ayant des points + ceux validés à 0 pt)
@@ -4687,17 +4868,21 @@
         const upsertPlayer = (name, pts, team) => {
             const clean = normaliserNomParticipant(name);
             if (!clean) return;
+            // Si la liste du Google Sheet est connue, ignorer les anciens noms supprimés du Sheet (sauf s'ils ont déjà des points enregistrés sur le serveur)
+            if (hasSheetParticipants && knownParticipantsList.length > 0 && !trouverCorrespondanceListe(clean, knownParticipantsList) && !(pts > 0)) {
+                return;
+            }
             const key = clean.toLowerCase();
+            const normTeam = normaliserNomEquipe(team || localTeams[clean] || "");
             if (!playerMap[key]) {
                 playerMap[key] = {
                     participant: clean,
                     points: (typeof pts === "number" && !isNaN(pts)) ? pts : 0,
-                    team: team || localTeams[clean] || ""
+                    team: normTeam
                 };
             } else {
                 if (typeof pts === "number" && !isNaN(pts)) playerMap[key].points = Math.max(playerMap[key].points, pts);
-                if (team) playerMap[key].team = team;
-                else if (!playerMap[key].team && localTeams[clean]) playerMap[key].team = localTeams[clean];
+                if (normTeam) playerMap[key].team = normTeam;
             }
         };
 
@@ -4715,7 +4900,7 @@
             return a.participant.localeCompare(b.participant, 'fr');
         });
 
-        // Calculer les deux équipes : Pirate du Ricard & Pirate du Long Island
+        // Calculer les deux équipes : Hollandais Volant & Black Pearl
         const teamStats = {
             [TEAM_RICARD]: { name: TEAM_RICARD, points: 0, members: [] },
             [TEAM_LONG_ISLAND]: { name: TEAM_LONG_ISLAND, points: 0, members: [] }
@@ -4731,10 +4916,11 @@
         // Si le serveur a renvoyé des équipes explicites avec davantage de membres, fusionner proprement
         if (Array.isArray(serverTeams)) {
             serverTeams.forEach(st => {
-                if (st && (st.team === TEAM_RICARD || st.team === TEAM_LONG_ISLAND)) {
-                    if (Array.isArray(st.members) && st.members.length > teamStats[st.team].members.length) {
-                        teamStats[st.team].points = Number(st.points) || 0;
-                        teamStats[st.team].members = st.members;
+                const nt = st ? normaliserNomEquipe(st.team) : "";
+                if (nt === TEAM_RICARD || nt === TEAM_LONG_ISLAND) {
+                    if (Array.isArray(st.members) && st.members.length > teamStats[nt].members.length) {
+                        teamStats[nt].points = Number(st.points) || 0;
+                        teamStats[nt].members = st.members;
                     }
                 }
             });
@@ -4746,12 +4932,11 @@
             const rLeads = rStat.points > lStat.points;
             const lLeads = lStat.points > rStat.points;
 
-            const buildCard = (stat, isRicard, isLead) => {
-                const icon = isRicard ? "🥃" : "🍹";
-                const cls = isRicard ? "team-card-ricard" : "team-card-longisland";
+            const buildCard = (stat, isHollandais, isLead) => {
+                const cls = isHollandais ? "team-card-ricard" : "team-card-longisland";
                 const membersHtml = stat.members.length
                     ? stat.members.map(m => {
-                        const mName = typeof m === "string" ? m : m.name;
+                        const mName = normaliserNomParticipant(typeof m === "string" ? m : m.name);
                         const mPts = typeof m === "object" && m.points != null ? m.points : 0;
                         const isMe = monNom && mName.trim().toLowerCase() === monNom;
                         return `<span class="tc-member-chip${isMe ? ' is-me' : ''}">${mName} (${mPts})</span>`;
@@ -4761,8 +4946,8 @@
                 return `
                 <div class="team-card ${cls}${isLead ? ' team-leader' : ''}">
                   <div class="tc-header">
-                    <div class="tc-title">${icon} ${stat.name}</div>
-                    ${isLead ? '<span class="tc-leader-badge">👑 En tête</span>' : ''}
+                    <div class="tc-title">${stat.name}</div>
+                    ${isLead ? '<span class="tc-leader-badge">En tête</span>' : ''}
                   </div>
                   <div class="tc-score-row">
                     <span class="tc-pts">${stat.points} <small style="font-size:12px;font-weight:normal;">pts</small></span>
@@ -4790,9 +4975,9 @@
                 const isMe = monNom && row.participant.trim().toLowerCase() === monNom;
                 let teamBadge = "";
                 if (row.team === TEAM_RICARD) {
-                    teamBadge = `<span class="team-pill team-ricard">🥃 ${TEAM_RICARD}</span>`;
+                    teamBadge = `<span class="team-pill team-ricard">${TEAM_RICARD}</span>`;
                 } else if (row.team === TEAM_LONG_ISLAND) {
-                    teamBadge = `<span class="team-pill team-longisland">🍹 ${TEAM_LONG_ISLAND}</span>`;
+                    teamBadge = `<span class="team-pill team-longisland">${TEAM_LONG_ISLAND}</span>`;
                 }
                 tbody.innerHTML += `
                 <tr class="${isMe ? 'my-rank' : ''}">
