@@ -1007,6 +1007,301 @@
     letter-spacing: 0.5px;
   }
 
+  /* VALIDATION DU PARTICIPANT & ÉQUIPAGES */
+  .participant-picker-row {
+    display: flex;
+    gap: 7px;
+    align-items: stretch;
+  }
+  .participant-picker-row select {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+  .btn-validate-profile {
+    padding: 0 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid #5a1824;
+    background: linear-gradient(180deg, var(--wine-light) 0%, var(--wine) 100%);
+    color: #fdf6e8;
+    font-family: 'Special Elite', monospace;
+    font-size: 12.5px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    transition: transform .12s, filter .15s;
+  }
+  .btn-validate-profile:active {
+    transform: scale(0.97);
+  }
+  .btn-validate-profile:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .btn-cancel-profile {
+    padding: 0 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(43,29,14,.35);
+    background: rgba(255,255,255,.6);
+    color: var(--ink-soft);
+    font-family: 'Special Elite', monospace;
+    font-size: 11.5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .participant-picker-hint {
+    display: block;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    margin-top: 5px;
+    line-height: 1.3;
+  }
+  .participant-validated-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(255,253,246,.95) 0%, rgba(244,230,198,.92) 100%);
+    border: 1.5px solid var(--brass);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.6);
+    text-align: left;
+  }
+  .participant-validated-card[hidden] {
+    display: none !important;
+  }
+  .vp-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+  .vp-identity {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .vp-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--ink-soft);
+  }
+  .vp-name {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .vp-team-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .team-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: bold;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(43,29,14,.25);
+    background: rgba(169,130,45,.15);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .team-pill.team-ricard {
+    background: linear-gradient(135deg, #f9e498 0%, #e0b445 100%);
+    border-color: #9e7414;
+    color: #2b1d0e;
+  }
+  .team-pill.team-longisland {
+    background: linear-gradient(135deg, #8e283b 0%, #5c1624 100%);
+    border-color: #3f0c16;
+    color: #fdf6e8;
+  }
+  .btn-change-profile {
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(43,29,14,.35);
+    background: rgba(255,255,255,.7);
+    color: var(--ink);
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all .15s;
+  }
+  .btn-change-profile:hover, .btn-change-profile:active {
+    background: var(--brass-light);
+    border-color: var(--ink);
+  }
+
+  /* CLASSEMENT ÉQUIPES & SOLO */
+  .ranking-section-head {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 16px;
+    color: var(--wine);
+    text-align: left;
+    margin: 4px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(169,130,45,.35);
+    padding-bottom: 4px;
+  }
+  .teams-duel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .team-card {
+    border-radius: var(--radius-md);
+    padding: 11px 10px;
+    text-align: left;
+    border: 1.5px solid rgba(43,29,14,.25);
+    background: linear-gradient(160deg, #fffdf7 0%, #f3e5c3 100%);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .team-card.team-card-ricard {
+    border-color: #b58921;
+    background: linear-gradient(160deg, #fffdf4 0%, #f7e6b5 100%);
+  }
+  .team-card.team-card-longisland {
+    border-color: var(--wine);
+    background: linear-gradient(160deg, #fff9fa 0%, #f4dce0 100%);
+  }
+  .team-card.team-leader {
+    box-shadow: 0 4px 14px rgba(169,130,45,.35), inset 0 0 0 1px rgba(212,171,92,.6);
+  }
+  .tc-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .tc-title {
+    font-family: 'Pirata One', cursive;
+    font-size: 16.5px;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .team-card-longisland .tc-title {
+    color: var(--wine);
+  }
+  .tc-leader-badge {
+    font-size: 9.5px;
+    font-weight: bold;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--brass);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .tc-score-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px 0;
+    border-top: 1px dashed rgba(43,29,14,.18);
+    border-bottom: 1px dashed rgba(43,29,14,.18);
+  }
+  .tc-pts {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .team-card-longisland .tc-pts {
+    color: var(--wine);
+  }
+  .tc-count {
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+  .tc-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .tc-member-chip {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.75);
+    border: 1px solid rgba(43,29,14,.18);
+    color: var(--ink);
+  }
+  .tc-member-chip.is-me {
+    font-weight: bold;
+    border-color: var(--wine);
+    background: rgba(122,35,51,.12);
+  }
+  .solo-player-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .solo-player-cell .team-pill {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  body.dark-mode .participant-validated-card {
+    background: linear-gradient(135deg, rgba(38,27,16,.95) 0%, rgba(25,17,10,.95) 100%);
+    border-color: rgba(212,171,92,.45);
+  }
+  body.dark-mode .vp-name {
+    color: #f5ecc7;
+  }
+  body.dark-mode .btn-change-profile,
+  body.dark-mode .btn-cancel-profile {
+    background: rgba(255,255,255,.08);
+    color: #f5ecc7;
+    border-color: rgba(212,171,92,.35);
+  }
+  body.dark-mode .ranking-section-head {
+    color: var(--brass-light);
+  }
+  body.dark-mode .team-card.team-card-ricard {
+    background: linear-gradient(160deg, rgba(48,36,14,.92) 0%, rgba(30,22,9,.95) 100%);
+    border-color: #c99c2e;
+  }
+  body.dark-mode .team-card.team-card-longisland {
+    background: linear-gradient(160deg, rgba(52,18,26,.92) 0%, rgba(30,11,16,.95) 100%);
+    border-color: #b94a5f;
+  }
+  body.dark-mode .tc-title,
+  body.dark-mode .tc-pts {
+    color: #f5ecc7;
+  }
+  body.dark-mode .team-card-longisland .tc-title,
+  body.dark-mode .team-card-longisland .tc-pts {
+    color: #ff9eb0;
+  }
+  body.dark-mode .tc-member-chip {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(212,171,92,.25);
+    color: #e8dcc2;
+  }
+
   /* CANVAS CACHÉ POUR LA COMPRESSION */
   #resize-canvas { display: none; }
 </style>
@@ -1072,23 +1367,44 @@
     <div id="progress-track"><div id="progress-fill"></div></div>
   </div>
 
-  <div class="ledger-line">
-    <label for="global-participant">Qui tient la plume ce soir ?</label>
-    <select id="global-participant" onchange="sauvegarderParticipant()">
-      <option value="">-- Choisis ton nom --</option>
-      <option value="Majid">Majid</option>
-      <option value="Alexandre Faby">Alexandre Faby 👑</option>
-      <option value="Jérémy Straub">Jérémy Straub 👑</option>
-      <option value="Romain R">Romain R</option>
-      <option value="Théo M">Théo M</option>
-      <option value="Pepette">Pepette</option>
-      <option value="Jules D">Jules D</option>
-      <option value="Daubeuf">Daubeuf</option>
-      <option value="Zaza">Zaza</option>
-      <option value="Emy">Emy</option>
-      <option value="Mama">Mama</option>
-      <option value="David M">David M</option>
-    </select>
+  <div class="ledger-line" id="participant-ledger-box">
+    <div id="participant-picker-box">
+      <label for="global-participant">Qui tient la plume ce soir ?</label>
+      <div class="participant-picker-row">
+        <select id="global-participant" onchange="onSelectParticipantChange()">
+          <option value="">-- Choisis ton prénom --</option>
+          <option value="Majid">Majid</option>
+          <option value="Alexandre Faby">Alexandre Faby 👑</option>
+          <option value="Jérémy Straub">Jérémy Straub 👑</option>
+          <option value="Romain R">Romain R</option>
+          <option value="Théo M">Théo M</option>
+          <option value="Pepette">Pepette</option>
+          <option value="Jules D">Jules D</option>
+          <option value="Daubeuf">Daubeuf</option>
+          <option value="Zaza">Zaza</option>
+          <option value="Emy">Emy</option>
+          <option value="Mama">Mama</option>
+          <option value="David M">David M</option>
+        </select>
+        <button type="button" class="btn-validate-profile" id="btn-validate-participant" onclick="validerParticipant()">✓ Valider</button>
+        <button type="button" class="btn-cancel-profile" id="btn-cancel-change-participant" onclick="annulerChangementParticipant()" hidden>Annuler</button>
+      </div>
+      <small class="participant-picker-hint" id="participant-picker-hint">Choisis ton prénom puis clique sur <b>Valider</b> pour rejoindre ton équipage et le classement !</small>
+    </div>
+    <div id="participant-validated-box" class="participant-validated-card" hidden>
+      <div class="vp-main">
+        <div class="vp-identity">
+          <span class="vp-label">🏴‍☠️ Corsaire validé :</span>
+          <strong class="vp-name" id="vp-name">—</strong>
+        </div>
+        <div class="vp-team-wrap">
+          <span class="team-pill" id="vp-team">⚓ Équipage…</span>
+        </div>
+      </div>
+      <button type="button" class="btn-change-profile" onclick="ouvrirChangementParticipant()" title="Tu t'es trompé de prénom ? Clique ici pour en changer">
+        ✏️ Changer
+      </button>
+    </div>
   </div>
   <div id="costume-claim-area"></div>
 
@@ -1105,8 +1421,20 @@
   </div>
 
   <div id="tab-scores" class="tab-content">
+    <div class="ranking-section-head">
+      <span>⚔️ Classement Équipes</span>
+      <small style="font-family:'Special Elite',monospace;font-size:10.5px;color:var(--ink-soft);">Équilibrage auto</small>
+    </div>
+    <div id="teams-ranking-area" class="teams-duel-grid">
+      <div class="skeleton-row" style="height:105px;margin:0;"></div>
+      <div class="skeleton-row" style="height:105px;margin:0;"></div>
+    </div>
+    <div class="ranking-section-head" style="margin-top:14px;">
+      <span>🏆 Classement Solo</span>
+      <small style="font-family:'Special Elite',monospace;font-size:10.5px;color:var(--ink-soft);" id="solo-count-label">Corsaires inscrits</small>
+    </div>
     <table class="ledger-table">
-      <thead><tr><th>Rang</th><th>Corsaire</th><th>Points</th></tr></thead>
+      <thead><tr><th>Rang</th><th>Corsaire &amp; Équipe</th><th>Points</th></tr></thead>
       <tbody id="ranking-body"><tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr></tbody>
     </table>
   </div>
@@ -1779,12 +2107,14 @@
         gererClicAdmin(true);
     }
 
-    function ouvrirModalAdminGeocache() {
+    async function ouvrirModalAdminGeocache() {
         const p = document.getElementById('global-participant') ? document.getElementById('global-participant').value : '';
         if (!isParticipantAdmin(p)) {
             showToast("Accès réservé aux Capitaines Organisateurs (Alexandre Faby & Jérémy Straub).", "bad");
             return;
         }
+        // Rafraîchir depuis le Google Sheet avant d'afficher pour être sûr d'avoir le dernier indice écrit dans le Sheet
+        fetchGameState(true);
         const latInput = document.getElementById("admin-geo-lat");
         const lngInput = document.getElementById("admin-geo-lng");
         const indiceInput = document.getElementById("admin-geo-indice");
@@ -1829,6 +2159,15 @@
             btnGps.innerHTML = "📡 Recherche du signal GPS précis…";
         }
 
+        // Vérifier si la modale Admin est ouverte : si oui, on lit l'indice saisi dans le champ ;
+        // sinon (clic rapide depuis la bannière), on ne touche PAS à l'indice du Google Sheet (updateIndice = false) !
+        const modalAdmin = document.getElementById("modal-admin-geocache");
+        const isModalOpen = modalAdmin && modalAdmin.classList.contains("is-open");
+        const indiceInput = document.getElementById("admin-geo-indice");
+        const rayonInput = document.getElementById("admin-geo-rayon");
+        const typedIndice = (isModalOpen && indiceInput && indiceInput.value.trim() !== "") ? indiceInput.value.trim() : null;
+        const typedRayon = (isModalOpen && rayonInput && !isNaN(parseFloat(rayonInput.value))) ? parseFloat(rayonInput.value) : targetRadius;
+
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
                 if (btnGps) {
@@ -1842,11 +2181,12 @@
                 const msg = `📍 Position GPS captée avec succès !\n\n` +
                             `• Latitude : ${lat}\n` +
                             `• Longitude : ${lng}\n` +
-                            `• Précision : ±${acc} m\n\n` +
-                            `Définir cet endroit comme NOUVELLE GÉOCACHE pour tout l'équipage ?`;
+                            `• Précision : ±${acc} m\n` +
+                            (typedIndice ? `• Indice : "${typedIndice}"\n` : `• Indice : (conservé depuis le Google Sheet)\n`) +
+                            `\nDéfinir cet endroit comme NOUVELLE GÉOCACHE pour tout l'équipage ?`;
 
                 if (confirm(msg)) {
-                    await appliquerEtSynchroniserGeocache(lat, lng, targetClue, targetRadius);
+                    await appliquerEtSynchroniserGeocache(lat, lng, typedIndice, typedRayon, Boolean(typedIndice));
                 }
             },
             (err) => {
@@ -1867,8 +2207,8 @@
     }
 
     function appliquerGeocacheLocale(lat, lng, indice, rayon, persisterLocal = true) {
-        targetCoords.lat = Number(lat);
-        targetCoords.lng = Number(lng);
+        if (lat != null && !isNaN(Number(lat))) targetCoords.lat = Number(lat);
+        if (lng != null && !isNaN(Number(lng))) targetCoords.lng = Number(lng);
         if (indice != null && typeof indice === "string" && indice.trim() !== "") {
             targetClue = indice.trim();
         }
@@ -1890,25 +2230,26 @@
         const agbText = document.getElementById("agb-target-text");
         if (agbText) agbText.textContent = `${targetCoords.lat.toFixed(6)}, ${targetCoords.lng.toFixed(6)}`;
         const inputLat = document.getElementById("admin-geo-lat");
-        if (inputLat) inputLat.value = targetCoords.lat;
+        if (inputLat && document.activeElement !== inputLat) inputLat.value = targetCoords.lat;
         const inputLng = document.getElementById("admin-geo-lng");
-        if (inputLng) inputLng.value = targetCoords.lng;
+        if (inputLng && document.activeElement !== inputLng) inputLng.value = targetCoords.lng;
         const inputIndice = document.getElementById("admin-geo-indice");
-        if (inputIndice) inputIndice.value = targetClue;
+        if (inputIndice && document.activeElement !== inputIndice) inputIndice.value = targetClue;
         const inputRayon = document.getElementById("admin-geo-rayon");
-        if (inputRayon) inputRayon.value = targetRadius;
+        if (inputRayon && document.activeElement !== inputRayon) inputRayon.value = targetRadius;
         const gmapsLink = document.getElementById("admin-geo-maps-link");
         if (gmapsLink) gmapsLink.href = `https://www.google.com/maps?q=${targetCoords.lat},${targetCoords.lng}`;
         const clueDisp = document.getElementById("geocache-clue-display");
         if (clueDisp) clueDisp.textContent = targetClue;
     }
 
-    async function appliquerEtSynchroniserGeocache(lat, lng, indice, rayon) {
+    async function appliquerEtSynchroniserGeocache(lat, lng, indice, rayon, updateIndice = true) {
         const joueur = (document.getElementById("global-participant") ? document.getElementById("global-participant").value : "") || "Admin";
-        const clue = (indice != null && typeof indice === "string" && indice.trim() !== "") ? indice.trim() : targetClue;
+        const hasNewClue = updateIndice && indice != null && typeof indice === "string" && indice.trim() !== "";
+        const clue = hasNewClue ? indice.trim() : targetClue;
         const rad = (rayon != null && !isNaN(Number(rayon)) && Number(rayon) > 0) ? Number(rayon) : targetRadius;
         
-        appliquerGeocacheLocale(lat, lng, clue, rad, true);
+        appliquerGeocacheLocale(lat, lng, hasNewClue ? clue : null, rad, true);
         showToast(`📍 Cache mise à jour : ${lat}, ${lng}`, "good");
         lancerConfettis();
 
@@ -1916,16 +2257,22 @@
             action: "set_geocache",
             lat: lat,
             lng: lng,
-            indice: clue,
             rayon: rad,
+            updateIndice: hasNewClue,
             participant: joueur,
             uid: nouvelUid()
         };
+        if (hasNewClue) {
+            payload.indice = clue;
+        }
 
         try {
             const res = await envoyerAuServeur(payload);
-            if (res && res.status === "ok") {
-                showToast("✓ Synchronisé sur le Google Sheet !", "good");
+            if (res && (res.status === "ok" || res.status === "success")) {
+                if (res.indice && typeof res.indice === "string" && res.indice.trim() !== "") {
+                    appliquerGeocacheLocale(lat, lng, res.indice.trim(), res.rayon || rad, true);
+                }
+                showToast("✓ Géocache & Indice synchronisés avec le Google Sheet !", "good");
             } else {
                 showToast("Enregistré localement (Google Apps Script en attente)", "info");
             }
@@ -1942,23 +2289,23 @@
         const indiceInput = document.getElementById("admin-geo-indice");
         const rayonInput = document.getElementById("admin-geo-rayon");
 
-        const lat = parseFloat(latInput ? latInput.value : "");
-        const lng = parseFloat(lngInput ? lngInput.value : "");
-        const indice = indiceInput ? indiceInput.value.trim() : targetClue;
+        const lat = parseFloat(String(latInput ? latInput.value : "").replace(",", "."));
+        const lng = parseFloat(String(lngInput ? lngInput.value : "").replace(",", "."));
+        const indice = (indiceInput && indiceInput.value.trim() !== "") ? indiceInput.value.trim() : targetClue;
         const rayon = rayonInput ? parseFloat(rayonInput.value) || targetRadius : targetRadius;
 
         if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
             showToast("Coordonnées GPS invalides. Vérifie les valeurs.", "bad");
             return;
         }
-        if (confirm(`Enregistrer ces paramètres pour la Géocache ?\n• Latitude : ${lat}\n• Longitude : ${lng}\n• Rayon : ${rayon} m\n• Indice : "${indice}"`)) {
-            await appliquerEtSynchroniserGeocache(lat, lng, indice, rayon);
+        if (confirm(`Enregistrer ces paramètres pour la Géocache sur le Google Sheet ?\n• Latitude : ${lat}\n• Longitude : ${lng}\n• Rayon : ${rayon} m\n• Indice : "${indice}"`)) {
+            await appliquerEtSynchroniserGeocache(lat, lng, indice, rayon, true);
         }
     }
 
     async function reinitialiserGeocacheDefaut() {
         if (confirm("Réinitialiser la géocache aux coordonnées et indice d'origine ?")) {
-            await appliquerEtSynchroniserGeocache(DEFAULT_TARGET_COORDS.lat, DEFAULT_TARGET_COORDS.lng, DEFAULT_TARGET_CLUE, DEFAULT_TARGET_RADIUS);
+            await appliquerEtSynchroniserGeocache(DEFAULT_TARGET_COORDS.lat, DEFAULT_TARGET_COORDS.lng, DEFAULT_TARGET_CLUE, DEFAULT_TARGET_RADIUS, true);
         }
     }
 
@@ -2007,31 +2354,318 @@
         location.reload();
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        let savedName = localStorage.getItem('barathon_participant');
-        if (savedName) {
-            const sel = document.getElementById('global-participant');
-            if (savedName === "Alexandre" || savedName === "Alexandre Faby") {
-                savedName = "Alexandre Faby";
-                localStorage.setItem('barathon_participant', "Alexandre Faby");
-            } else if (savedName === "Jeremy S" || savedName === "Jérémy Straub" || savedName === "Jeremy Straub") {
-                savedName = "Jérémy Straub";
-                localStorage.setItem('barathon_participant', "Jérémy Straub");
+    // ---------- GESTION DES PARTICIPANTS, VALIDATION EN CACHE & ÉQUIPAGES ÉQUILIBRÉS ----------
+    const TEAM_RICARD = "Pirate du Ricard";
+    const TEAM_LONG_ISLAND = "Pirate du Long Island";
+    const DEFAULT_PARTICIPANTS = [
+        "Majid", "Alexandre Faby", "Jérémy Straub", "Romain R",
+        "Théo M", "Pepette", "Jules D", "Daubeuf",
+        "Zaza", "Emy", "Mama", "David M"
+    ];
+    let knownParticipantsList = DEFAULT_PARTICIPANTS.slice();
+    let modeChangementParticipant = false;
+
+    function getDeviceId() {
+        try {
+            let id = localStorage.getItem("barathon_device_id");
+            if (!id) {
+                id = "dev-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+                localStorage.setItem("barathon_device_id", id);
             }
+            return id;
+        } catch (_) {
+            return "dev-local";
+        }
+    }
+
+    function getLocalTeamsMap() {
+        try {
+            return JSON.parse(localStorage.getItem("barathon_teams_map") || "{}");
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function saveLocalTeamsMap(map) {
+        try {
+            localStorage.setItem("barathon_teams_map", JSON.stringify(map || {}));
+        } catch (_) {}
+    }
+
+    function normaliserNomParticipant(savedName) {
+        if (!savedName) return "";
+        if (savedName === "Alexandre" || savedName === "Alexandre Faby") return "Alexandre Faby";
+        if (savedName === "Jeremy S" || savedName === "Jérémy Straub" || savedName === "Jeremy Straub") return "Jérémy Straub";
+        return savedName.trim();
+    }
+
+    function choisirEquipeEquilibreeLocale(participant, previousParticipant) {
+        const map = getLocalTeamsMap();
+        if (previousParticipant && previousParticipant !== participant) {
+            delete map[previousParticipant];
+        }
+        if (map[participant] === TEAM_RICARD || map[participant] === TEAM_LONG_ISLAND) {
+            saveLocalTeamsMap(map);
+            return map[participant];
+        }
+        let countRicard = 0, countLongIsland = 0;
+        Object.keys(map).forEach(k => {
+            if (k === participant) return;
+            if (map[k] === TEAM_RICARD) countRicard++;
+            else if (map[k] === TEAM_LONG_ISLAND) countLongIsland++;
+        });
+        let assigned = TEAM_RICARD;
+        if (countRicard < countLongIsland) assigned = TEAM_RICARD;
+        else if (countLongIsland < countRicard) assigned = TEAM_LONG_ISLAND;
+        else {
+            // Égalité parfaite : alterner de manière déterministe
+            assigned = ((countRicard + countLongIsland) % 2 === 0) ? TEAM_RICARD : TEAM_LONG_ISLAND;
+        }
+        map[participant] = assigned;
+        saveLocalTeamsMap(map);
+        return assigned;
+    }
+
+    function syncParticipantsDropdown(serverParticipants) {
+        const sel = document.getElementById("global-participant");
+        if (!sel) return;
+        const currentVal = sel.value || localStorage.getItem("barathon_participant") || "";
+
+        const namesSet = new Set();
+        const orderedNames = [];
+        const addName = (n) => {
+            if (!n || typeof n !== "string") return;
+            const clean = normaliserNomParticipant(n);
+            if (!clean) return;
+            const key = clean.toLowerCase();
+            if (!namesSet.has(key)) {
+                namesSet.add(key);
+                orderedNames.push(clean);
+            }
+        };
+
+        if (Array.isArray(serverParticipants) && serverParticipants.length > 0) {
+            const map = getLocalTeamsMap();
+            const serverValidatedMap = {};
+            serverParticipants.forEach(item => {
+                if (typeof item === "string") {
+                    addName(item);
+                } else if (item && item.name) {
+                    const cleanName = normaliserNomParticipant(item.name);
+                    addName(cleanName);
+                    if (item.team === TEAM_RICARD || item.team === TEAM_LONG_ISLAND) {
+                        serverValidatedMap[cleanName] = item.team;
+                    }
+                }
+            });
+            // Mettre à jour la carte des équipes depuis le Google Sheet tout en gardant le joueur local s'il vient de valider
+            const myValidated = localStorage.getItem("barathon_validated_participant");
+            const myTeam = localStorage.getItem("barathon_participant_team");
+            const mergedMap = Object.assign({}, serverValidatedMap);
+            if (myValidated && (myTeam === TEAM_RICARD || myTeam === TEAM_LONG_ISLAND) && !mergedMap[myValidated]) {
+                mergedMap[myValidated] = myTeam;
+            }
+            saveLocalTeamsMap(mergedMap);
+            try {
+                localStorage.setItem("barathon_participants_list", JSON.stringify(orderedNames));
+            } catch (_) {}
+        } else {
+            try {
+                const cachedList = JSON.parse(localStorage.getItem("barathon_participants_list") || "[]");
+                if (Array.isArray(cachedList) && cachedList.length > 0) cachedList.forEach(addName);
+            } catch (_) {}
+        }
+
+        DEFAULT_PARTICIPANTS.forEach(addName);
+        if (currentVal) addName(currentVal);
+        knownParticipantsList = orderedNames;
+
+        const mapTeams = getLocalTeamsMap();
+        let html = `<option value="">-- Choisis ton prénom --</option>`;
+        orderedNames.forEach(name => {
+            const crown = isParticipantAdmin(name) ? " 👑" : "";
+            const teamTag = mapTeams[name] ? ` (${mapTeams[name] === TEAM_RICARD ? "🥃 Ricard" : "🍹 Long Island"})` : "";
+            const selectedAttr = (name === currentVal) ? " selected" : "";
+            html += `<option value="${name.replace(/"/g, '&quot;')}"${selectedAttr}>${name}${crown}${teamTag}</option>`;
+        });
+        sel.innerHTML = html;
+        if (currentVal) sel.value = currentVal;
+    }
+
+    function majParticipantValidationUI() {
+        const sel = document.getElementById("global-participant");
+        const pickerBox = document.getElementById("participant-picker-box");
+        const validatedBox = document.getElementById("participant-validated-box");
+        const cancelBtn = document.getElementById("btn-cancel-change-participant");
+        const vpName = document.getElementById("vp-name");
+        const vpTeam = document.getElementById("vp-team");
+
+        const isValidated = localStorage.getItem("barathon_participant_validated") === "1";
+        const validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || localStorage.getItem("barathon_participant") || "");
+        const map = getLocalTeamsMap();
+        const team = map[validatedName] || localStorage.getItem("barathon_participant_team") || "";
+
+        if (isValidated && validatedName && !modeChangementParticipant) {
+            if (sel && sel.value !== validatedName) sel.value = validatedName;
+            if (pickerBox) pickerBox.hidden = true;
+            if (validatedBox) validatedBox.hidden = false;
+            if (vpName) vpName.innerHTML = `${validatedName}${isParticipantAdmin(validatedName) ? " 👑" : ""}`;
+            if (vpTeam) {
+                if (team === TEAM_LONG_ISLAND) {
+                    vpTeam.className = "team-pill team-longisland";
+                    vpTeam.innerHTML = `🍹 ${TEAM_LONG_ISLAND}`;
+                } else {
+                    vpTeam.className = "team-pill team-ricard";
+                    vpTeam.innerHTML = `🥃 ${team || TEAM_RICARD}`;
+                }
+            }
+        } else {
+            if (pickerBox) pickerBox.hidden = false;
+            if (validatedBox) validatedBox.hidden = true;
+            if (cancelBtn) cancelBtn.hidden = !(isValidated && validatedName);
+        }
+    }
+
+    function onSelectParticipantChange() {
+        const sel = document.getElementById("global-participant");
+        const name = sel ? normaliserNomParticipant(sel.value) : "";
+        // Aperçu immédiat des droits admin et de l'état de ses consos, mais demande de cliquer sur Valider pour verrouiller son profil et son équipe
+        majAdminUI();
+        majAffichageCostume();
+        renderBars();
+    }
+
+    async function validerParticipant() {
+        const sel = document.getElementById("global-participant");
+        const name = sel ? normaliserNomParticipant(sel.value) : "";
+        if (!name) {
+            showToast("Choisis d'abord ton prénom dans la liste déroulante !", "bad");
+            if (sel) sel.focus();
+            return false;
+        }
+
+        const previousParticipant = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
+        const btn = document.getElementById("btn-validate-participant");
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "⏳…";
+        }
+
+        // Attribution locale immédiate (équilibrage automatique à 1 personne près max)
+        const localTeam = choisirEquipeEquilibreeLocale(name, previousParticipant);
+        try {
+            localStorage.setItem("barathon_participant", name);
+            localStorage.setItem("barathon_validated_participant", name);
+            localStorage.setItem("barathon_participant_validated", "1");
+            localStorage.setItem("barathon_participant_team", localTeam);
+        } catch (_) {}
+
+        modeChangementParticipant = false;
+        syncParticipantsDropdown();
+        majParticipantValidationUI();
+        majAdminUI();
+        majAffichageCostume();
+        renderBars();
+
+        const payload = {
+            action: "register_participant",
+            participant: name,
+            previousParticipant: (previousParticipant && previousParticipant !== name) ? previousParticipant : "",
+            deviceId: getDeviceId(),
+            uid: nouvelUid()
+        };
+
+        try {
+            const res = await envoyerAuServeur(payload);
+            if (res && (res.status === "success" || res.status === "ok")) {
+                const serverTeam = res.team || localTeam;
+                try { localStorage.setItem("barathon_participant_team", serverTeam); } catch (_) {}
+                const map = getLocalTeamsMap();
+                if (previousParticipant && previousParticipant !== name) delete map[previousParticipant];
+                map[name] = serverTeam;
+                saveLocalTeamsMap(map);
+                if (Array.isArray(res.participants)) {
+                    syncParticipantsDropdown(res.participants);
+                } else {
+                    syncParticipantsDropdown();
+                }
+                majParticipantValidationUI();
+                showToast(`🏴‍☠️ ${name} validé(e) dans l'équipage « ${serverTeam} » !`, "good");
+            } else {
+                showToast(`🏴‍☠️ ${name} validé(e) dans l'équipage « ${localTeam} » !`, "good");
+            }
+        } catch (e) {
+            stockerHorsLigne(payload);
+            showToast(`🏴‍☠️ ${name} validé(e) en cache (${localTeam}) !`, "good");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "✓ Valider";
+            }
+        }
+
+        if (document.getElementById("tab-scores") && document.getElementById("tab-scores").classList.contains("active")) {
+            chargerClassement();
+        }
+        return true;
+    }
+
+    function ouvrirChangementParticipant() {
+        modeChangementParticipant = true;
+        majParticipantValidationUI();
+        const sel = document.getElementById("global-participant");
+        if (sel) sel.focus();
+        showToast("Sélectionne le bon prénom puis clique sur « ✓ Valider ».", "info");
+    }
+
+    function annulerChangementParticipant() {
+        modeChangementParticipant = false;
+        const validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || localStorage.getItem("barathon_participant") || "");
+        const sel = document.getElementById("global-participant");
+        if (sel && validatedName) sel.value = validatedName;
+        majParticipantValidationUI();
+        majAdminUI();
+        majAffichageCostume();
+        renderBars();
+    }
+
+    function verifierParticipantValide() {
+        const sel = document.getElementById("global-participant");
+        const val = sel ? normaliserNomParticipant(sel.value) : "";
+        if (!val) {
+            showToast("Choisis ton prénom en haut et clique sur « ✓ Valider » !", "bad");
+            return false;
+        }
+        const isValidated = localStorage.getItem("barathon_participant_validated") === "1";
+        const validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
+        if (!isValidated || validatedName !== val || modeChangementParticipant) {
+            showToast("Clique d'abord sur « ✓ Valider » à côté de ton prénom pour confirmer ton profil et ton équipe !", "bad");
+            const btn = document.getElementById("btn-validate-participant");
+            if (btn) {
+                btn.scrollIntoView({ behavior: "smooth", block: "center" });
+                btn.focus();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        syncParticipantsDropdown();
+        let savedName = normaliserNomParticipant(localStorage.getItem('barathon_participant') || "");
+        if (savedName) {
+            localStorage.setItem('barathon_participant', savedName);
+            const sel = document.getElementById('global-participant');
             if (sel) sel.value = savedName;
         }
+        majParticipantValidationUI();
         majAffichageCostume();
         initPorte();
         majAdminUI();
     });
 
     function sauvegarderParticipant() {
-        const name = document.getElementById('global-participant').value;
-        if (name) localStorage.setItem('barathon_participant', name);
-        majAdminUI();
-        majAffichageCostume();
-        renderBars();
-        if (document.getElementById('tab-scores') && document.getElementById('tab-scores').classList.contains('active')) chargerClassement();
+        onSelectParticipantChange();
     }
 
     function showToast(text, type = 'info') {
@@ -2166,34 +2800,42 @@
         if (!document.hidden && appStarted) programmerSync(0);
     });
 
-    async function fetchGameState() {
-        if (syncEnCours) return;
+    async function fetchGameState(force = false) {
+        if (syncEnCours && !force) return;
         syncEnCours = true;
         try {
-            const res = await fetch(WEB_APP_URL + "?action=get_state");
+            const res = await fetch(WEB_APP_URL + "?action=get_state&_t=" + Date.now(), { cache: "no-store" });
             const data = await res.json();
             syncEchecs = 0;
             const firstSync = !stateSynced;
             stateSynced = true;
 
-            // Synchronisation temps réel de la géocache et de l'indice si définis dans le Google Sheet
+            // Synchronisation de la liste des participants et des équipes depuis l'onglet "Participants" du Google Sheet
+            if (Array.isArray(data.participants) && data.participants.length > 0) {
+                syncParticipantsDropdown(data.participants);
+                majParticipantValidationUI();
+            }
+
+            // Synchronisation temps réel de la géocache et de l'indice définis dans l'onglet "Geocache" du Google Sheet
             if (data.geocache) {
-                const gLat = typeof data.geocache.lat === "number" ? data.geocache.lat : parseFloat(data.geocache.lat);
-                const gLng = typeof data.geocache.lng === "number" ? data.geocache.lng : parseFloat(data.geocache.lng);
+                const gLat = typeof data.geocache.lat === "number" ? data.geocache.lat : parseFloat(String(data.geocache.lat).replace(",", "."));
+                const gLng = typeof data.geocache.lng === "number" ? data.geocache.lng : parseFloat(String(data.geocache.lng).replace(",", "."));
                 const gIndice = (data.geocache.indice !== undefined && data.geocache.indice !== null) ? String(data.geocache.indice).trim() : "";
                 const gRayon = data.geocache.rayon ? (parseFloat(data.geocache.rayon) || targetRadius) : targetRadius;
 
-                if (!isNaN(gLat) && !isNaN(gLng)) {
-                    const diffCoords = Math.abs(gLat - targetCoords.lat) > 0.000005 || Math.abs(gLng - targetCoords.lng) > 0.000005;
-                    const diffClue = gIndice && gIndice !== targetClue;
-                    const diffRayon = gRayon && gRayon !== targetRadius;
-                    if (diffCoords || diffClue || diffRayon) {
-                        appliquerGeocacheLocale(gLat, gLng, gIndice || targetClue, gRayon || targetRadius, true);
-                    }
+                const validLat = !isNaN(gLat) ? gLat : targetCoords.lat;
+                const validLng = !isNaN(gLng) ? gLng : targetCoords.lng;
+                const diffCoords = Math.abs(validLat - targetCoords.lat) > 0.000005 || Math.abs(validLng - targetCoords.lng) > 0.000005;
+                const diffClue = Boolean(gIndice) && gIndice !== targetClue;
+                const diffRayon = Boolean(gRayon) && gRayon !== targetRadius;
+
+                if (diffCoords || diffClue || diffRayon || firstSync) {
+                    appliquerGeocacheLocale(validLat, validLng, gIndice || targetClue, gRayon || targetRadius, true);
                 }
             } else if (typeof data.geocache_lat === "number" && typeof data.geocache_lng === "number") {
-                if (Math.abs(data.geocache_lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache_lng - targetCoords.lng) > 0.000005) {
-                    appliquerGeocacheLocale(data.geocache_lat, data.geocache_lng, targetClue, targetRadius, true);
+                const gIndice = (data.geocache_indice !== undefined && data.geocache_indice !== null) ? String(data.geocache_indice).trim() : "";
+                if (Math.abs(data.geocache_lat - targetCoords.lat) > 0.000005 || Math.abs(data.geocache_lng - targetCoords.lng) > 0.000005 || (gIndice && gIndice !== targetClue)) {
+                    appliquerGeocacheLocale(data.geocache_lat, data.geocache_lng, gIndice || targetClue, targetRadius, true);
                 }
             }
 
@@ -2203,7 +2845,6 @@
                 renderBars();
                 renderCarte();
                 if (!firstSync) {
-                    // quelqu'un d'autre vient de débloquer ou admin a changé : on prévient, et on ferme l'épreuve devenue inutile
                     const riddle = document.getElementById("modal-riddle");
                     if (riddle && riddle.classList.contains("is-open") && activeBarIdForRiddle !== null && activeBarIdForRiddle <= currentGlobalStep) fermerModales();
                     if (data.currentStep > ancienStep) {
@@ -2460,8 +3101,8 @@
     }
 
     function ouvrirEnigme(barId) {
+        if (!verifierParticipantValide()) return;
         const joueur = document.getElementById("global-participant").value;
-        if (!joueur) { showToast("Choisis d'abord ton nom, en haut du carnet !", "bad"); return; }
 
         activeBarIdForRiddle = barId;
         const c = document.getElementById("riddle-content");
@@ -2470,6 +3111,7 @@
         document.getElementById("riddle-msg").className = "feedback";
 
         if (barId === 2) {
+            fetchGameState(true);
             resetCompassState();
             const adminWidget = isParticipantAdmin(joueur) ? `
               <div class="admin-geocache-banner">
@@ -3578,9 +4220,15 @@
     function majAffichageCostume() {
         const area = document.getElementById("costume-claim-area");
         if (!area) return;
-        const p = document.getElementById("global-participant").value;
-        if (!p) {
-            area.innerHTML = `<div class="costume-ribbon">🎭 Spécial 31 Octobre : choisis ton nom ci-dessus pour déclarer ton déguisement (+10 pts) !</div>`;
+        const sel = document.getElementById("global-participant");
+        const validatedName = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
+        const isValidated = localStorage.getItem("barathon_participant_validated") === "1" && Boolean(validatedName);
+        if (isValidated && !modeChangementParticipant && sel && sel.value !== validatedName) {
+            sel.value = validatedName;
+        }
+        const p = (sel ? sel.value : "") || (isValidated ? validatedName : "");
+        if (!p || !isValidated || modeChangementParticipant) {
+            area.innerHTML = `<div class="costume-ribbon">🎭 Spécial 31 Octobre : choisis ton prénom et clique sur « ✓ Valider » ci-dessus pour rejoindre ton équipe et déclarer ton déguisement (+10 pts) !</div>`;
             return;
         }
         const state = localStorage.getItem("barathon_costume_claimed_" + p);
@@ -3670,11 +4318,8 @@
     }
 
     function validerChoixCostume() {
+        if (!verifierParticipantValide()) return;
         const p = document.getElementById("global-participant").value;
-        if (!p) {
-            showToast("Choisis d'abord ton nom dans la liste !", "bad");
-            return;
-        }
         if (choixCostumeActuel === "non") {
             enregistrerNonDeguisement(p);
         } else {
@@ -3830,8 +4475,8 @@
     }
 
     function ouvrirValidationBoisson(barId) {
+        if (!verifierParticipantValide()) return;
         const p = document.getElementById("global-participant").value;
-        if (!p) { showToast("Choisis d'abord ton nom, en haut du carnet !", "bad"); return; }
         selectedBarForDrink = BARS_DATA.find(b => b.id === barId);
         document.getElementById("drink-bar-title").textContent = `Consommation : ${selectedBarForDrink.name}`;
         document.getElementById("drink-photo").value = "";
@@ -4025,21 +4670,163 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function chargerClassement() {
-        const tbody = document.getElementById('ranking-body'); 
-        tbody.innerHTML = `<tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr>`;
-        const monNom = (document.getElementById('global-participant').value || "").trim().toLowerCase();
-        try {
-            const res = await fetch(WEB_APP_URL + "?action=classement"); 
-            const data = await res.json(); 
+    function renderDualLeaderboards(rawSolo, serverTeams, monNom) {
+        const tbody = document.getElementById('ranking-body');
+        const teamsArea = document.getElementById('teams-ranking-area');
+        const countLabel = document.getElementById('solo-count-label');
+
+        const localTeams = getLocalTeamsMap();
+        const myValidated = normaliserNomParticipant(localStorage.getItem("barathon_validated_participant") || "");
+        const myTeam = localStorage.getItem("barathon_participant_team") || "";
+        if (myValidated && (myTeam === TEAM_RICARD || myTeam === TEAM_LONG_ISLAND) && !localTeams[myValidated]) {
+            localTeams[myValidated] = myTeam;
+        }
+
+        // Construire la table complète des joueurs (ceux ayant des points + ceux validés à 0 pt)
+        const playerMap = {};
+        const upsertPlayer = (name, pts, team) => {
+            const clean = normaliserNomParticipant(name);
+            if (!clean) return;
+            const key = clean.toLowerCase();
+            if (!playerMap[key]) {
+                playerMap[key] = {
+                    participant: clean,
+                    points: (typeof pts === "number" && !isNaN(pts)) ? pts : 0,
+                    team: team || localTeams[clean] || ""
+                };
+            } else {
+                if (typeof pts === "number" && !isNaN(pts)) playerMap[key].points = Math.max(playerMap[key].points, pts);
+                if (team) playerMap[key].team = team;
+                else if (!playerMap[key].team && localTeams[clean]) playerMap[key].team = localTeams[clean];
+            }
+        };
+
+        if (Array.isArray(rawSolo)) {
+            rawSolo.forEach(r => {
+                if (r && r.participant) upsertPlayer(r.participant, Number(r.points) || 0, r.team || "");
+            });
+        }
+        Object.keys(localTeams).forEach(pName => {
+            if (localTeams[pName]) upsertPlayer(pName, 0, localTeams[pName]);
+        });
+
+        const soloList = Object.values(playerMap).sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.participant.localeCompare(b.participant, 'fr');
+        });
+
+        // Calculer les deux équipes : Pirate du Ricard & Pirate du Long Island
+        const teamStats = {
+            [TEAM_RICARD]: { name: TEAM_RICARD, points: 0, members: [] },
+            [TEAM_LONG_ISLAND]: { name: TEAM_LONG_ISLAND, points: 0, members: [] }
+        };
+
+        soloList.forEach(p => {
+            if (p.team === TEAM_RICARD || p.team === TEAM_LONG_ISLAND) {
+                teamStats[p.team].points += p.points;
+                teamStats[p.team].members.push({ name: p.participant, points: p.points });
+            }
+        });
+
+        // Si le serveur a renvoyé des équipes explicites avec davantage de membres, fusionner proprement
+        if (Array.isArray(serverTeams)) {
+            serverTeams.forEach(st => {
+                if (st && (st.team === TEAM_RICARD || st.team === TEAM_LONG_ISLAND)) {
+                    if (Array.isArray(st.members) && st.members.length > teamStats[st.team].members.length) {
+                        teamStats[st.team].points = Number(st.points) || 0;
+                        teamStats[st.team].members = st.members;
+                    }
+                }
+            });
+        }
+
+        if (teamsArea) {
+            const rStat = teamStats[TEAM_RICARD];
+            const lStat = teamStats[TEAM_LONG_ISLAND];
+            const rLeads = rStat.points > lStat.points;
+            const lLeads = lStat.points > rStat.points;
+
+            const buildCard = (stat, isRicard, isLead) => {
+                const icon = isRicard ? "🥃" : "🍹";
+                const cls = isRicard ? "team-card-ricard" : "team-card-longisland";
+                const membersHtml = stat.members.length
+                    ? stat.members.map(m => {
+                        const mName = typeof m === "string" ? m : m.name;
+                        const mPts = typeof m === "object" && m.points != null ? m.points : 0;
+                        const isMe = monNom && mName.trim().toLowerCase() === monNom;
+                        return `<span class="tc-member-chip${isMe ? ' is-me' : ''}">${mName} (${mPts})</span>`;
+                    }).join("")
+                    : `<span style="font-size:10px;color:var(--ink-soft);font-style:italic;">Aucun corsaire validé</span>`;
+
+                return `
+                <div class="team-card ${cls}${isLead ? ' team-leader' : ''}">
+                  <div class="tc-header">
+                    <div class="tc-title">${icon} ${stat.name}</div>
+                    ${isLead ? '<span class="tc-leader-badge">👑 En tête</span>' : ''}
+                  </div>
+                  <div class="tc-score-row">
+                    <span class="tc-pts">${stat.points} <small style="font-size:12px;font-weight:normal;">pts</small></span>
+                    <span class="tc-count">${stat.members.length} corsaire${stat.members.length > 1 ? 's' : ''}</span>
+                  </div>
+                  <div class="tc-members">${membersHtml}</div>
+                </div>`;
+            };
+
+            teamsArea.innerHTML = buildCard(rStat, true, rLeads) + buildCard(lStat, false, lLeads);
+        }
+
+        if (countLabel) {
+            countLabel.textContent = `${soloList.length} corsaire${soloList.length > 1 ? 's' : ''} en lice`;
+        }
+
+        if (tbody) {
             tbody.innerHTML = "";
-            data.forEach((row, i) => {
+            if (soloList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="padding:14px;color:var(--ink-soft);">Valide ton prénom en haut de page pour apparaître dans le classement !</td></tr>`;
+                return;
+            }
+            soloList.forEach((row, i) => {
                 let rang = i === 0 ? '<span class="medal medal-gold">I</span>' : i === 1 ? '<span class="medal medal-silver">II</span>' : i === 2 ? '<span class="medal medal-bronze">III</span>' : `#${i + 1}`;
                 const isMe = monNom && row.participant.trim().toLowerCase() === monNom;
-                tbody.innerHTML += `<tr class="${isMe ? 'my-rank' : ''}"><td>${rang}</td><td><b>${row.participant}${isMe ? ' (toi)' : ''}</b></td><td>${row.points} pts</td></tr>`;
+                let teamBadge = "";
+                if (row.team === TEAM_RICARD) {
+                    teamBadge = `<span class="team-pill team-ricard">🥃 ${TEAM_RICARD}</span>`;
+                } else if (row.team === TEAM_LONG_ISLAND) {
+                    teamBadge = `<span class="team-pill team-longisland">🍹 ${TEAM_LONG_ISLAND}</span>`;
+                }
+                tbody.innerHTML += `
+                <tr class="${isMe ? 'my-rank' : ''}">
+                  <td>${rang}</td>
+                  <td>
+                    <div class="solo-player-cell">
+                      <b>${row.participant}${isMe ? ' (toi)' : ''}</b>
+                      ${teamBadge}
+                    </div>
+                  </td>
+                  <td><b>${row.points} pts</b></td>
+                </tr>`;
             });
+        }
+    }
+
+    async function chargerClassement() {
+        const tbody = document.getElementById('ranking-body'); 
+        if (tbody) tbody.innerHTML = `<tr><td colspan="3" style="padding:16px;"><div class="skeleton-line" style="width:60%;margin:0 auto;"></div></td></tr>`;
+        const monNom = (document.getElementById('global-participant').value || "").trim().toLowerCase();
+        try {
+            const res = await fetch(WEB_APP_URL + "?action=classement&_t=" + Date.now(), { cache: "no-store" }); 
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                renderDualLeaderboards(data, null, monNom);
+            } else if (data && typeof data === "object") {
+                if (Array.isArray(data.participants)) {
+                    syncParticipantsDropdown(data.participants);
+                    majParticipantValidationUI();
+                }
+                renderDualLeaderboards(data.solo || data.ranking || [], data.teams || null, monNom);
+            }
         } catch (e) { 
-            tbody.innerHTML = `<tr><td colspan="3">Mode hors-ligne actif<br><button class="btn btn-ghost" onclick="chargerClassement()">Réessayer</button></td></tr>`; 
+            renderDualLeaderboards([], null, monNom);
         }
     }
 
